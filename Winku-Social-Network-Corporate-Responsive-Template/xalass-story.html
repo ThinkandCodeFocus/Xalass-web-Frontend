@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Xalass - Détail de l'histoire" />
+    <title>Xalass - Histoire</title>
+    
+    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16"> 
+    <link rel="stylesheet" href="css/main.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/xalass.css">
+</head>
+<body>
+
+<div class="theme-layout">
+    <!-- Header -->
+    <header class="sticky-header">
+        <div class="menu-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-3 col-md-3 col-4">
+                        <a href="xalass-feed.html" class="logo" style="font-size: 24px; color: #667eea; font-weight: bold;">
+                            <i class="fa fa-comments"></i> Xalass
+                        </a>
+                    </div>
+                    <div class="col-lg-6 col-md-5 col-4">
+                        <form action="xalass-search.html" method="GET">
+                            <input type="text" name="q" placeholder="Rechercher une histoire..." class="form-control">
+                        </form>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-4 text-right">
+                        <div class="user-menu" style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                            <a href="xalass-notifications.html" style="position: relative; color: #333;">
+                                <i class="fa fa-bell" style="font-size: 20px;"></i>
+                                <span id="notifBadge" class="notif-count" style="display: none;">0</span>
+                            </a>
+                            <a href="xalass-profile.html" id="headerAvatar" style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; display: block;">
+                                <img src="" alt="Mon profil" style="width: 100%; height: 100%; object-fit: cover;">
+                            </a>
+                            <a href="#" onclick="logoutUser(); return false;" title="Déconnexion" style="color: #e91e63;">
+                                <i class="fa fa-sign-out" style="font-size: 18px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <section style="padding-top: 80px; padding-bottom: 100px; min-height: 100vh;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <!-- Bouton retour -->
+                    <a href="xalass-feed.html" style="display: inline-block; margin-bottom: 20px; color: #667eea;">
+                        <i class="fa fa-arrow-left"></i> Retour au fil
+                    </a>
+                    
+                    <!-- Contenu de l'histoire -->
+                    <div id="storyContent" class="central-meta" style="background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                    
+                    <!-- Section commentaires -->
+                    <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 25px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px;">
+                            <i class="fa fa-comments"></i> Commentaires 
+                            <span id="commentsCount" style="color: #999; font-size: 14px;"></span>
+                        </h4>
+                        
+                        <!-- Formulaire de commentaire -->
+                        <form id="commentForm" style="margin-bottom: 25px;">
+                            <div style="display: flex; gap: 10px;">
+                                <div id="myAvatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                                    <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <textarea id="commentText" placeholder="Ajouter un commentaire..." rows="2" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 10px; resize: none;"></textarea>
+                                    <button type="submit" class="mtr-btn" style="margin-top: 10px; padding: 8px 20px; font-size: 13px;">
+                                        <span>Commenter</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Liste des commentaires -->
+                        <div id="commentsList">
+                            <!-- Chargé dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Modal de réponse -->
+    <div id="replyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: #fff; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; margin: auto;">
+            <h5 style="margin-bottom: 15px;">Répondre au commentaire</h5>
+            <textarea id="replyText" placeholder="Votre réponse..." rows="3" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 10px;"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                <button onclick="closeReplyModal()" style="padding: 8px 20px; border: none; background: #eee; border-radius: 20px; cursor: pointer;">
+                    Annuler
+                </button>
+                <button onclick="submitReply()" class="mtr-btn" style="padding: 8px 20px;">
+                    <span>Répondre</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de signalement -->
+    <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: #fff; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; margin: auto;">
+            <h5 style="margin-bottom: 15px;"><i class="fa fa-flag" style="color: #e91e63;"></i> Signaler cette histoire</h5>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Pourquoi signalez-vous ce contenu ?</p>
+            
+            <div class="report-options">
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="inappropriate">
+                    <span>Contenu inapproprié</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="harassment">
+                    <span>Harcèlement ou intimidation</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="fake">
+                    <span>Fausse information</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="spam">
+                    <span>Spam ou publicité</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="other">
+                    <span>Autre raison</span>
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button onclick="closeReportModal()" style="padding: 8px 20px; border: none; background: #eee; border-radius: 20px; cursor: pointer;">
+                    Annuler
+                </button>
+                <button onclick="submitReportForm()" style="padding: 8px 20px; border: none; background: #e91e63; color: #fff; border-radius: 20px; cursor: pointer;">
+                    Signaler
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation Mobile -->
+    <nav class="d-md-none" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000;">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-3">
+                    <a href="xalass-feed.html" style="color: #666;">
+                        <i class="fa fa-home" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Accueil</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-search.html" style="color: #666;">
+                        <i class="fa fa-search" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Recherche</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-notifications.html" style="color: #666;">
+                        <i class="fa fa-bell" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Notifs</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-profile.html" style="color: #666;">
+                        <i class="fa fa-user" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Profil</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<script src="js/main.min.js"></script>
+<script src="js/xalass.js"></script>
+<script>
+let currentStoryId = null;
+let currentCommentId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier l'authentification
+    const session = checkAuth();
+    if (!session) return;
+    
+    // Afficher les avatars
+    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
+    document.querySelector('#myAvatar img').src = getAvatarUrl(session.avatar);
+    
+    // Récupérer l'ID de l'histoire
+    const urlParams = new URLSearchParams(window.location.search);
+    currentStoryId = urlParams.get('id');
+    
+    if (!currentStoryId) {
+        window.location.href = 'xalass-feed.html';
+        return;
+    }
+    
+    // Charger l'histoire
+    loadStory();
+    
+    // Incrémenter les vues
+    incrementViews(currentStoryId);
+    
+    // Mettre à jour le badge de notifications
+    updateNotifBadge();
+});
+
+function loadStory() {
+    const story = getStoryById(currentStoryId);
+    const session = getSession();
+    
+    if (!story) {
+        document.getElementById('storyContent').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <i class="fa fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                <p>Cette histoire n'existe pas ou a été supprimée.</p>
+                <a href="xalass-feed.html" class="mtr-btn" style="margin-top: 15px; display: inline-block;">
+                    <span>Retour au fil</span>
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    const isLiked = story.likes && story.likes.includes(session.id);
+    const isOwner = story.authorId === session.id;
+    
+    document.getElementById('storyContent').innerHTML = `
+        <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
+            <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
+                <img src="${getAvatarUrl(story.authorAvatar)}" alt="${story.authorPseudo}" style="width: 100%; height: 100%; object-fit: cover;">
+            </figure>
+            <div class="friend-name" style="flex: 1;">
+                <ins><a href="#" style="font-size: 18px;">${story.authorPseudo}</a></ins>
+                <span class="time-ago" style="display: block; margin-top: 3px;">${timeAgo(story.createdAt)}</span>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
+            ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+            <span style="color: #999; font-size: 12px; margin-left: 10px;">
+                <i class="fa fa-eye"></i> ${story.views || 0} vues
+            </span>
+        </div>
+        
+        <div class="story-text" style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 25px;">
+            ${story.content}
+        </div>
+        
+        <div class="post-actions" style="display: flex; align-items: center; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; gap: 15px;">
+            <a href="#" onclick="handleLike(); return false;" class="like ${isLiked ? 'liked' : ''}" id="likeBtn" style="font-size: 16px;">
+                <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                <span id="likeCount">${story.likes?.length || 0}</span> J'aime
+            </a>
+            
+            <button onclick="shareStory('${story.id}')" class="share-btn">
+                <i class="fa fa-share-alt"></i> Partager
+            </button>
+            
+            ${!isOwner ? `
+                <a href="#" onclick="openReportModal(); return false;" style="color: #999; font-size: 14px; margin-left: auto;">
+                    <i class="fa fa-flag"></i> Signaler
+                </a>
+            ` : ''}
+        </div>
+    `;
+    
+    // Charger les commentaires
+    loadComments(story);
+}
+
+function loadComments(story) {
+    const container = document.getElementById('commentsList');
+    const session = getSession();
+    
+    document.getElementById('commentsCount').textContent = `(${story.comments?.length || 0})`;
+    
+    if (!story.comments || story.comments.length === 0) {
+        container.innerHTML = `
+            <p style="color: #999; text-align: center; padding: 20px;">
+                Aucun commentaire pour le moment. Soyez le premier à réagir !
+            </p>
+        `;
+        return;
+    }
+    
+    // Trier par popularité
+    const sortedComments = sortCommentsByPopularity(story.comments);
+    
+    container.innerHTML = sortedComments.map(comment => {
+        const isCommentLiked = comment.likes && comment.likes.includes(session.id);
+        
+        return `
+            <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                        <img src="${getAvatarUrl(comment.authorAvatar)}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
+                            <strong style="color: #667eea;">${comment.authorPseudo}</strong>
+                            <span style="color: #999; font-size: 11px; margin-left: 10px;">${timeAgo(comment.createdAt)}</span>
+                            <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
+                        </div>
+                        
+                        <div class="comment-actions">
+                            <a href="#" onclick="handleCommentLike('${comment.id}'); return false;" class="${isCommentLiked ? 'liked' : ''}" data-comment="${comment.id}">
+                                <i class="fa ${isCommentLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                                <span class="comment-like-count">${comment.likes?.length || 0}</span>
+                            </a>
+                            <a href="#" onclick="openReplyModal('${comment.id}'); return false;">
+                                <i class="fa fa-reply"></i> Répondre
+                            </a>
+                        </div>
+                        
+                        ${comment.replies && comment.replies.length > 0 ? `
+                            <ul class="replies-list">
+                                ${comment.replies.map(reply => {
+                                    const isReplyLiked = reply.likes && reply.likes.includes(session.id);
+                                    return `
+                                        <li style="padding: 10px 0;">
+                                            <div style="display: flex; gap: 10px;">
+                                                <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                                                    <img src="${getAvatarUrl(reply.authorAvatar)}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
+                                                        <strong style="color: #667eea; font-size: 13px;">${reply.authorPseudo}</strong>
+                                                        <span style="color: #999; font-size: 10px; margin-left: 8px;">${timeAgo(reply.createdAt)}</span>
+                                                        <p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>
+                                                    </div>
+                                                    <div class="comment-actions" style="font-size: 12px;">
+                                                        <a href="#" onclick="handleReplyLike('${comment.id}', '${reply.id}'); return false;" class="${isReplyLiked ? 'liked' : ''}" data-reply="${reply.id}">
+                                                            <i class="fa ${isReplyLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                                                            <span class="reply-like-count">${reply.likes?.length || 0}</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function handleLike() {
+    const result = toggleLike(currentStoryId, 'story');
+    
+    if (result.success) {
+        const btn = document.getElementById('likeBtn');
+        const icon = btn.querySelector('i');
+        const count = document.getElementById('likeCount');
+        
+        if (result.liked) {
+            btn.classList.add('liked');
+            icon.className = 'fa fa-heart';
+        } else {
+            btn.classList.remove('liked');
+            icon.className = 'fa fa-heart-o';
+        }
+        
+        count.textContent = result.count;
+    }
+}
+
+function handleCommentLike(commentId) {
+    const result = toggleLike(currentStoryId, 'comment', commentId);
+    
+    if (result.success) {
+        const btn = document.querySelector(`[data-comment="${commentId}"]`);
+        const icon = btn.querySelector('i');
+        const count = btn.querySelector('.comment-like-count');
+        
+        if (result.liked) {
+            btn.classList.add('liked');
+            icon.className = 'fa fa-heart';
+        } else {
+            btn.classList.remove('liked');
+            icon.className = 'fa fa-heart-o';
+        }
+        
+        count.textContent = result.count;
+    }
+}
+
+function handleReplyLike(commentId, replyId) {
+    const result = toggleLike(currentStoryId, 'reply', commentId, replyId);
+    
+    if (result.success) {
+        const btn = document.querySelector(`[data-reply="${replyId}"]`);
+        const icon = btn.querySelector('i');
+        const count = btn.querySelector('.reply-like-count');
+        
+        if (result.liked) {
+            btn.classList.add('liked');
+            icon.className = 'fa fa-heart';
+        } else {
+            btn.classList.remove('liked');
+            icon.className = 'fa fa-heart-o';
+        }
+        
+        count.textContent = result.count;
+    }
+}
+
+// Formulaire de commentaire
+document.getElementById('commentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = document.getElementById('commentText').value.trim();
+    
+    if (!content) {
+        showToast('Veuillez écrire un commentaire');
+        return;
+    }
+    
+    const result = addComment(currentStoryId, content);
+    
+    if (result.success) {
+        document.getElementById('commentText').value = '';
+        showToast('Commentaire ajouté !');
+        loadStory();
+    } else {
+        showToast(result.message);
+    }
+});
+
+// Modal de réponse
+function openReplyModal(commentId) {
+    currentCommentId = commentId;
+    document.getElementById('replyModal').style.display = 'flex';
+    document.getElementById('replyText').focus();
+}
+
+function closeReplyModal() {
+    document.getElementById('replyModal').style.display = 'none';
+    document.getElementById('replyText').value = '';
+    currentCommentId = null;
+}
+
+function submitReply() {
+    const content = document.getElementById('replyText').value.trim();
+    
+    if (!content) {
+        showToast('Veuillez écrire une réponse');
+        return;
+    }
+    
+    const result = addReply(currentStoryId, currentCommentId, content);
+    
+    if (result.success) {
+        closeReplyModal();
+        showToast('Réponse ajoutée !');
+        loadStory();
+    } else {
+        showToast(result.message);
+    }
+}
+
+// Modal de signalement
+function openReportModal() {
+    document.getElementById('reportModal').style.display = 'flex';
+}
+
+function closeReportModal() {
+    document.getElementById('reportModal').style.display = 'none';
+    document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
+}
+
+function submitReportForm() {
+    const reason = document.querySelector('input[name="reportReason"]:checked');
+    
+    if (!reason) {
+        showToast('Veuillez sélectionner une raison');
+        return;
+    }
+    
+    const result = submitReport(currentStoryId, reason.value);
+    
+    closeReportModal();
+    showToast(result.message);
+    
+    if (result.deleted) {
+        setTimeout(() => {
+            window.location.href = 'xalass-feed.html';
+        }, 1500);
+    }
+}
+
+function updateNotifBadge() {
+    const session = getSession();
+    if (!session) return;
+    
+    const count = getUnreadCount(session.id);
+    const badge = document.getElementById('notifBadge');
+    
+    if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Fermer les modaux en cliquant à l'extérieur
+document.getElementById('replyModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReplyModal();
+});
+
+document.getElementById('reportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReportModal();
+});
+</script>
+
+</body>
+</html>

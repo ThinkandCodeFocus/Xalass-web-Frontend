@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Xalass - Recherche" />
+    <title>Xalass - Recherche</title>
+    
+    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16"> 
+    <link rel="stylesheet" href="css/main.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/xalass.css">
+</head>
+<body>
+
+<div class="theme-layout">
+    <!-- Header -->
+    <header class="sticky-header">
+        <div class="menu-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-3 col-md-3 col-4">
+                        <a href="xalass-feed.html" class="logo" style="font-size: 24px; color: #667eea; font-weight: bold;">
+                            <i class="fa fa-comments"></i> Xalass
+                        </a>
+                    </div>
+                    <div class="col-lg-6 col-md-5 col-4">
+                        <form id="searchForm">
+                            <input type="text" id="searchInput" name="q" placeholder="Rechercher une histoire..." class="form-control" autofocus>
+                        </form>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-4 text-right">
+                        <div class="user-menu" style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                            <a href="xalass-notifications.html" style="position: relative; color: #333;">
+                                <i class="fa fa-bell" style="font-size: 20px;"></i>
+                                <span id="notifBadge" class="notif-count" style="display: none;">0</span>
+                            </a>
+                            <a href="xalass-profile.html" id="headerAvatar" style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; display: block;">
+                                <img src="" alt="Mon profil" style="width: 100%; height: 100%; object-fit: cover;">
+                            </a>
+                            <a href="#" onclick="logoutUser(); return false;" title="Déconnexion" style="color: #e91e63;">
+                                <i class="fa fa-sign-out" style="font-size: 18px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <section style="padding-top: 80px; padding-bottom: 100px; min-height: 100vh;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <!-- Filtres -->
+                    <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h5 style="margin-bottom: 15px;">
+                            <i class="fa fa-filter"></i> Filtrer par catégorie
+                        </h5>
+                        <div class="search-filters">
+                            <button class="filter-btn active" data-category="all" onclick="setFilter('all')">
+                                <i class="fa fa-list"></i> Toutes
+                            </button>
+                            <button class="filter-btn" data-category="amour" onclick="setFilter('amour')">
+                                ❤️ Amour
+                            </button>
+                            <button class="filter-btn" data-category="amitie" onclick="setFilter('amitie')">
+                                👥 Amitié
+                            </button>
+                            <button class="filter-btn" data-category="social" onclick="setFilter('social')">
+                                🌍 Social
+                            </button>
+                            <button class="filter-btn" data-category="travail" onclick="setFilter('travail')">
+                                💼 Travail
+                            </button>
+                            <button class="filter-btn" data-category="autre" onclick="setFilter('autre')">
+                                ⭐ Autre
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Résultats -->
+                    <div id="searchHeader" style="margin-bottom: 15px; display: none;">
+                        <span id="resultCount" style="color: #666;"></span>
+                    </div>
+                    
+                    <div id="searchResults">
+                        <!-- Chargé dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Bottom Navigation Mobile -->
+    <nav class="d-md-none" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000;">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-3">
+                    <a href="xalass-feed.html" style="color: #666;">
+                        <i class="fa fa-home" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Accueil</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-search.html" style="color: #667eea;">
+                        <i class="fa fa-search" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Recherche</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-notifications.html" style="color: #666;">
+                        <i class="fa fa-bell" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Notifs</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-profile.html" style="color: #666;">
+                        <i class="fa fa-user" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Profil</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<script src="js/main.min.js"></script>
+<script src="js/xalass.js"></script>
+<script>
+let currentFilter = 'all';
+let currentQuery = '';
+let searchTimeout;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier l'authentification
+    const session = checkAuth();
+    if (!session) return;
+    
+    // Afficher l'avatar
+    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
+    
+    // Récupérer la recherche depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    
+    if (query) {
+        document.getElementById('searchInput').value = query;
+        currentQuery = query;
+        performSearch();
+    } else {
+        showInitialState();
+    }
+    
+    // Écouter les changements de recherche
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        currentQuery = e.target.value;
+        
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performSearch();
+        }, 300);
+    });
+    
+    // Mettre à jour le badge de notifications
+    updateNotifBadge();
+});
+
+function showInitialState() {
+    const container = document.getElementById('searchResults');
+    container.innerHTML = `
+        <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <i class="fa fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
+            <h5 style="color: #666;">Rechercher des histoires</h5>
+            <p style="color: #999; font-size: 14px;">
+                Entrez un mot-clé ou filtrez par catégorie pour trouver des histoires
+            </p>
+        </div>
+    `;
+    document.getElementById('searchHeader').style.display = 'none';
+}
+
+function setFilter(category) {
+    currentFilter = category;
+    
+    // Mettre à jour l'UI
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.category === category) {
+            btn.classList.add('active');
+        }
+    });
+    
+    performSearch();
+}
+
+function performSearch() {
+    const results = searchStories(currentQuery, currentFilter);
+    displayResults(results);
+}
+
+function displayResults(stories) {
+    const container = document.getElementById('searchResults');
+    const header = document.getElementById('searchHeader');
+    const session = getSession();
+    
+    if (stories.length === 0) {
+        header.style.display = 'none';
+        container.innerHTML = `
+            <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <i class="fa fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
+                <h5 style="color: #666;">Aucun résultat</h5>
+                <p style="color: #999; font-size: 14px;">
+                    ${currentQuery ? `Aucune histoire ne correspond à "${currentQuery}"` : 'Aucune histoire dans cette catégorie'}
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Afficher le header
+    header.style.display = 'block';
+    document.getElementById('resultCount').textContent = `${stories.length} histoire${stories.length > 1 ? 's' : ''} trouvée${stories.length > 1 ? 's' : ''}`;
+    
+    container.innerHTML = stories.map(story => {
+        const isLiked = story.likes && story.likes.includes(session.id);
+        let displayContent = story.content;
+        
+        // Surligner les termes de recherche
+        if (currentQuery) {
+            const terms = currentQuery.split(' ').filter(t => t.trim());
+            terms.forEach(term => {
+                const regex = new RegExp(`(${term})`, 'gi');
+                displayContent = displayContent.replace(regex, '<span class="search-highlight">$1</span>');
+            });
+        }
+        
+        // Tronquer le contenu
+        if (displayContent.length > 300) {
+            displayContent = displayContent.substring(0, 300) + '...';
+        }
+        
+        return `
+            <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <figure style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-right: 12px; flex-shrink: 0;">
+                        <img src="${getAvatarUrl(story.authorAvatar)}" alt="${story.authorPseudo}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </figure>
+                    <div class="friend-name" style="flex: 1;">
+                        <ins><a href="#" style="color: #667eea;">${story.authorPseudo}</a></ins>
+                        <span class="time-ago" style="display: block;">${timeAgo(story.createdAt)}</span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
+                    ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+                </div>
+                
+                <div class="post-content" style="color: #333; line-height: 1.6; margin-bottom: 15px;">
+                    ${displayContent}
+                </div>
+                
+                <div class="post-actions" style="display: flex; align-items: center; padding-top: 15px; border-top: 1px solid #eee;">
+                    <span style="color: #999; margin-right: 20px;">
+                        <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}" style="${isLiked ? 'color: #e91e63;' : ''}"></i> ${story.likes?.length || 0}
+                    </span>
+                    <span style="color: #999; margin-right: 20px;">
+                        <i class="fa fa-comment-o"></i> ${story.comments?.length || 0}
+                    </span>
+                    <a href="xalass-story.html?id=${story.id}" class="view-story" style="margin-left: auto;">
+                        Lire l'histoire <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateNotifBadge() {
+    const session = getSession();
+    if (!session) return;
+    
+    const count = getUnreadCount(session.id);
+    const badge = document.getElementById('notifBadge');
+    
+    if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Empêcher la soumission du formulaire
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    performSearch();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xalass - Fil d'histoires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        /* Header */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #dc2626;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #fecaca;
+        }
+
+        /* Main Layout */
+        .main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* Publish Card */
+        .publish-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .publish-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .publish-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f3f4f6;
+        }
+
+        .publish-input-wrapper {
+            flex: 1;
+        }
+
+        .publish-title {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .publish-title:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #fff;
+        }
+
+        .publish-content {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.2s;
+            background: #f9fafb;
+            margin-bottom: 16px;
+        }
+
+        .publish-content:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #fff;
+        }
+
+        .publish-options {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .category-select {
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-select:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: #6366f1;
+        }
+
+        .btn-publish {
+            margin-left: auto;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        /* Story Card */
+        .story-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .story-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .story-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .story-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #f3f4f6;
+        }
+
+        .story-meta {
+            flex: 1;
+        }
+
+        .story-author {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1f2937;
+        }
+
+        .story-time {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .story-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-amour { background: #fce7f3; color: #db2777; }
+        .badge-amitie { background: #dbeafe; color: #2563eb; }
+        .badge-famille { background: #d1fae5; color: #059669; }
+        .badge-travail { background: #fef3c7; color: #d97706; }
+        .badge-social { background: #e0e7ff; color: #4f46e5; }
+        .badge-autre { background: #f3f4f6; color: #6b7280; }
+
+        .badge-following {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: #fff;
+            margin-left: 6px;
+        }
+
+        .story-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .story-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .story-title a:hover {
+            color: #6366f1;
+        }
+
+        .story-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #4b5563;
+            margin-bottom: 16px;
+        }
+
+        .story-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #f9fafb;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .action-btn.liked {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        .action-btn.reported {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+
+            .publish-options {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-publish {
+                margin-left: 0;
+                margin-top: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="xalass-feed.html" class="logo">Xalass</a>
+            <nav class="nav">
+                <a href="xalass-feed.html" class="nav-link active">📖 Histoires</a>
+                <a href="xalass-search.html" class="nav-link">🔍 Rechercher</a>
+                <a href="xalass-notifications.html" class="nav-link">🔔 Notifications</a>
+                <a href="xalass-profile.html" class="nav-link">👤 Profil</a>
+            </nav>
+            <div class="user-menu">
+                <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="location.href='xalass-profile.html'">
+                <button class="btn-logout" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Publish Story -->
+        <div class="publish-card">
+            <div class="publish-header">
+                <img src="" alt="Avatar" class="publish-avatar" id="publish-avatar">
+                <div class="publish-input-wrapper">
+                    <input type="text" class="publish-title" id="story-title" placeholder="Titre de ton histoire...">
+                </div>
+            </div>
+            <textarea class="publish-content" id="story-content" placeholder="Raconte ton histoire ici... Qu'est-ce que tu veux partager anonymement ?"></textarea>
+            <div class="publish-options">
+                <select class="category-select" id="story-category">
+                    <option value="autre">📁 Catégorie</option>
+                    <option value="amour">❤️ Amour</option>
+                    <option value="amitie">💙 Amitié</option>
+                    <option value="famille">💚 Famille</option>
+                    <option value="travail">💛 Travail</option>
+                    <option value="social">💜 Social</option>
+                </select>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="story-following">
+                    À suivre... (histoire incomplète)
+                </label>
+                <button class="btn-publish" onclick="publishStory()">Publier ✨</button>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterStories('all')">Tout</button>
+            <button class="filter-tab" onclick="filterStories('amour')">❤️ Amour</button>
+            <button class="filter-tab" onclick="filterStories('amitie')">💙 Amitié</button>
+            <button class="filter-tab" onclick="filterStories('famille')">💚 Famille</button>
+            <button class="filter-tab" onclick="filterStories('travail')">💛 Travail</button>
+            <button class="filter-tab" onclick="filterStories('social')">💜 Social</button>
+            <button class="filter-tab" onclick="filterStories('following')">📖 À suivre</button>
+        </div>
+
+        <!-- Stories Feed -->
+        <div id="stories-feed"></div>
+    </main>
+
+    <script>
+        let currentFilter = 'all';
+        let session = null;
+
+        // Check auth
+        function checkAuth() {
+            session = JSON.parse(localStorage.getItem('xalass_session'));
+            if (!session) {
+                window.location.href = 'xalass-login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Format time
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return "À l'instant";
+            if (diff < 3600) return Math.floor(diff / 60) + ' min';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' j';
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        // Render stories
+        function renderStories() {
+            const feed = document.getElementById('stories-feed');
+            let stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            
+            // Filter
+            if (currentFilter === 'following') {
+                stories = stories.filter(s => s.isFollowing);
+            } else if (currentFilter !== 'all') {
+                stories = stories.filter(s => s.category === currentFilter);
+            }
+
+            // Sort by date
+            stories.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (stories.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">Aucune histoire pour le moment</div>
+                    </div>
+                `;
+                return;
+            }
+
+            feed.innerHTML = stories.map(story => {
+                const isLiked = story.likedBy && story.likedBy.includes(session.userId);
+                const categoryClass = 'badge-' + (story.category || 'autre');
+                
+                return `
+                    <article class="story-card">
+                        <div class="story-header">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${story.avatar || 1}" alt="Avatar" class="story-avatar">
+                            <div class="story-meta">
+                                <div class="story-author">${story.author}</div>
+                                <div class="story-time">${formatTime(story.createdAt)}</div>
+                            </div>
+                            <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
+                            ${story.isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
+                        </div>
+                        <h2 class="story-title">
+                            <a href="xalass-story.html?id=${story.id}">${story.title}</a>
+                        </h2>
+                        <p class="story-content">${story.content.substring(0, 300)}${story.content.length > 300 ? '...' : ''}</p>
+                        <div class="story-actions">
+                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.id})">
+                                ${isLiked ? '❤️' : '🤍'} ${story.likes || 0}
+                            </button>
+                            <button class="action-btn" onclick="location.href='xalass-story.html?id=${story.id}'">
+                                💬 ${(story.comments || []).length}
+                            </button>
+                            <button class="action-btn" onclick="shareStory(${story.id})">
+                                📤 Partager
+                            </button>
+                            <button class="action-btn ${story.reports >= 1 ? 'reported' : ''}" onclick="reportStory(${story.id})">
+                                ⚠️ Signaler
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Publish story
+        function publishStory() {
+            const title = document.getElementById('story-title').value.trim();
+            const content = document.getElementById('story-content').value.trim();
+            const category = document.getElementById('story-category').value;
+            const isFollowing = document.getElementById('story-following').checked;
+
+            if (!title || !content) {
+                alert('Remplis le titre et le contenu de ton histoire');
+                return;
+            }
+
+            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            const newStory = {
+                id: Date.now(),
+                authorId: session.userId,
+                author: session.pseudo,
+                avatar: session.avatar,
+                title,
+                content,
+                category,
+                isFollowing,
+                likes: 0,
+                likedBy: [],
+                comments: [],
+                reports: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            stories.unshift(newStory);
+            localStorage.setItem('xalass_stories', JSON.stringify(stories));
+
+            // Clear form
+            document.getElementById('story-title').value = '';
+            document.getElementById('story-content').value = '';
+            document.getElementById('story-category').value = 'autre';
+            document.getElementById('story-following').checked = false;
+
+            renderStories();
+        }
+
+        // Toggle like
+        function toggleLike(storyId) {
+            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            const story = stories.find(s => s.id === storyId);
+            
+            if (!story) return;
+
+            if (!story.likedBy) story.likedBy = [];
+            
+            const index = story.likedBy.indexOf(session.userId);
+            if (index > -1) {
+                story.likedBy.splice(index, 1);
+                story.likes = Math.max(0, (story.likes || 0) - 1);
+            } else {
+                story.likedBy.push(session.userId);
+                story.likes = (story.likes || 0) + 1;
+            }
+
+            localStorage.setItem('xalass_stories', JSON.stringify(stories));
+            renderStories();
+        }
+
+        // Share story
+        function shareStory(storyId) {
+            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            const story = stories.find(s => s.id === storyId);
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: story.title,
+                    text: story.content.substring(0, 100) + '...',
+                    url: window.location.origin + '/xalass-story.html?id=' + storyId
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.origin + '/xalass-story.html?id=' + storyId);
+                alert('Lien copié !');
+            }
+        }
+
+        // Report story
+        function reportStory(storyId) {
+            if (!confirm('Signaler cette histoire comme inappropriée ?')) return;
+            
+            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            const storyIndex = stories.findIndex(s => s.id === storyId);
+            
+            if (storyIndex > -1) {
+                stories[storyIndex].reports = (stories[storyIndex].reports || 0) + 1;
+                
+                if (stories[storyIndex].reports >= 3) {
+                    stories.splice(storyIndex, 1);
+                    alert('Histoire supprimée suite aux signalements');
+                } else {
+                    alert('Signalement enregistré');
+                }
+                
+                localStorage.setItem('xalass_stories', JSON.stringify(stories));
+                renderStories();
+            }
+        }
+
+        // Filter stories
+        function filterStories(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderStories();
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('xalass_session');
+            window.location.href = 'xalass-login.html';
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.avatar}`;
+            document.getElementById('user-avatar').src = avatarUrl;
+            document.getElementById('publish-avatar').src = avatarUrl;
+            
+            renderStories();
+        });
+    </script>
+</body>
+</html>

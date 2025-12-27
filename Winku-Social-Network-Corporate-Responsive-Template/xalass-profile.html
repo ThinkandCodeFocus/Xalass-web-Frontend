@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Xalass - Mon profil" />
+    <title>Xalass - Profil</title>
+    
+    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16"> 
+    <link rel="stylesheet" href="css/main.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/xalass.css">
+</head>
+<body>
+
+<div class="theme-layout">
+    <!-- Header -->
+    <header class="sticky-header">
+        <div class="menu-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-3 col-md-3 col-4">
+                        <a href="xalass-feed.html" class="logo" style="font-size: 24px; color: #667eea; font-weight: bold;">
+                            <i class="fa fa-comments"></i> Xalass
+                        </a>
+                    </div>
+                    <div class="col-lg-6 col-md-5 col-4">
+                        <form action="xalass-search.html" method="GET">
+                            <input type="text" name="q" placeholder="Rechercher une histoire..." class="form-control">
+                        </form>
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-4 text-right">
+                        <div class="user-menu" style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                            <a href="xalass-notifications.html" style="position: relative; color: #333;">
+                                <i class="fa fa-bell" style="font-size: 20px;"></i>
+                                <span id="notifBadge" class="notif-count" style="display: none;">0</span>
+                            </a>
+                            <a href="xalass-profile.html" id="headerAvatar" style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; display: block;">
+                                <img src="" alt="Mon profil" style="width: 100%; height: 100%; object-fit: cover;">
+                            </a>
+                            <a href="#" onclick="logoutUser(); return false;" title="Déconnexion" style="color: #e91e63;">
+                                <i class="fa fa-sign-out" style="font-size: 18px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <section style="padding-top: 80px; padding-bottom: 100px; min-height: 100vh;">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar profil -->
+                <div class="col-lg-4 col-md-5">
+                    <!-- Carte profil -->
+                    <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div id="profileAvatar" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin: 0 auto 15px; border: 4px solid #667eea;">
+                            <img src="" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <h3 id="profilePseudo" style="margin-bottom: 5px; color: #333;"></h3>
+                        <span id="profileDate" style="color: #999; font-size: 13px;"></span>
+                        
+                        <!-- Statistiques -->
+                        <div class="profile-stats" style="margin-top: 20px;">
+                            <div class="stat-item">
+                                <i class="fa fa-book"></i>
+                                <div>
+                                    <strong id="statStories">0</strong>
+                                    <span>Histoires publiées</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fa fa-heart"></i>
+                                <div>
+                                    <strong id="statLikes">0</strong>
+                                    <span>Likes reçus</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fa fa-comments"></i>
+                                <div>
+                                    <strong id="statComments">0</strong>
+                                    <span>Commentaires reçus</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <h5 style="margin-bottom: 15px;"><i class="fa fa-cog"></i> Actions</h5>
+                        <a href="#" onclick="confirmLogout(); return false;" style="display: block; padding: 12px; background: #f8f9fa; border-radius: 8px; color: #e91e63; text-align: center; margin-bottom: 10px;">
+                            <i class="fa fa-sign-out"></i> Déconnexion
+                        </a>
+                        <a href="#" onclick="confirmDeleteAccount(); return false;" style="display: block; padding: 12px; background: #fff0f0; border-radius: 8px; color: #d32f2f; text-align: center;">
+                            <i class="fa fa-trash"></i> Supprimer mon compte
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Histoires -->
+                <div class="col-lg-8 col-md-7">
+                    <!-- Onglets -->
+                    <div class="profile-tabs">
+                        <ul class="nav nav-tabs" style="background: #fff; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                            <li class="nav-item" style="flex: 1;">
+                                <a class="nav-link active text-center" id="tab-published" onclick="showTab('published')">
+                                    <i class="fa fa-book"></i> Mes histoires
+                                </a>
+                            </li>
+                            <li class="nav-item" style="flex: 1;">
+                                <a class="nav-link text-center" id="tab-asuivre" onclick="showTab('asuivre')">
+                                    <i class="fa fa-edit"></i> À suivre
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Contenu des onglets -->
+                    <div class="tab-content" style="background: #fff; border-radius: 0 0 8px 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <!-- Histoires publiées -->
+                        <div id="panel-published" class="tab-pane active">
+                            <div id="publishedStories">
+                                <!-- Chargé dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <!-- Histoires à suivre -->
+                        <div id="panel-asuivre" class="tab-pane" style="display: none;">
+                            <div id="asuivreStories">
+                                <!-- Chargé dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Modal de modification -->
+    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+        <div style="background: #fff; border-radius: 12px; padding: 25px; width: 90%; max-width: 600px; margin: auto;">
+            <h5 style="margin-bottom: 15px;"><i class="fa fa-edit"></i> Modifier l'histoire</h5>
+            <textarea id="editContent" rows="8" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 15px; resize: vertical;"></textarea>
+            <div style="margin-top: 15px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="editAsuivre" style="margin-right: 10px;">
+                    <span>📖 À suivre (histoire incomplète)</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button onclick="closeEditModal()" style="padding: 10px 25px; border: none; background: #eee; border-radius: 20px; cursor: pointer;">
+                    Annuler
+                </button>
+                <button onclick="saveEdit()" class="mtr-btn" style="padding: 10px 25px;">
+                    <span>Enregistrer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation Mobile -->
+    <nav class="d-md-none" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000;">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-3">
+                    <a href="xalass-feed.html" style="color: #666;">
+                        <i class="fa fa-home" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Accueil</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-search.html" style="color: #666;">
+                        <i class="fa fa-search" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Recherche</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-notifications.html" style="color: #666;">
+                        <i class="fa fa-bell" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Notifs</small>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="xalass-profile.html" style="color: #667eea;">
+                        <i class="fa fa-user" style="font-size: 20px;"></i>
+                        <small style="display: block; font-size: 10px;">Profil</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<script src="js/main.min.js"></script>
+<script src="js/xalass.js"></script>
+<script>
+let currentEditStoryId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérifier l'authentification
+    const session = checkAuth();
+    if (!session) return;
+    
+    // Afficher les informations du profil
+    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
+    document.querySelector('#profileAvatar img').src = getAvatarUrl(session.avatar);
+    document.getElementById('profilePseudo').textContent = session.pseudo;
+    document.getElementById('profileDate').textContent = 'Membre depuis ' + new Date(session.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    
+    // Charger les statistiques
+    loadStats();
+    
+    // Charger les histoires
+    loadMyStories();
+    
+    // Mettre à jour le badge de notifications
+    updateNotifBadge();
+});
+
+function loadStats() {
+    const session = getSession();
+    const stats = getUserStats(session.id);
+    
+    document.getElementById('statStories').textContent = stats.storiesCount;
+    document.getElementById('statLikes').textContent = stats.likesCount;
+    document.getElementById('statComments').textContent = stats.commentsCount;
+}
+
+function loadMyStories() {
+    const session = getSession();
+    const stories = getStories().filter(s => s.authorId === session.id);
+    
+    const published = stories.filter(s => !s.isAsuivre);
+    const asuivre = stories.filter(s => s.isAsuivre);
+    
+    // Histoires publiées
+    const publishedContainer = document.getElementById('publishedStories');
+    if (published.length === 0) {
+        publishedContainer.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <i class="fa fa-book" style="font-size: 36px; margin-bottom: 10px;"></i>
+                <p>Vous n'avez pas encore publié d'histoire.</p>
+                <a href="xalass-feed.html" class="mtr-btn" style="margin-top: 10px; display: inline-block; padding: 8px 20px;">
+                    <span>Écrire une histoire</span>
+                </a>
+            </div>
+        `;
+    } else {
+        publishedContainer.innerHTML = published.map(story => renderStoryCard(story)).join('');
+    }
+    
+    // Histoires à suivre
+    const asuivreContainer = document.getElementById('asuivreStories');
+    if (asuivre.length === 0) {
+        asuivreContainer.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #999;">
+                <i class="fa fa-edit" style="font-size: 36px; margin-bottom: 10px;"></i>
+                <p>Aucune histoire en cours.</p>
+            </div>
+        `;
+    } else {
+        asuivreContainer.innerHTML = asuivre.map(story => renderStoryCard(story, true)).join('');
+    }
+}
+
+function renderStoryCard(story, showContinue = false) {
+    return `
+        <div class="story-card" style="padding: 20px; border-bottom: 1px solid #eee;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <div>
+                    <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
+                    ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+                </div>
+                <span class="time-ago">${timeAgo(story.createdAt)}</span>
+            </div>
+            
+            <p style="color: #333; line-height: 1.6; margin-bottom: 15px;">
+                ${story.content.length > 200 ? story.content.substring(0, 200) + '...' : story.content}
+            </p>
+            
+            <div style="display: flex; align-items: center; gap: 20px; color: #999; font-size: 13px;">
+                <span><i class="fa fa-heart"></i> ${story.likes?.length || 0}</span>
+                <span><i class="fa fa-comment"></i> ${story.comments?.length || 0}</span>
+                <span><i class="fa fa-eye"></i> ${story.views || 0}</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <a href="xalass-story.html?id=${story.id}" style="padding: 6px 15px; background: #667eea; color: #fff; border-radius: 20px; font-size: 12px;">
+                    <i class="fa fa-eye"></i> Voir
+                </a>
+                ${showContinue ? `
+                    <button onclick="openEditModal('${story.id}')" style="padding: 6px 15px; background: #4caf50; color: #fff; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                        <i class="fa fa-edit"></i> Continuer
+                    </button>
+                ` : `
+                    <button onclick="openEditModal('${story.id}')" style="padding: 6px 15px; background: #f0f0f0; color: #666; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                        <i class="fa fa-edit"></i> Modifier
+                    </button>
+                `}
+                <button onclick="confirmDeleteStory('${story.id}')" style="padding: 6px 15px; background: #ffebee; color: #e91e63; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                    <i class="fa fa-trash"></i> Supprimer
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function showTab(tabName) {
+    // Mettre à jour les onglets
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    
+    // Mettre à jour les panneaux
+    document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+    document.getElementById('panel-' + tabName).style.display = 'block';
+}
+
+function openEditModal(storyId) {
+    const story = getStoryById(storyId);
+    if (!story) return;
+    
+    currentEditStoryId = storyId;
+    document.getElementById('editContent').value = story.content;
+    document.getElementById('editAsuivre').checked = story.isAsuivre;
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    currentEditStoryId = null;
+}
+
+function saveEdit() {
+    const content = document.getElementById('editContent').value.trim();
+    const isAsuivre = document.getElementById('editAsuivre').checked;
+    
+    if (!content) {
+        showToast('Le contenu ne peut pas être vide');
+        return;
+    }
+    
+    const result = updateStory(currentEditStoryId, content, isAsuivre);
+    
+    if (result.success) {
+        closeEditModal();
+        showToast('Histoire modifiée !');
+        loadMyStories();
+        loadStats();
+    } else {
+        showToast(result.message);
+    }
+}
+
+function confirmDeleteStory(storyId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ? Cette action est irréversible.')) {
+        const result = deleteStory(storyId);
+        
+        if (result.success) {
+            showToast('Histoire supprimée');
+            loadMyStories();
+            loadStats();
+        } else {
+            showToast(result.message);
+        }
+    }
+}
+
+function confirmLogout() {
+    if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+        logoutUser();
+    }
+}
+
+function confirmDeleteAccount() {
+    if (confirm('⚠️ ATTENTION : Cette action supprimera définitivement votre compte et toutes vos histoires. Cette action est IRRÉVERSIBLE.\n\nVoulez-vous vraiment supprimer votre compte ?')) {
+        if (confirm('Êtes-vous vraiment sûr ? Vous perdrez tout accès à ce compte.')) {
+            const session = getSession();
+            
+            // Supprimer les histoires de l'utilisateur
+            let stories = getStories();
+            stories = stories.filter(s => s.authorId !== session.id);
+            saveStories(stories);
+            
+            // Supprimer l'utilisateur
+            let users = getUsers();
+            users = users.filter(u => u.id !== session.id);
+            saveUsers(users);
+            
+            // Déconnecter
+            clearSession();
+            
+            showToast('Compte supprimé');
+            setTimeout(() => {
+                window.location.href = 'xalass-login.html';
+            }, 1000);
+        }
+    }
+}
+
+function updateNotifBadge() {
+    const session = getSession();
+    if (!session) return;
+    
+    const count = getUnreadCount(session.id);
+    const badge = document.getElementById('notifBadge');
+    
+    if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Fermer le modal en cliquant à l'extérieur
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+</script>
+
+</body>
+</html>

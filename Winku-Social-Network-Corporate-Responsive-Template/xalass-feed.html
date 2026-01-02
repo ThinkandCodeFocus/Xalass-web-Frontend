@@ -14,22 +14,53 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f3f4f6;
+            background: #0d1117;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             min-height: 100vh;
-            color: #1f2937;
+            color: #e6edf3;
+            position: relative;
+        }
+
+        /* Pattern de points subtil comme GitHub */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Assurer que le contenu est au-dessus du pattern */
+        .header,
+        .main-container {
+            position: relative;
+            z-index: 1;
         }
 
         /* Header */
         .header {
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .header-inner {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
             height: 64px;
@@ -56,7 +87,7 @@
         .nav-link {
             padding: 10px 16px;
             border-radius: 10px;
-            color: #6b7280;
+            color: #8b949e;
             text-decoration: none;
             font-weight: 500;
             font-size: 14px;
@@ -67,13 +98,14 @@
         }
 
         .nav-link:hover {
-            background: #f3f4f6;
-            color: #1f2937;
+            background: rgba(99, 102, 241, 0.1);
+            color: #e6edf3;
         }
 
         .nav-link.active {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .user-menu {
@@ -82,11 +114,89 @@
             gap: 12px;
         }
 
+        /* Menu hamburger pour mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e6edf3;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 16px;
+            z-index: 99;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-nav.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav-link {
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #8b949e;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #8b5cf6;
+        }
+
+        .mobile-nav-link.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            color: #8b5cf6;
+        }
+
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #f3f4f6;
+            background: rgba(99, 102, 241, 0.2);
+            border: 2px solid rgba(99, 102, 241, 0.3);
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -97,10 +207,10 @@
 
         .btn-logout {
             padding: 8px 16px;
-            border: none;
+            border: 1px solid rgba(220, 38, 38, 0.3);
             border-radius: 8px;
-            background: #fee2e2;
-            color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+            color: #f85149;
             font-weight: 500;
             font-size: 13px;
             cursor: pointer;
@@ -108,23 +218,165 @@
         }
 
         .btn-logout:hover {
-            background: #fecaca;
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
         }
 
-        /* Main Layout */
-        .main {
-            max-width: 800px;
+        /* Main Layout - 3 colonnes */
+        .main-container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 24px 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 24px;
+        }
+
+        /* Sidebar gauche */
+        .sidebar-left {
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+        }
+
+        .sidebar-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .sidebar-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .sidebar-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #e6edf3;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats-label {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .stats-value {
+            font-weight: 700;
+            color: #8b5cf6;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e6edf3;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #8b5cf6;
+            transform: translateX(4px);
+        }
+
+        /* Colonne centrale */
+        .main {
+            min-width: 0; /* Important pour grid */
+        }
+
+        /* Sidebar droite */
+        .sidebar-right {
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+        }
+
+        .trending-topics {
+            list-style: none;
+        }
+
+        .trending-topic {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trending-topic:last-child {
+            border-bottom: none;
+        }
+
+        .trending-topic:hover {
+            color: #8b5cf6;
+            transform: translateX(4px);
+        }
+
+        .trending-topic-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #e6edf3;
+        }
+
+        .trending-topic-count {
+            font-size: 12px;
+            color: #8b949e;
         }
 
         /* Publish Card */
         .publish-card {
-            background: #fff;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .publish-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
         }
 
         .publish-header {
@@ -148,39 +400,51 @@
         .publish-title {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e5e7eb;
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 10px;
             font-size: 15px;
             font-weight: 600;
             font-family: inherit;
             transition: all 0.2s;
-            background: #f9fafb;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
+        }
+
+        .publish-title::placeholder {
+            color: #6b7280;
         }
 
         .publish-title:focus {
             outline: none;
             border-color: #6366f1;
-            background: #fff;
+            background: rgba(13, 17, 23, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .publish-content {
             width: 100%;
             padding: 14px 16px;
-            border: 2px solid #e5e7eb;
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 12px;
             font-size: 15px;
             font-family: inherit;
             resize: vertical;
             min-height: 100px;
             transition: all 0.2s;
-            background: #f9fafb;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
             margin-bottom: 16px;
+        }
+
+        .publish-content::placeholder {
+            color: #6b7280;
         }
 
         .publish-content:focus {
             outline: none;
             border-color: #6366f1;
-            background: #fff;
+            background: rgba(13, 17, 23, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .publish-options {
@@ -192,11 +456,12 @@
 
         .category-select {
             padding: 10px 14px;
-            border: 2px solid #e5e7eb;
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 10px;
             font-size: 14px;
             font-family: inherit;
-            background: #f9fafb;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -204,6 +469,7 @@
         .category-select:focus {
             outline: none;
             border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .checkbox-label {
@@ -211,7 +477,7 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
-            color: #6b7280;
+            color: #8b949e;
             cursor: pointer;
         }
 
@@ -249,39 +515,46 @@
 
         .filter-tab {
             padding: 8px 16px;
-            background: #fff;
-            border: 2px solid #e5e7eb;
+            background: rgba(22, 27, 34, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
-            color: #6b7280;
+            color: #8b949e;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .filter-tab:hover {
-            border-color: #6366f1;
-            color: #6366f1;
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #8b5cf6;
+            background: rgba(99, 102, 241, 0.1);
         }
 
         .filter-tab.active {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border-color: transparent;
             color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         /* Story Card */
         .story-card {
-            background: #fff;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
         }
 
         .story-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
         }
 
         .story-header {
@@ -305,12 +578,12 @@
         .story-author {
             font-weight: 600;
             font-size: 15px;
-            color: #1f2937;
+            color: #e6edf3;
         }
 
         .story-time {
             font-size: 13px;
-            color: #9ca3af;
+            color: #8b949e;
         }
 
         .story-badge {
@@ -337,7 +610,7 @@
         .story-title {
             font-size: 18px;
             font-weight: 700;
-            color: #1f2937;
+            color: #e6edf3;
             margin-bottom: 10px;
             line-height: 1.4;
         }
@@ -345,16 +618,18 @@
         .story-title a {
             color: inherit;
             text-decoration: none;
+            transition: all 0.2s;
         }
 
         .story-title a:hover {
-            color: #6366f1;
+            color: #8b5cf6;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
         }
 
         .story-content {
             font-size: 15px;
             line-height: 1.7;
-            color: #4b5563;
+            color: #c9d1d9;
             margin-bottom: 16px;
         }
 
@@ -370,36 +645,39 @@
             align-items: center;
             gap: 6px;
             padding: 8px 14px;
-            background: #f9fafb;
-            border: none;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 8px;
             font-size: 13px;
             font-weight: 500;
-            color: #6b7280;
+            color: #8b949e;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .action-btn:hover {
-            background: #f3f4f6;
-            color: #1f2937;
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #e6edf3;
         }
 
         .action-btn.liked {
-            background: #fef2f2;
-            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f85149;
         }
 
         .action-btn.reported {
-            background: #fef3c7;
-            color: #d97706;
+            background: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.3);
+            color: #f59e0b;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #9ca3af;
+            color: #8b949e;
         }
 
         .empty-state-icon {
@@ -411,20 +689,373 @@
             font-size: 16px;
         }
 
-        /* Responsive */
+        /* Responsive - Desktop Large */
+        @media (max-width: 1400px) {
+            .main-container {
+                max-width: 1200px;
+                grid-template-columns: 260px 1fr 300px;
+                gap: 20px;
+            }
+        }
+
+        /* Responsive - Desktop */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 240px 1fr 280px;
+                gap: 18px;
+            }
+
+            .header-inner {
+                max-width: 100%;
+                padding: 0 16px;
+            }
+
+            .sidebar-card {
+                padding: 16px;
+            }
+        }
+
+        /* Responsive - Tablette */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .sidebar-left,
+            .sidebar-right {
+                display: none;
+            }
+
+            .header-inner {
+                padding: 0 12px;
+            }
+
+            .nav {
+                gap: 4px;
+            }
+
+            .nav-link {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+        }
+
+        /* Responsive - Mobile Large */
         @media (max-width: 768px) {
+            .header-inner {
+                height: 56px;
+                padding: 0 12px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
             .nav {
                 display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .mobile-nav {
+                top: 56px;
+            }
+
+            .user-menu {
+                gap: 8px;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .btn-logout {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .main-container {
+                padding: 16px 12px;
+                gap: 16px;
+            }
+
+            .publish-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .publish-header {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .publish-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .publish-title {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            .publish-content {
+                padding: 12px 14px;
+                font-size: 14px;
+                min-height: 80px;
             }
 
             .publish-options {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 10px;
+            }
+
+            .category-select {
+                width: 100%;
+                padding: 10px 12px;
             }
 
             .btn-publish {
+                width: 100%;
                 margin-left: 0;
-                margin-top: 12px;
+                margin-top: 0;
+                padding: 12px;
+            }
+
+            .filter-tabs {
+                gap: 6px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .filter-tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-tab {
+                padding: 6px 12px;
+                font-size: 12px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .story-card {
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
+
+            .story-header {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .story-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .story-author {
+                font-size: 14px;
+            }
+
+            .story-time {
+                font-size: 12px;
+            }
+
+            .story-title {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .story-content {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .story-actions {
+                gap: 6px;
+                padding-top: 12px;
+                flex-wrap: wrap;
+            }
+
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .sidebar-card h3 {
+                font-size: 15px;
+            }
+
+            .stats-value {
+                font-size: 16px;
+            }
+        }
+
+        /* Responsive - Mobile Small */
+        @media (max-width: 480px) {
+            .header-inner {
+                height: 52px;
+                padding: 0 10px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .menu-toggle {
+                font-size: 20px;
+                padding: 6px;
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+            }
+
+            .btn-logout {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .mobile-nav {
+                top: 52px;
+                padding: 12px;
+            }
+
+            .main-container {
+                padding: 12px 10px;
+            }
+
+            .publish-card {
+                padding: 12px;
+            }
+
+            .publish-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .publish-title {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .publish-content {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-height: 70px;
+            }
+
+            .filter-tab {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .story-card {
+                padding: 12px;
+            }
+
+            .story-title {
+                font-size: 15px;
+            }
+
+            .story-content {
+                font-size: 13px;
+            }
+
+            .action-btn {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+        }
+
+        /* Responsive - Très petit mobile */
+        @media (max-width: 360px) {
+            .header-inner {
+                padding: 0 8px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .main-container {
+                padding: 10px 8px;
+            }
+
+            .publish-card {
+                padding: 10px;
+            }
+
+            .story-card {
+                padding: 10px;
+            }
+        }
+
+        /* Amélioration du scroll sur mobile */
+        @media (max-width: 768px) {
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .filter-tabs {
+                scroll-snap-type: x mandatory;
+            }
+
+            .filter-tab {
+                scroll-snap-align: start;
+            }
+        }
+
+        /* Amélioration de l'affichage tactile */
+        @media (hover: none) and (pointer: coarse) {
+            .action-btn,
+            .filter-tab,
+            .nav-link,
+            .quick-action-btn,
+            .mobile-nav-link {
+                min-height: 44px; /* Taille minimale pour le touch */
+            }
+
+            .btn-publish,
+            .btn-logout {
+                min-height: 44px;
+            }
+        }
+
+        /* Amélioration du viewport sur mobile */
+        @media (max-width: 768px) {
+            .main-container {
+                min-height: calc(100vh - 56px);
+            }
+        }
+
+        /* Optimisation pour les écrans en mode paysage mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header-inner {
+                height: 48px;
+            }
+
+            .mobile-nav {
+                top: 48px;
+            }
+
+            .main-container {
+                padding: 12px;
             }
         }
     </style>
@@ -432,6 +1063,7 @@
 <body>
     <header class="header">
         <div class="header-inner">
+            <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
             <a href="xalass-feed.html" class="logo">Xalass</a>
             <nav class="nav">
                 <a href="xalass-feed.html" class="nav-link active">📖 Histoires</a>
@@ -446,7 +1078,53 @@
         </div>
     </header>
 
-    <main class="main">
+    <!-- Menu mobile -->
+    <nav class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-links">
+            <a href="xalass-feed.html" class="mobile-nav-link active" onclick="closeMobileNav()">📖 Histoires</a>
+            <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">🔍 Rechercher</a>
+            <a href="xalass-notifications.html" class="mobile-nav-link" onclick="closeMobileNav()">🔔 Notifications</a>
+            <a href="xalass-profile.html" class="mobile-nav-link" onclick="closeMobileNav()">👤 Profil</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Sidebar gauche -->
+        <aside class="sidebar-left">
+            <div class="sidebar-card">
+                <h3>📊 Statistiques</h3>
+                <div class="stats-item">
+                    <span class="stats-label">Total posts</span>
+                    <span class="stats-value" id="total-posts">-</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">Mes posts</span>
+                    <span class="stats-value" id="my-posts">-</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">Mes likes</span>
+                    <span class="stats-value" id="my-likes">-</span>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>⚡ Actions rapides</h3>
+                <div class="quick-actions">
+                    <a href="xalass-profile.html" class="quick-action-btn">
+                        👤 Mon profil
+                    </a>
+                    <a href="xalass-notifications.html" class="quick-action-btn">
+                        🔔 Notifications
+                    </a>
+                    <a href="xalass-search.html" class="quick-action-btn">
+                        🔍 Rechercher
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Colonne centrale -->
+        <main class="main">
         <!-- Publish Story -->
         <div class="publish-card">
             <div class="publish-header">
@@ -486,16 +1164,59 @@
 
         <!-- Stories Feed -->
         <div id="stories-feed"></div>
-    </main>
+        </main>
 
+        <!-- Sidebar droite -->
+        <aside class="sidebar-right">
+            <div class="sidebar-card">
+                <h3>🔥 Tendances</h3>
+                <ul class="trending-topics" id="trending-topics">
+                    <li class="trending-topic" onclick="filterStories('amour')">
+                        <div class="trending-topic-name">❤️ Amour</div>
+                        <div class="trending-topic-count" id="trend-amour">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('amitie')">
+                        <div class="trending-topic-name">💙 Amitié</div>
+                        <div class="trending-topic-count" id="trend-amitie">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('famille')">
+                        <div class="trending-topic-name">💚 Famille</div>
+                        <div class="trending-topic-count" id="trend-famille">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('travail')">
+                        <div class="trending-topic-name">💛 Travail</div>
+                        <div class="trending-topic-count" id="trend-travail">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('social')">
+                        <div class="trending-topic-name">💜 Social</div>
+                        <div class="trending-topic-count" id="trend-social">-</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>💡 Suggestions</h3>
+                <p style="color: #8b949e; font-size: 14px; line-height: 1.6;">
+                    Partagez vos histoires anonymement et découvrez celles des autres. 
+                    Chaque histoire compte ! ✨
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Charger les scripts API -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    
     <script>
         let currentFilter = 'all';
         let session = null;
+        let allPosts = [];
 
         // Check auth
         function checkAuth() {
             session = JSON.parse(localStorage.getItem('xalass_session'));
-            if (!session) {
+            if (!session || !session.anon_uuid) {
                 window.location.href = 'xalass-login.html';
                 return false;
             }
@@ -515,20 +1236,103 @@
             return date.toLocaleDateString('fr-FR');
         }
 
-        // Render stories
+        // Cache des posts
+        let postsCache = {
+            data: [],
+            timestamp: null,
+            cacheDuration: 30000 // 30 secondes
+        };
+
+        // Load posts from API avec cache
+        async function loadPosts(forceRefresh = false) {
+            const feed = document.getElementById('stories-feed');
+            
+            // Afficher un indicateur de chargement
+            feed.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Chargement...</div>';
+            
+            try {
+                // Vérifier le cache
+                const now = Date.now();
+                if (!forceRefresh && postsCache.data.length > 0 && postsCache.timestamp && (now - postsCache.timestamp) < postsCache.cacheDuration) {
+                    console.log('Utilisation du cache');
+                    allPosts = postsCache.data;
+                    renderStories();
+                    return;
+                }
+
+                // Charger depuis l'API
+                allPosts = await api.getAllPosts();
+                
+                // Mettre à jour le cache
+                postsCache.data = allPosts;
+                postsCache.timestamp = now;
+                
+                renderStories();
+            } catch (error) {
+                console.error('Erreur lors du chargement des posts:', error);
+                
+                // Essayer d'utiliser le cache en cas d'erreur
+                if (postsCache.data.length > 0) {
+                    console.log('Utilisation du cache en cas d\'erreur');
+                    allPosts = postsCache.data;
+                    renderStories();
+                } else {
+                    feed.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-state-text">Erreur de chargement. Vérifie ta connexion.</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Pagination
+        let currentPage = 0;
+        const postsPerPage = 20;
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            const session = JSON.parse(localStorage.getItem('xalass_session'));
+            if (!session || !allPosts.length) return;
+
+            // Total posts
+            const totalEl = document.getElementById('total-posts');
+            if (totalEl) totalEl.textContent = allPosts.length;
+
+            // Mes posts
+            const myPosts = allPosts.filter(p => p.author_id === session.user_id);
+            const myPostsEl = document.getElementById('my-posts');
+            if (myPostsEl) myPostsEl.textContent = myPosts.length;
+
+            // Mes likes
+            const myLikes = allPosts.filter(p => p.user_liked).length;
+            const myLikesEl = document.getElementById('my-likes');
+            if (myLikesEl) myLikesEl.textContent = myLikes;
+
+            // Tendances par catégorie
+            const categories = ['amour', 'amitie', 'famille', 'travail', 'social'];
+            categories.forEach(cat => {
+                const count = allPosts.filter(p => p.category === cat).length;
+                const el = document.getElementById(`trend-${cat}`);
+                if (el) el.textContent = `${count} posts`;
+            });
+        }
+
+        // Render stories avec pagination
         function renderStories() {
             const feed = document.getElementById('stories-feed');
-            let stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
+            let stories = [...allPosts];
             
             // Filter
             if (currentFilter === 'following') {
-                stories = stories.filter(s => s.isFollowing);
+                stories = stories.filter(s => s.status === 'EN COURS');
             } else if (currentFilter !== 'all') {
                 stories = stories.filter(s => s.category === currentFilter);
             }
 
-            // Sort by date
-            stories.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            // Sort by date (déjà trié par le backend, mais on peut re-trier)
+            stories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             if (stories.length === 0) {
                 feed.innerHTML = `
@@ -537,49 +1341,74 @@
                         <div class="empty-state-text">Aucune histoire pour le moment</div>
                     </div>
                 `;
+                updateStats();
                 return;
             }
 
-            feed.innerHTML = stories.map(story => {
-                const isLiked = story.likedBy && story.likedBy.includes(session.userId);
+            // Pagination : afficher seulement les premiers posts
+            const startIndex = 0;
+            const endIndex = (currentPage + 1) * postsPerPage;
+            const postsToShow = stories.slice(startIndex, endIndex);
+            const hasMore = stories.length > endIndex;
+
+            feed.innerHTML = postsToShow.map(story => {
+                const isLiked = story.user_liked || false;
                 const categoryClass = 'badge-' + (story.category || 'autre');
+                const isFollowing = story.status === 'EN COURS';
+                const reactionsCount = story.reactions_count || 0;
+                const commentsCount = story.comments_count || 0;
                 
                 return `
                     <article class="story-card">
                         <div class="story-header">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${story.avatar || 1}" alt="Avatar" class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${story.author?.user_id || 1}" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
-                                <div class="story-author">${story.author}</div>
-                                <div class="story-time">${formatTime(story.createdAt)}</div>
+                                <div class="story-author">${story.author?.code_name || 'Anonyme'}</div>
+                                <div class="story-time">${formatTime(story.created_at)}</div>
                             </div>
                             <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
-                            ${story.isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
+                            ${isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
                         </div>
                         <h2 class="story-title">
-                            <a href="xalass-story.html?id=${story.id}">${story.title}</a>
+                            <a href="xalass-story.html?id=${story.post_id}">${story.title}</a>
                         </h2>
                         <p class="story-content">${story.content.substring(0, 300)}${story.content.length > 300 ? '...' : ''}</p>
                         <div class="story-actions">
-                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.id})">
-                                ${isLiked ? '❤️' : '🤍'} ${story.likes || 0}
+                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.post_id})">
+                                ${isLiked ? '❤️' : '🤍'} ${reactionsCount}
                             </button>
-                            <button class="action-btn" onclick="location.href='xalass-story.html?id=${story.id}'">
-                                💬 ${(story.comments || []).length}
+                            <button class="action-btn" onclick="location.href='xalass-story.html?id=${story.post_id}'">
+                                💬 ${commentsCount}
                             </button>
-                            <button class="action-btn" onclick="shareStory(${story.id})">
+                            <button class="action-btn" onclick="shareStory(${story.post_id}, '${story.title}')">
                                 📤 Partager
                             </button>
-                            <button class="action-btn ${story.reports >= 1 ? 'reported' : ''}" onclick="reportStory(${story.id})">
+                            <button class="action-btn" onclick="reportStory(${story.post_id})">
                                 ⚠️ Signaler
                             </button>
                         </div>
                     </article>
                 `;
-            }).join('');
+            }).join('') + (hasMore ? `
+                <div style="text-align: center; padding: 20px;">
+                    <button onclick="loadMorePosts()" style="padding: 12px 24px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        Charger plus de posts (${stories.length - endIndex} restants)
+                    </button>
+                </div>
+            ` : '');
+            
+            // Mettre à jour les statistiques
+            updateStats();
         }
 
-        // Publish story
-        function publishStory() {
+        // Charger plus de posts
+        function loadMorePosts() {
+            currentPage++;
+            renderStories();
+        }
+
+        // Publish story - Utilise l'API
+        async function publishStory() {
             const title = document.getElementById('story-title').value.trim();
             const content = document.getElementById('story-content').value.trim();
             const category = document.getElementById('story-category').value;
@@ -590,99 +1419,99 @@
                 return;
             }
 
-            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
-            const newStory = {
-                id: Date.now(),
-                authorId: session.userId,
-                author: session.pseudo,
-                avatar: session.avatar,
-                title,
-                content,
-                category,
-                isFollowing,
-                likes: 0,
-                likedBy: [],
-                comments: [],
-                reports: 0,
-                createdAt: new Date().toISOString()
-            };
+            const status = isFollowing ? 'EN COURS' : 'FINISH';
+            const btn = document.querySelector('.btn-publish');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Publication...';
 
-            stories.unshift(newStory);
-            localStorage.setItem('xalass_stories', JSON.stringify(stories));
+            try {
+                const newPost = await api.createPost(title, content, category, status);
+                
+                // Clear form
+                document.getElementById('story-title').value = '';
+                document.getElementById('story-content').value = '';
+                document.getElementById('story-category').value = 'autre';
+                document.getElementById('story-following').checked = false;
 
-            // Clear form
-            document.getElementById('story-title').value = '';
-            document.getElementById('story-content').value = '';
-            document.getElementById('story-category').value = 'autre';
-            document.getElementById('story-following').checked = false;
-
-            renderStories();
+                // Ajouter le nouveau post au début de la liste (mise à jour optimiste)
+                if (newPost) {
+                    allPosts.unshift(newPost);
+                    postsCache.data = allPosts;
+                    postsCache.timestamp = Date.now();
+                    renderStories();
+                } else {
+                    // Si pas de retour, recharger (force refresh)
+                    await loadPosts(true);
+                }
+            } catch (error) {
+                alert('Erreur lors de la publication: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         }
 
-        // Toggle like
-        function toggleLike(storyId) {
-            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
-            const story = stories.find(s => s.id === storyId);
-            
-            if (!story) return;
+        // Toggle like - Utilise l'API avec mise à jour optimiste
+        async function toggleLike(postId) {
+            // Trouver le post dans la liste
+            const post = allPosts.find(p => p.post_id === postId);
+            if (!post) return;
 
-            if (!story.likedBy) story.likedBy = [];
+            // Mise à jour optimiste (immédiate)
+            const wasLiked = post.user_liked || false;
+            post.user_liked = !wasLiked;
+            post.reactions_count = (post.reactions_count || 0) + (wasLiked ? -1 : 1);
             
-            const index = story.likedBy.indexOf(session.userId);
-            if (index > -1) {
-                story.likedBy.splice(index, 1);
-                story.likes = Math.max(0, (story.likes || 0) - 1);
-            } else {
-                story.likedBy.push(session.userId);
-                story.likes = (story.likes || 0) + 1;
-            }
-
-            localStorage.setItem('xalass_stories', JSON.stringify(stories));
+            // Mettre à jour l'affichage immédiatement
             renderStories();
+
+            // Ensuite, mettre à jour via l'API
+            try {
+                await api.togglePostReaction(postId);
+                // Mettre à jour le cache
+                postsCache.data = allPosts;
+            } catch (error) {
+                // En cas d'erreur, annuler la mise à jour optimiste
+                post.user_liked = wasLiked;
+                post.reactions_count = (post.reactions_count || 0) + (wasLiked ? 1 : -1);
+                renderStories();
+                alert('Erreur lors du like: ' + error.message);
+            }
         }
 
         // Share story
-        function shareStory(storyId) {
-            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
-            const story = stories.find(s => s.id === storyId);
+        function shareStory(postId, title) {
+            const url = window.location.origin + window.location.pathname.replace('xalass-feed.html', '') + 'xalass-story.html?id=' + postId;
             
             if (navigator.share) {
                 navigator.share({
-                    title: story.title,
-                    text: story.content.substring(0, 100) + '...',
-                    url: window.location.origin + '/xalass-story.html?id=' + storyId
+                    title: title,
+                    text: 'Découvre cette histoire sur Xalass',
+                    url: url
                 });
             } else {
-                navigator.clipboard.writeText(window.location.origin + '/xalass-story.html?id=' + storyId);
+                navigator.clipboard.writeText(url);
                 alert('Lien copié !');
             }
         }
 
-        // Report story
-        function reportStory(storyId) {
+        // Report story - Utilise l'API
+        async function reportStory(postId) {
             if (!confirm('Signaler cette histoire comme inappropriée ?')) return;
             
-            const stories = JSON.parse(localStorage.getItem('xalass_stories') || '[]');
-            const storyIndex = stories.findIndex(s => s.id === storyId);
-            
-            if (storyIndex > -1) {
-                stories[storyIndex].reports = (stories[storyIndex].reports || 0) + 1;
-                
-                if (stories[storyIndex].reports >= 3) {
-                    stories.splice(storyIndex, 1);
-                    alert('Histoire supprimée suite aux signalements');
-                } else {
-                    alert('Signalement enregistré');
-                }
-                
-                localStorage.setItem('xalass_stories', JSON.stringify(stories));
-                renderStories();
+            try {
+                await api.reportPost(postId);
+                alert('Signalement enregistré. Merci pour votre vigilance.');
+            } catch (error) {
+                alert('Erreur lors du signalement: ' + error.message);
             }
         }
 
         // Filter stories
         function filterStories(filter) {
             currentFilter = filter;
+            currentPage = 0; // Réinitialiser la pagination
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             renderStories();
@@ -691,18 +1520,168 @@
         // Logout
         function logout() {
             localStorage.removeItem('xalass_session');
+            if (eventSource) {
+                eventSource.close();
+            }
             window.location.href = 'xalass-login.html';
         }
 
+        // Menu mobile
+        function toggleMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.classList.toggle('active');
+        }
+
+        function closeMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.classList.remove('active');
+        }
+
+        // Fermer le menu mobile en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            const mobileNav = document.getElementById('mobile-nav');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (mobileNav && menuToggle && 
+                !mobileNav.contains(event.target) && 
+                !menuToggle.contains(event.target) &&
+                mobileNav.classList.contains('active')) {
+                closeMobileNav();
+            }
+        });
+
+        // Connexion SSE pour les mises à jour en temps réel
+        let eventSource = null;
+
+        function connectSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            const lastPostId = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.post_id)) : 0;
+            eventSource = api.createEventSource(lastPostId);
+
+            // Écouter les nouveaux posts
+            eventSource.addEventListener('message', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'new_posts' && data.posts && data.posts.length > 0) {
+                        // Ajouter les nouveaux posts au début de la liste
+                        data.posts.reverse(); // Inverser pour avoir les plus récents en premier
+                        allPosts = [...data.posts, ...allPosts];
+                        postsCache.data = allPosts;
+                        postsCache.timestamp = Date.now();
+                        renderStories();
+                        
+                        // Notification discrète
+                        showNotification(`${data.posts.length} nouveau(x) post(s) !`);
+                    }
+                    
+                    if (data.type === 'post_updates' && data.updates) {
+                        // Mettre à jour les compteurs des posts existants
+                        data.updates.forEach(update => {
+                            const post = allPosts.find(p => p.post_id === update.post_id);
+                            if (post) {
+                                post.reactions_count = update.reactions_count;
+                                post.comments_count = update.comments_count;
+                                post.user_liked = update.user_liked;
+                            }
+                        });
+                        renderStories();
+                    }
+                } catch (error) {
+                    console.error('Erreur SSE:', error);
+                }
+            });
+
+            // Gérer les erreurs
+            eventSource.onerror = function(error) {
+                console.error('Erreur de connexion SSE:', error);
+                // Réessayer après 5 secondes
+                setTimeout(() => {
+                    if (eventSource && eventSource.readyState === EventSource.CLOSED) {
+                        connectSSE();
+                    }
+                }, 5000);
+            };
+        }
+
+        // Fonction pour afficher une notification discrète
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: rgba(22, 27, 34, 0.95);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                color: #e6edf3;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                font-size: 14px;
+                font-weight: 500;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Ajouter les animations CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
         // Init
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             if (!checkAuth()) return;
             
-            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.avatar}`;
+            // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
+            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user_id || 1}`;
             document.getElementById('user-avatar').src = avatarUrl;
             document.getElementById('publish-avatar').src = avatarUrl;
             
-            renderStories();
+            // Charger les posts (avec cache)
+            await loadPosts();
+            
+            // Connecter SSE pour les mises à jour en temps réel
+            connectSSE();
+            
+            // Nettoyer la connexion SSE quand on quitte la page
+            window.addEventListener('beforeunload', function() {
+                if (eventSource) {
+                    eventSource.close();
+                }
+            });
         });
     </script>
 </body>

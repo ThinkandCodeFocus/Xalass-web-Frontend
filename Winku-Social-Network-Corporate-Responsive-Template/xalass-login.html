@@ -381,6 +381,10 @@
         </div>
     </div>
 
+    <!-- Charger les scripts API -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    
     <script>
         // Tab switching
         function showTab(tab) {
@@ -414,94 +418,40 @@
             document.getElementById('selected-avatar').value = id;
         }
 
-        // Initialize demo data
-        function initDemoData() {
-            if (!localStorage.getItem('xalass_users')) {
-                const users = [
-                    { id: 1, pseudo: 'AnonymePoète42', password: 'demo', avatar: 3 },
-                    { id: 2, pseudo: 'ConfessionNuit', password: 'demo', avatar: 7 },
-                    { id: 3, pseudo: 'Mystère2024', password: 'demo', avatar: 12 }
-                ];
-                localStorage.setItem('xalass_users', JSON.stringify(users));
-            }
-
-            if (!localStorage.getItem('xalass_stories')) {
-                const stories = [
-                    {
-                        id: 1,
-                        authorId: 1,
-                        author: 'AnonymePoète42',
-                        avatar: 3,
-                        title: "J'ai enfin dit la vérité à ma famille",
-                        content: "Pendant 10 ans, j'ai gardé un secret qui me rongeait. Ce week-end, j'ai tout avoué. La réaction n'était pas celle que j'attendais... mais je me sens enfin libre.",
-                        category: 'famille',
-                        isFollowing: false,
-                        likes: 47,
-                        likedBy: [],
-                        comments: [],
-                        reports: 0,
-                        createdAt: new Date(Date.now() - 3600000).toISOString()
-                    },
-                    {
-                        id: 2,
-                        authorId: 2,
-                        author: 'ConfessionNuit',
-                        avatar: 7,
-                        title: "Mon collègue ne sait pas que c'est moi",
-                        content: "Chaque jour, je laisse un petit mot d'encouragement sur son bureau. Il cherche qui c'est depuis 3 mois. Je n'oserai jamais lui dire que c'est moi qui l'aide à tenir...",
-                        category: 'travail',
-                        isFollowing: true,
-                        likes: 128,
-                        likedBy: [],
-                        comments: [],
-                        reports: 0,
-                        createdAt: new Date(Date.now() - 7200000).toISOString()
-                    },
-                    {
-                        id: 3,
-                        authorId: 3,
-                        author: 'Mystère2024',
-                        avatar: 12,
-                        title: "L'amour de ma vie ne sait pas que j'existe",
-                        content: "On prend le même bus chaque matin. Je connais son parfum, son sourire, sa façon de lire. Mais je n'ai jamais osé lui parler. Un jour peut-être...",
-                        category: 'amour',
-                        isFollowing: true,
-                        likes: 89,
-                        likedBy: [],
-                        comments: [],
-                        reports: 0,
-                        createdAt: new Date(Date.now() - 10800000).toISOString()
-                    }
-                ];
-                localStorage.setItem('xalass_stories', JSON.stringify(stories));
-            }
-        }
-
-        // Login handler
-        function handleLogin(e) {
+        // Login handler - Utilise l'API
+        async function handleLogin(e) {
             e.preventDefault();
             const pseudo = document.getElementById('login-pseudo').value.trim();
             const password = document.getElementById('login-password').value;
             const errorEl = document.getElementById('login-error');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            const users = JSON.parse(localStorage.getItem('xalass_users') || '[]');
-            const user = users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase() && u.password === password);
+            errorEl.classList.remove('show');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Connexion...';
 
-            if (user) {
+            try {
+                const user = await api.loginAnonymousUser(pseudo, password || null);
+                
+                // Sauvegarder la session
                 localStorage.setItem('xalass_session', JSON.stringify({
-                    userId: user.id,
-                    pseudo: user.pseudo,
-                    avatar: user.avatar
+                    user_id: user.user_id,
+                    anon_uuid: user.anon_uuid,
+                    code_name: user.code_name,
+                    session_hash: user.session_hash
                 }));
+
                 window.location.href = 'xalass-feed.html';
-            } else {
-                errorEl.textContent = 'Pseudonyme ou mot de passe incorrect';
+            } catch (error) {
+                errorEl.textContent = error.message || 'Erreur de connexion. Vérifie ton pseudonyme et mot de passe.';
                 errorEl.classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Se connecter';
             }
         }
 
-        // Register handler
-        function handleRegister(e) {
+        // Register handler - Utilise l'API
+        async function handleRegister(e) {
             e.preventDefault();
             const pseudo = document.getElementById('register-pseudo').value.trim();
             const password = document.getElementById('register-password').value;
@@ -509,6 +459,7 @@
             const avatar = parseInt(document.getElementById('selected-avatar').value);
             const errorEl = document.getElementById('register-error');
             const successEl = document.getElementById('register-success');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
             errorEl.classList.remove('show');
             successEl.classList.remove('show');
@@ -519,41 +470,45 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('xalass_users') || '[]');
-            
-            if (users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase())) {
-                errorEl.textContent = 'Ce pseudonyme est déjà pris';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création...';
+
+            try {
+                const user = await api.createAnonymousUser(pseudo, password || null);
+                
+                successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
+                successEl.classList.add('show');
+                
+                document.getElementById('register-form').reset();
+                
+                setTimeout(() => showTab('login'), 1500);
+            } catch (error) {
+                errorEl.textContent = error.message || 'Erreur lors de la création du compte.';
                 errorEl.classList.add('show');
-                return;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer mon compte';
             }
-
-            const newUser = {
-                id: Date.now(),
-                pseudo: pseudo,
-                password: password,
-                avatar: avatar
-            };
-
-            users.push(newUser);
-            localStorage.setItem('xalass_users', JSON.stringify(users));
-
-            successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
-            successEl.classList.add('show');
-            
-            document.getElementById('register-form').reset();
-            
-            setTimeout(() => showTab('login'), 1500);
         }
 
-        // Demo login
-        function demoLogin() {
-            initDemoData();
-            localStorage.setItem('xalass_session', JSON.stringify({
-                userId: 1,
-                pseudo: 'AnonymePoète42',
-                avatar: 3
-            }));
-            window.location.href = 'xalass-feed.html';
+        // Demo login - Crée un compte démo
+        async function demoLogin() {
+            try {
+                // Créer un utilisateur démo avec un nom unique
+                const demoCodeName = 'Demo' + Date.now();
+                const user = await api.createAnonymousUser(demoCodeName, null);
+                
+                // Sauvegarder la session
+                localStorage.setItem('xalass_session', JSON.stringify({
+                    user_id: user.user_id,
+                    anon_uuid: user.anon_uuid,
+                    code_name: user.code_name,
+                    session_hash: user.session_hash
+                }));
+
+                window.location.href = 'xalass-feed.html';
+            } catch (error) {
+                alert('Erreur lors de la connexion démo: ' + error.message);
+            }
         }
 
         // Check if already logged in
@@ -567,7 +522,6 @@
         // Init
         document.addEventListener('DOMContentLoaded', function() {
             generateAvatars();
-            initDemoData();
             checkSession();
         });
     </script>

@@ -186,20 +186,52 @@
     </nav>
 </div>
 
+<!-- Charger les scripts API -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script src="js/main.min.js"></script>
-<script src="js/xalass.js"></script>
 <script>
 let currentStoryId = null;
 let currentCommentId = null;
+let currentPost = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+// Format time
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return "À l'instant";
+    if (diff < 3600) return Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+    if (diff < 604800) return Math.floor(diff / 86400) + ' j';
+    return date.toLocaleDateString('fr-FR');
+}
+
+// Get avatar URL
+function getAvatarUrl(seed) {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed || 1}`;
+}
+
+// Check auth
+function checkAuth() {
+    const session = JSON.parse(localStorage.getItem('xalass_session'));
+    if (!session || !session.anon_uuid) {
+        window.location.href = 'xalass-login.html';
+        return null;
+    }
+    return session;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
     // Vérifier l'authentification
     const session = checkAuth();
     if (!session) return;
     
     // Afficher les avatars
-    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
-    document.querySelector('#myAvatar img').src = getAvatarUrl(session.avatar);
+    const avatarUrl = getAvatarUrl(session.user_id);
+    document.querySelector('#headerAvatar img').src = avatarUrl;
+    document.querySelector('#myAvatar img').src = avatarUrl;
     
     // Récupérer l'ID de l'histoire
     const urlParams = new URLSearchParams(window.location.search);
@@ -211,20 +243,74 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Charger l'histoire
-    loadStory();
-    
-    // Incrémenter les vues
-    incrementViews(currentStoryId);
+    await loadStory();
     
     // Mettre à jour le badge de notifications
-    updateNotifBadge();
+    await updateNotifBadge();
 });
 
-function loadStory() {
-    const story = getStoryById(currentStoryId);
-    const session = getSession();
+async function loadStory() {
+    try {
+        const post = await api.getPostById(currentStoryId);
+        currentPost = post;
+        
+        const session = JSON.parse(localStorage.getItem('xalass_session'));
+        const isLiked = post.user_liked || false;
+        const isOwner = post.author_id === session.user_id;
     
-    if (!story) {
+        const categoryLabels = {
+            'amour': 'Amour',
+            'amitie': 'Amitié',
+            'famille': 'Famille',
+            'travail': 'Travail',
+            'social': 'Social',
+            'autre': 'Autre'
+        };
+        
+        document.getElementById('storyContent').innerHTML = `
+            <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
+                <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
+                    <img src="${getAvatarUrl(post.author?.user_id)}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
+                </figure>
+                <div class="friend-name" style="flex: 1;">
+                    <ins><a href="#" style="font-size: 18px;">${post.author?.code_name || 'Anonyme'}</a></ins>
+                    <span class="time-ago" style="display: block; margin-top: 3px;">${formatTime(post.created_at)}</span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <span class="category-badge category-${post.category}">${categoryLabels[post.category] || 'Autre'}</span>
+                ${post.status === 'EN COURS' ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+            </div>
+            
+            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 15px; color: #1f2937;">${post.title}</h2>
+            
+            <div class="story-text" style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 25px;">
+                ${post.content}
+            </div>
+            
+            <div class="post-actions" style="display: flex; align-items: center; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; gap: 15px;">
+                <a href="#" onclick="handleLike(); return false;" class="like ${isLiked ? 'liked' : ''}" id="likeBtn" style="font-size: 16px;">
+                    <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                    <span id="likeCount">${post.reactions_count || 0}</span> J'aime
+                </a>
+                
+                <button onclick="shareStory('${post.post_id}', '${post.title}')" class="share-btn">
+                    <i class="fa fa-share-alt"></i> Partager
+                </button>
+                
+                ${!isOwner ? `
+                    <a href="#" onclick="openReportModal(); return false;" style="color: #999; font-size: 14px; margin-left: auto;">
+                        <i class="fa fa-flag"></i> Signaler
+                    </a>
+                ` : ''}
+            </div>
+        `;
+        
+        // Charger les commentaires
+        await loadComments();
+    } catch (error) {
+        console.error('Erreur lors du chargement du post:', error);
         document.getElementById('storyContent').innerHTML = `
             <div style="text-align: center; padding: 40px; color: #999;">
                 <i class="fa fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
@@ -234,216 +320,153 @@ function loadStory() {
                 </a>
             </div>
         `;
-        return;
     }
-    
-    const isLiked = story.likes && story.likes.includes(session.id);
-    const isOwner = story.authorId === session.id;
-    
-    document.getElementById('storyContent').innerHTML = `
-        <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
-            <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
-                <img src="${getAvatarUrl(story.authorAvatar)}" alt="${story.authorPseudo}" style="width: 100%; height: 100%; object-fit: cover;">
-            </figure>
-            <div class="friend-name" style="flex: 1;">
-                <ins><a href="#" style="font-size: 18px;">${story.authorPseudo}</a></ins>
-                <span class="time-ago" style="display: block; margin-top: 3px;">${timeAgo(story.createdAt)}</span>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-            <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
-            ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
-            <span style="color: #999; font-size: 12px; margin-left: 10px;">
-                <i class="fa fa-eye"></i> ${story.views || 0} vues
-            </span>
-        </div>
-        
-        <div class="story-text" style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 25px;">
-            ${story.content}
-        </div>
-        
-        <div class="post-actions" style="display: flex; align-items: center; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; gap: 15px;">
-            <a href="#" onclick="handleLike(); return false;" class="like ${isLiked ? 'liked' : ''}" id="likeBtn" style="font-size: 16px;">
-                <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
-                <span id="likeCount">${story.likes?.length || 0}</span> J'aime
-            </a>
-            
-            <button onclick="shareStory('${story.id}')" class="share-btn">
-                <i class="fa fa-share-alt"></i> Partager
-            </button>
-            
-            ${!isOwner ? `
-                <a href="#" onclick="openReportModal(); return false;" style="color: #999; font-size: 14px; margin-left: auto;">
-                    <i class="fa fa-flag"></i> Signaler
-                </a>
-            ` : ''}
-        </div>
-    `;
-    
-    // Charger les commentaires
-    loadComments(story);
 }
 
-function loadComments(story) {
+async function loadComments() {
     const container = document.getElementById('commentsList');
-    const session = getSession();
+    const session = JSON.parse(localStorage.getItem('xalass_session'));
     
-    document.getElementById('commentsCount').textContent = `(${story.comments?.length || 0})`;
-    
-    if (!story.comments || story.comments.length === 0) {
-        container.innerHTML = `
-            <p style="color: #999; text-align: center; padding: 20px;">
-                Aucun commentaire pour le moment. Soyez le premier à réagir !
-            </p>
-        `;
-        return;
-    }
-    
-    // Trier par popularité
-    const sortedComments = sortCommentsByPopularity(story.comments);
-    
-    container.innerHTML = sortedComments.map(comment => {
-        const isCommentLiked = comment.likes && comment.likes.includes(session.id);
+    try {
+        const comments = await api.getCommentsByPost(currentStoryId);
         
-        return `
-            <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
-                <div style="display: flex; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                        <img src="${getAvatarUrl(comment.authorAvatar)}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <div style="flex: 1;">
-                        <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
-                            <strong style="color: #667eea;">${comment.authorPseudo}</strong>
-                            <span style="color: #999; font-size: 11px; margin-left: 10px;">${timeAgo(comment.createdAt)}</span>
-                            <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
+        document.getElementById('commentsCount').textContent = `(${comments.length})`;
+        
+        if (!comments || comments.length === 0) {
+            container.innerHTML = `
+                <p style="color: #999; text-align: center; padding: 20px;">
+                    Aucun commentaire pour le moment. Soyez le premier à réagir !
+                </p>
+            `;
+            return;
+        }
+        
+        container.innerHTML = comments.map(comment => {
+            const isCommentLiked = comment.user_liked || false;
+            
+            return `
+                <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
+                    <div style="display: flex; gap: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                            <img src="${getAvatarUrl(comment.author?.user_id)}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
-                        
-                        <div class="comment-actions">
-                            <a href="#" onclick="handleCommentLike('${comment.id}'); return false;" class="${isCommentLiked ? 'liked' : ''}" data-comment="${comment.id}">
-                                <i class="fa ${isCommentLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
-                                <span class="comment-like-count">${comment.likes?.length || 0}</span>
-                            </a>
-                            <a href="#" onclick="openReplyModal('${comment.id}'); return false;">
-                                <i class="fa fa-reply"></i> Répondre
-                            </a>
+                        <div style="flex: 1;">
+                            <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
+                                <strong style="color: #667eea;">${comment.author?.code_name || 'Anonyme'}</strong>
+                                <span style="color: #999; font-size: 11px; margin-left: 10px;">${formatTime(comment.created_at)}</span>
+                                <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
+                            </div>
+                            
+                            <div class="comment-actions">
+                                <a href="#" onclick="handleCommentLike('${comment.comment_id}'); return false;" class="${isCommentLiked ? 'liked' : ''}" data-comment="${comment.comment_id}">
+                                    <i class="fa ${isCommentLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                                    <span class="comment-like-count">${comment.reactions_count || 0}</span>
+                                </a>
+                                <a href="#" onclick="openReplyModal('${comment.comment_id}'); return false;">
+                                    <i class="fa fa-reply"></i> Répondre
+                                </a>
+                            </div>
+                            
+                            ${comment.replies && comment.replies.length > 0 ? `
+                                <ul class="replies-list">
+                                    ${comment.replies.map(reply => {
+                                        const isReplyLiked = reply.user_liked || false;
+                                        return `
+                                            <li style="padding: 10px 0;">
+                                                <div style="display: flex; gap: 10px;">
+                                                    <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                                                        <img src="${getAvatarUrl(reply.author?.user_id)}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    </div>
+                                                    <div style="flex: 1;">
+                                                        <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
+                                                            <strong style="color: #667eea; font-size: 13px;">${reply.author?.code_name || 'Anonyme'}</strong>
+                                                            <span style="color: #999; font-size: 10px; margin-left: 8px;">${formatTime(reply.created_at)}</span>
+                                                            <p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>
+                                                        </div>
+                                                        <div class="comment-actions" style="font-size: 12px;">
+                                                            <a href="#" onclick="handleReplyLike('${reply.comment_id}'); return false;" class="${isReplyLiked ? 'liked' : ''}" data-reply="${reply.comment_id}">
+                                                                <i class="fa ${isReplyLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                                                                <span class="reply-like-count">${reply.reactions_count || 0}</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        `;
+                                    }).join('')}
+                                </ul>
+                            ` : ''}
                         </div>
-                        
-                        ${comment.replies && comment.replies.length > 0 ? `
-                            <ul class="replies-list">
-                                ${comment.replies.map(reply => {
-                                    const isReplyLiked = reply.likes && reply.likes.includes(session.id);
-                                    return `
-                                        <li style="padding: 10px 0;">
-                                            <div style="display: flex; gap: 10px;">
-                                                <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                                                    <img src="${getAvatarUrl(reply.authorAvatar)}" style="width: 100%; height: 100%; object-fit: cover;">
-                                                </div>
-                                                <div style="flex: 1;">
-                                                    <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
-                                                        <strong style="color: #667eea; font-size: 13px;">${reply.authorPseudo}</strong>
-                                                        <span style="color: #999; font-size: 10px; margin-left: 8px;">${timeAgo(reply.createdAt)}</span>
-                                                        <p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>
-                                                    </div>
-                                                    <div class="comment-actions" style="font-size: 12px;">
-                                                        <a href="#" onclick="handleReplyLike('${comment.id}', '${reply.id}'); return false;" class="${isReplyLiked ? 'liked' : ''}" data-reply="${reply.id}">
-                                                            <i class="fa ${isReplyLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
-                                                            <span class="reply-like-count">${reply.likes?.length || 0}</span>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    `;
-                                }).join('')}
-                            </ul>
-                        ` : ''}
                     </div>
                 </div>
-            </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Erreur lors du chargement des commentaires:', error);
+        container.innerHTML = `
+            <p style="color: #999; text-align: center; padding: 20px;">
+                Erreur lors du chargement des commentaires.
+            </p>
         `;
-    }).join('');
-}
-
-function handleLike() {
-    const result = toggleLike(currentStoryId, 'story');
-    
-    if (result.success) {
-        const btn = document.getElementById('likeBtn');
-        const icon = btn.querySelector('i');
-        const count = document.getElementById('likeCount');
-        
-        if (result.liked) {
-            btn.classList.add('liked');
-            icon.className = 'fa fa-heart';
-        } else {
-            btn.classList.remove('liked');
-            icon.className = 'fa fa-heart-o';
-        }
-        
-        count.textContent = result.count;
     }
 }
 
-function handleCommentLike(commentId) {
-    const result = toggleLike(currentStoryId, 'comment', commentId);
-    
-    if (result.success) {
-        const btn = document.querySelector(`[data-comment="${commentId}"]`);
-        const icon = btn.querySelector('i');
-        const count = btn.querySelector('.comment-like-count');
-        
-        if (result.liked) {
-            btn.classList.add('liked');
-            icon.className = 'fa fa-heart';
-        } else {
-            btn.classList.remove('liked');
-            icon.className = 'fa fa-heart-o';
-        }
-        
-        count.textContent = result.count;
+async function handleLike() {
+    try {
+        await api.togglePostReaction(currentStoryId);
+        // Recharger le post pour avoir les nouveaux compteurs
+        await loadStory();
+    } catch (error) {
+        alert('Erreur lors du like: ' + error.message);
     }
 }
 
-function handleReplyLike(commentId, replyId) {
-    const result = toggleLike(currentStoryId, 'reply', commentId, replyId);
-    
-    if (result.success) {
-        const btn = document.querySelector(`[data-reply="${replyId}"]`);
-        const icon = btn.querySelector('i');
-        const count = btn.querySelector('.reply-like-count');
-        
-        if (result.liked) {
-            btn.classList.add('liked');
-            icon.className = 'fa fa-heart';
-        } else {
-            btn.classList.remove('liked');
-            icon.className = 'fa fa-heart-o';
-        }
-        
-        count.textContent = result.count;
+async function handleCommentLike(commentId) {
+    try {
+        await api.toggleCommentReaction(commentId);
+        // Recharger les commentaires
+        await loadComments();
+    } catch (error) {
+        alert('Erreur lors du like: ' + error.message);
+    }
+}
+
+async function handleReplyLike(replyId) {
+    try {
+        await api.toggleCommentReaction(replyId);
+        // Recharger les commentaires
+        await loadComments();
+    } catch (error) {
+        alert('Erreur lors du like: ' + error.message);
     }
 }
 
 // Formulaire de commentaire
-document.getElementById('commentForm').addEventListener('submit', function(e) {
+document.getElementById('commentForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const content = document.getElementById('commentText').value.trim();
     
     if (!content) {
-        showToast('Veuillez écrire un commentaire');
+        alert('Veuillez écrire un commentaire');
         return;
     }
     
-    const result = addComment(currentStoryId, content);
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Publication...';
     
-    if (result.success) {
+    try {
+        await api.createComment(currentStoryId, content);
         document.getElementById('commentText').value = '';
-        showToast('Commentaire ajouté !');
-        loadStory();
-    } else {
-        showToast(result.message);
+        alert('Commentaire ajouté !');
+        await loadComments();
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
 });
 
@@ -460,22 +483,21 @@ function closeReplyModal() {
     currentCommentId = null;
 }
 
-function submitReply() {
+async function submitReply() {
     const content = document.getElementById('replyText').value.trim();
     
     if (!content) {
-        showToast('Veuillez écrire une réponse');
+        alert('Veuillez écrire une réponse');
         return;
     }
     
-    const result = addReply(currentStoryId, currentCommentId, content);
-    
-    if (result.success) {
+    try {
+        await api.createComment(currentStoryId, content, currentCommentId);
         closeReplyModal();
-        showToast('Réponse ajoutée !');
-        loadStory();
-    } else {
-        showToast(result.message);
+        alert('Réponse ajoutée !');
+        await loadComments();
+    } catch (error) {
+        alert('Erreur: ' + error.message);
     }
 }
 
@@ -489,39 +511,58 @@ function closeReportModal() {
     document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
 }
 
-function submitReportForm() {
+async function submitReportForm() {
     const reason = document.querySelector('input[name="reportReason"]:checked');
     
     if (!reason) {
-        showToast('Veuillez sélectionner une raison');
+        alert('Veuillez sélectionner une raison');
         return;
     }
     
-    const result = submitReport(currentStoryId, reason.value);
-    
-    closeReportModal();
-    showToast(result.message);
-    
-    if (result.deleted) {
-        setTimeout(() => {
-            window.location.href = 'xalass-feed.html';
-        }, 1500);
+    try {
+        await api.reportPost(currentStoryId);
+        closeReportModal();
+        alert('Signalement enregistré. Merci pour votre vigilance.');
+    } catch (error) {
+        alert('Erreur lors du signalement: ' + error.message);
     }
 }
 
-function updateNotifBadge() {
-    const session = getSession();
-    if (!session) return;
-    
-    const count = getUnreadCount(session.id);
-    const badge = document.getElementById('notifBadge');
-    
-    if (count > 0) {
-        badge.textContent = count > 9 ? '9+' : count;
-        badge.style.display = 'block';
-    } else {
-        badge.style.display = 'none';
+async function updateNotifBadge() {
+    try {
+        const notifications = await api.getNotifications();
+        const unreadCount = notifications.filter(n => !n.read).length;
+        const badge = document.getElementById('notifBadge');
+        
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des notifications:', error);
     }
+}
+
+function shareStory(postId, title) {
+    const url = window.location.origin + window.location.pathname.replace('xalass-story.html', '') + 'xalass-story.html?id=' + postId;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: title,
+            text: 'Découvre cette histoire sur Xalass',
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url);
+        alert('Lien copié !');
+    }
+}
+
+function logoutUser() {
+    localStorage.removeItem('xalass_session');
+    window.location.href = 'xalass-login.html';
 }
 
 // Fermer les modaux en cliquant à l'extérieur
@@ -536,3 +577,4 @@ document.getElementById('reportModal').addEventListener('click', function(e) {
 
 </body>
 </html>
+

@@ -130,6 +130,8 @@
 
 <script src="js/main.min.js"></script>
 <script src="js/xalass.js"></script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script>
 let currentFilter = 'all';
 let currentQuery = '';
@@ -141,7 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!session) return;
     
     // Afficher l'avatar
-    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
+    const avatarSeed = session.avatar || session.user_id || 1;
+    document.querySelector('#headerAvatar img').src = getAvatarUrl(avatarSeed);
     
     // Récupérer la recherche depuis l'URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -197,17 +200,44 @@ function setFilter(category) {
     performSearch();
 }
 
-function performSearch() {
-    const results = searchStories(currentQuery, currentFilter);
-    displayResults(results);
-}
-
-function displayResults(stories) {
+async function performSearch() {
     const container = document.getElementById('searchResults');
     const header = document.getElementById('searchHeader');
-    const session = getSession();
     
-    if (stories.length === 0) {
+    // Si pas de recherche et filtre "all", afficher l'état initial
+    if (!currentQuery && currentFilter === 'all') {
+        showInitialState();
+        return;
+    }
+    
+    // Afficher le chargement
+    container.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fa fa-spinner fa-spin"></i> Recherche en cours...</div>';
+    header.style.display = 'none';
+    
+    try {
+        // Appeler l'API de recherche
+        const results = await api.searchPosts(currentQuery || null, currentFilter);
+        displayResults(results);
+    } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
+        container.innerHTML = `
+            <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #e91e63; margin-bottom: 15px;"></i>
+                <h5 style="color: #666;">Erreur lors de la recherche</h5>
+                <p style="color: #999; font-size: 14px;">${error.message || 'Vérifiez votre connexion'}</p>
+                <button onclick="performSearch()" style="margin-top: 15px; padding: 8px 20px; background: #667eea; color: #fff; border: none; border-radius: 20px; cursor: pointer;">
+                    Réessayer
+                </button>
+            </div>
+        `;
+    }
+}
+
+function displayResults(posts) {
+    const container = document.getElementById('searchResults');
+    const header = document.getElementById('searchHeader');
+    
+    if (posts.length === 0) {
         header.style.display = 'none';
         container.innerHTML = `
             <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -223,18 +253,27 @@ function displayResults(stories) {
     
     // Afficher le header
     header.style.display = 'block';
-    document.getElementById('resultCount').textContent = `${stories.length} histoire${stories.length > 1 ? 's' : ''} trouvée${stories.length > 1 ? 's' : ''}`;
+    document.getElementById('resultCount').textContent = `${posts.length} histoire${posts.length > 1 ? 's' : ''} trouvée${posts.length > 1 ? 's' : ''}`;
     
-    container.innerHTML = stories.map(story => {
-        const isLiked = story.likes && story.likes.includes(session.id);
-        let displayContent = story.content;
+    container.innerHTML = posts.map(post => {
+        const postId = post.post_id || post.id;
+        const isLiked = post.user_liked || false;
+        const author = post.author || {};
+        const authorPseudo = author.code_name || 'Anonyme';
+        const authorAvatar = author.user_id || 1;
+        const createdAt = post.created_at || post.createdAt;
+        const isAsuivre = post.status === 'EN COURS';
         
-        // Surligner les termes de recherche
+        let displayContent = post.content || '';
+        let displayTitle = post.title || '';
+        
+        // Surligner les termes de recherche dans le titre et le contenu
         if (currentQuery) {
             const terms = currentQuery.split(' ').filter(t => t.trim());
             terms.forEach(term => {
                 const regex = new RegExp(`(${term})`, 'gi');
                 displayContent = displayContent.replace(regex, '<span class="search-highlight">$1</span>');
+                displayTitle = displayTitle.replace(regex, '<span class="search-highlight">$1</span>');
             });
         }
         
@@ -247,18 +286,20 @@ function displayResults(stories) {
             <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                 <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 15px;">
                     <figure style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-right: 12px; flex-shrink: 0;">
-                        <img src="${getAvatarUrl(story.authorAvatar)}" alt="${story.authorPseudo}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="${getAvatarUrl(authorAvatar)}" alt="${authorPseudo}" style="width: 100%; height: 100%; object-fit: cover;">
                     </figure>
                     <div class="friend-name" style="flex: 1;">
-                        <ins><a href="#" style="color: #667eea;">${story.authorPseudo}</a></ins>
-                        <span class="time-ago" style="display: block;">${timeAgo(story.createdAt)}</span>
+                        <ins><a href="#" style="color: #667eea;">${authorPseudo}</a></ins>
+                        <span class="time-ago" style="display: block;">${timeAgo(createdAt)}</span>
                     </div>
                 </div>
                 
                 <div style="margin-bottom: 10px;">
-                    <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
-                    ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+                    <span class="category-badge category-${post.category}">${getCategoryLabel(post.category)}</span>
+                    ${isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
                 </div>
+                
+                ${displayTitle ? `<h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">${displayTitle}</h5>` : ''}
                 
                 <div class="post-content" style="color: #333; line-height: 1.6; margin-bottom: 15px;">
                     ${displayContent}
@@ -266,12 +307,12 @@ function displayResults(stories) {
                 
                 <div class="post-actions" style="display: flex; align-items: center; padding-top: 15px; border-top: 1px solid #eee;">
                     <span style="color: #999; margin-right: 20px;">
-                        <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}" style="${isLiked ? 'color: #e91e63;' : ''}"></i> ${story.likes?.length || 0}
+                        <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}" style="${isLiked ? 'color: #e91e63;' : ''}"></i> ${post.reactions_count || 0}
                     </span>
                     <span style="color: #999; margin-right: 20px;">
-                        <i class="fa fa-comment-o"></i> ${story.comments?.length || 0}
+                        <i class="fa fa-comment-o"></i> ${post.comments_count || 0}
                     </span>
-                    <a href="xalass-story.html?id=${story.id}" class="view-story" style="margin-left: auto;">
+                    <a href="xalass-story.html?id=${postId}" class="view-story" style="margin-left: auto; text-decoration: none; color: #667eea;">
                         Lire l'histoire <i class="fa fa-arrow-right"></i>
                     </a>
                 </div>
@@ -281,18 +322,22 @@ function displayResults(stories) {
 }
 
 function updateNotifBadge() {
-    const session = getSession();
-    if (!session) return;
-    
-    const count = getUnreadCount(session.id);
     const badge = document.getElementById('notifBadge');
     
-    if (count > 0) {
-        badge.textContent = count > 9 ? '9+' : count;
-        badge.style.display = 'block';
-    } else {
+    // Charger depuis l'API
+    api.getNotifications().then(response => {
+        const notifs = Array.isArray(response) ? response : (response.notifications || []);
+        const unreadCount = response.unread_count || notifs.filter(n => !(n.is_read || n.read_at)).length;
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }).catch(err => {
+        console.error('Erreur badge:', err);
         badge.style.display = 'none';
-    }
+    });
 }
 
 // Empêcher la soumission du formulaire

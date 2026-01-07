@@ -184,6 +184,22 @@ class XalassAPI {
     }
 
     /**
+     * Recherche de posts par texte et optionnellement par catégorie
+     */
+    async searchPosts(query, category = null) {
+        const body = {};
+        if (query) body.query = query;
+        if (category && category !== 'all') body.category = category;
+
+        const response = await this.request('/search/posts', {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
+
+        return Array.isArray(response) ? response : [];
+    }
+
+    /**
      * Met à jour un post
      */
     async updatePost(postId, title, content, category, status) {

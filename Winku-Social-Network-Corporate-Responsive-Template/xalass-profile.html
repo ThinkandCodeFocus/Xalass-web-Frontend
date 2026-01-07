@@ -22,9 +22,14 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-3 col-md-3 col-4">
-                        <a href="xalass-feed.html" class="logo" style="font-size: 24px; color: #667eea; font-weight: bold;">
-                            <i class="fa fa-comments"></i> Xalass
-                        </a>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <a href="xalass-feed.html" style="color: #667eea; font-size: 20px; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; border-radius: 50%; background: #f0f0f0; transition: all 0.3s;" onmouseover="this.style.background='#667eea'; this.style.color='#fff';" onmouseout="this.style.background='#f0f0f0'; this.style.color='#667eea';" title="Retour à l'accueil">
+                                <i class="fa fa-arrow-left"></i>
+                            </a>
+                            <a href="xalass-feed.html" class="logo" style="font-size: 24px; color: #667eea; font-weight: bold;">
+                                <i class="fa fa-comments"></i> Xalass
+                            </a>
+                        </div>
                     </div>
                     <div class="col-lg-6 col-md-5 col-4">
                         <form action="xalass-search.html" method="GET">
@@ -53,6 +58,13 @@
     <!-- Contenu principal -->
     <section style="padding-top: 80px; padding-bottom: 100px; min-height: 100vh;">
         <div class="container">
+            <!-- Flèche de retour - Visible et bien positionnée -->
+            <div style="margin-bottom: 25px; padding: 15px 0;">
+                <a href="xalass-feed.html" style="display: inline-flex; align-items: center; gap: 12px; color: #667eea; text-decoration: none; font-size: 16px; font-weight: 500; padding: 12px 25px; background: #f0f0f0; border-radius: 30px; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" onmouseover="this.style.background='#667eea'; this.style.color='#fff'; this.style.transform='translateX(-5px)';" onmouseout="this.style.background='#f0f0f0'; this.style.color='#667eea'; this.style.transform='translateX(0)';">
+                    <i class="fa fa-arrow-left" style="font-size: 18px; font-weight: bold;"></i>
+                    <span>Retour à l'accueil</span>
+                </a>
+            </div>
             <div class="row">
                 <!-- Sidebar profil -->
                 <div class="col-lg-4 col-md-5">
@@ -198,8 +210,11 @@
 
 <script src="js/main.min.js"></script>
 <script src="js/xalass.js"></script>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script>
 let currentEditStoryId = null;
+let allMyPosts = []; // Stocker les posts pour les stats
 
 document.addEventListener('DOMContentLoaded', function() {
     // Vérifier l'authentification
@@ -207,102 +222,144 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!session) return;
     
     // Afficher les informations du profil
-    document.querySelector('#headerAvatar img').src = getAvatarUrl(session.avatar);
-    document.querySelector('#profileAvatar img').src = getAvatarUrl(session.avatar);
-    document.getElementById('profilePseudo').textContent = session.pseudo;
-    document.getElementById('profileDate').textContent = 'Membre depuis ' + new Date(session.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const avatarSeed = session.avatar || session.user_id || 1;
+    document.querySelector('#headerAvatar img').src = getAvatarUrl(avatarSeed);
+    document.querySelector('#profileAvatar img').src = getAvatarUrl(avatarSeed);
+    document.getElementById('profilePseudo').textContent = session.code_name || session.pseudo || 'Utilisateur';
     
-    // Charger les statistiques
-    loadStats();
+    // Date de création
+    if (session.date_creation || session.createdAt) {
+        const date = new Date(session.date_creation || session.createdAt);
+        document.getElementById('profileDate').textContent = 'Membre depuis ' + date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    }
     
-    // Charger les histoires
+    // Charger les histoires (qui chargera aussi les stats)
     loadMyStories();
     
     // Mettre à jour le badge de notifications
     updateNotifBadge();
 });
 
-function loadStats() {
-    const session = getSession();
-    const stats = getUserStats(session.id);
+async function loadStats(posts = null) {
+    const postsToUse = posts || allMyPosts;
     
-    document.getElementById('statStories').textContent = stats.storiesCount;
-    document.getElementById('statLikes').textContent = stats.likesCount;
-    document.getElementById('statComments').textContent = stats.commentsCount;
+    // Calculer les statistiques depuis les posts
+    const storiesCount = postsToUse.length;
+    const likesCount = postsToUse.reduce((sum, post) => sum + (post.reactions_count || 0), 0);
+    const commentsCount = postsToUse.reduce((sum, post) => sum + (post.comments_count || 0), 0);
+    
+    document.getElementById('statStories').textContent = storiesCount;
+    document.getElementById('statLikes').textContent = likesCount;
+    document.getElementById('statComments').textContent = commentsCount;
 }
 
-function loadMyStories() {
+async function loadMyStories() {
     const session = getSession();
-    const stories = getStories().filter(s => s.authorId === session.id);
+    if (!session || !session.user_id) {
+        console.error('Session invalide');
+        return;
+    }
     
-    const published = stories.filter(s => !s.isAsuivre);
-    const asuivre = stories.filter(s => s.isAsuivre);
-    
-    // Histoires publiées
     const publishedContainer = document.getElementById('publishedStories');
-    if (published.length === 0) {
-        publishedContainer.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: #999;">
-                <i class="fa fa-book" style="font-size: 36px; margin-bottom: 10px;"></i>
-                <p>Vous n'avez pas encore publié d'histoire.</p>
-                <a href="xalass-feed.html" class="mtr-btn" style="margin-top: 10px; display: inline-block; padding: 8px 20px;">
-                    <span>Écrire une histoire</span>
-                </a>
-            </div>
-        `;
-    } else {
-        publishedContainer.innerHTML = published.map(story => renderStoryCard(story)).join('');
-    }
-    
-    // Histoires à suivre
     const asuivreContainer = document.getElementById('asuivreStories');
-    if (asuivre.length === 0) {
-        asuivreContainer.innerHTML = `
-            <div style="text-align: center; padding: 30px; color: #999;">
-                <i class="fa fa-edit" style="font-size: 36px; margin-bottom: 10px;"></i>
-                <p>Aucune histoire en cours.</p>
+    
+    // Afficher le chargement
+    publishedContainer.innerHTML = '<div style="text-align: center; padding: 30px;"><i class="fa fa-spinner fa-spin"></i> Chargement...</div>';
+    asuivreContainer.innerHTML = '<div style="text-align: center; padding: 30px;"><i class="fa fa-spinner fa-spin"></i> Chargement...</div>';
+    
+    try {
+        // Charger les posts de l'utilisateur depuis l'API
+        const posts = await api.getPostsByAuthor(session.user_id);
+        allMyPosts = posts || [];
+        
+        // Séparer les posts publiés (FINISH) et à suivre (EN COURS)
+        const published = allMyPosts.filter(p => p.status === 'FINISH');
+        const asuivre = allMyPosts.filter(p => p.status === 'EN COURS');
+        
+        // Mettre à jour les stats
+        loadStats(allMyPosts);
+        
+        // Afficher les posts publiés
+        if (published.length === 0) {
+            publishedContainer.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #999;">
+                    <i class="fa fa-book" style="font-size: 36px; margin-bottom: 10px;"></i>
+                    <p>Vous n'avez pas encore publié d'histoire.</p>
+                    <a href="xalass-feed.html" class="mtr-btn" style="margin-top: 10px; display: inline-block; padding: 8px 20px;">
+                        <span>Écrire une histoire</span>
+                    </a>
+                </div>
+            `;
+        } else {
+            publishedContainer.innerHTML = published.map(post => renderStoryCard(post)).join('');
+        }
+        
+        // Afficher les posts à suivre
+        if (asuivre.length === 0) {
+            asuivreContainer.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #999;">
+                    <i class="fa fa-edit" style="font-size: 36px; margin-bottom: 10px;"></i>
+                    <p>Aucune histoire en cours.</p>
+                </div>
+            `;
+        } else {
+            asuivreContainer.innerHTML = asuivre.map(post => renderStoryCard(post, true)).join('');
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des posts:', error);
+        publishedContainer.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: #e91e63;">
+                <i class="fa fa-exclamation-triangle" style="font-size: 36px; margin-bottom: 10px;"></i>
+                <p>Erreur lors du chargement</p>
+                <p style="font-size: 13px;">${error.message || 'Vérifiez votre connexion'}</p>
+                <button onclick="loadMyStories()" style="margin-top: 15px; padding: 8px 20px; background: #667eea; color: #fff; border: none; border-radius: 20px; cursor: pointer;">
+                    Réessayer
+                </button>
             </div>
         `;
-    } else {
-        asuivreContainer.innerHTML = asuivre.map(story => renderStoryCard(story, true)).join('');
+        asuivreContainer.innerHTML = publishedContainer.innerHTML;
     }
 }
 
-function renderStoryCard(story, showContinue = false) {
+function renderStoryCard(post, showContinue = false) {
+    const postId = post.post_id || post.id;
+    const isAsuivre = post.status === 'EN COURS';
+    const createdAt = post.created_at || post.createdAt;
+    
     return `
         <div class="story-card" style="padding: 20px; border-bottom: 1px solid #eee;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <div>
-                    <span class="category-badge category-${story.category}">${getCategoryLabel(story.category)}</span>
-                    ${story.isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
+                    <span class="category-badge category-${post.category}">${getCategoryLabel(post.category)}</span>
+                    ${isAsuivre ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
                 </div>
-                <span class="time-ago">${timeAgo(story.createdAt)}</span>
+                <span class="time-ago">${timeAgo(createdAt)}</span>
             </div>
             
+            <h5 style="color: #333; margin-bottom: 10px; font-weight: 600;">${post.title || ''}</h5>
             <p style="color: #333; line-height: 1.6; margin-bottom: 15px;">
-                ${story.content.length > 200 ? story.content.substring(0, 200) + '...' : story.content}
+                ${post.content && post.content.length > 200 ? post.content.substring(0, 200) + '...' : (post.content || '')}
             </p>
             
             <div style="display: flex; align-items: center; gap: 20px; color: #999; font-size: 13px;">
-                <span><i class="fa fa-heart"></i> ${story.likes?.length || 0}</span>
-                <span><i class="fa fa-comment"></i> ${story.comments?.length || 0}</span>
-                <span><i class="fa fa-eye"></i> ${story.views || 0}</span>
+                <span><i class="fa fa-heart"></i> ${post.reactions_count || 0}</span>
+                <span><i class="fa fa-comment"></i> ${post.comments_count || 0}</span>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <a href="xalass-story.html?id=${story.id}" style="padding: 6px 15px; background: #667eea; color: #fff; border-radius: 20px; font-size: 12px;">
+                <a href="xalass-story.html?id=${postId}" style="padding: 6px 15px; background: #667eea; color: #fff; border-radius: 20px; font-size: 12px; text-decoration: none;">
                     <i class="fa fa-eye"></i> Voir
                 </a>
                 ${showContinue ? `
-                    <button onclick="openEditModal('${story.id}')" style="padding: 6px 15px; background: #4caf50; color: #fff; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                    <button onclick="openEditModal('${postId}')" style="padding: 6px 15px; background: #4caf50; color: #fff; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
                         <i class="fa fa-edit"></i> Continuer
                     </button>
                 ` : `
-                    <button onclick="openEditModal('${story.id}')" style="padding: 6px 15px; background: #f0f0f0; color: #666; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                    <button onclick="openEditModal('${postId}')" style="padding: 6px 15px; background: #f0f0f0; color: #666; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
                         <i class="fa fa-edit"></i> Modifier
                     </button>
                 `}
-                <button onclick="confirmDeleteStory('${story.id}')" style="padding: 6px 15px; background: #ffebee; color: #e91e63; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
+                <button onclick="confirmDeleteStory('${postId}')" style="padding: 6px 15px; background: #ffebee; color: #e91e63; border-radius: 20px; font-size: 12px; border: none; cursor: pointer;">
                     <i class="fa fa-trash"></i> Supprimer
                 </button>
             </div>
@@ -320,13 +377,17 @@ function showTab(tabName) {
     document.getElementById('panel-' + tabName).style.display = 'block';
 }
 
-function openEditModal(storyId) {
-    const story = getStoryById(storyId);
-    if (!story) return;
+function openEditModal(postId) {
+    // Trouver le post dans allMyPosts
+    const post = allMyPosts.find(p => (p.post_id || p.id) == postId);
+    if (!post) {
+        showToast('Post introuvable');
+        return;
+    }
     
-    currentEditStoryId = storyId;
-    document.getElementById('editContent').value = story.content;
-    document.getElementById('editAsuivre').checked = story.isAsuivre;
+    currentEditStoryId = postId;
+    document.getElementById('editContent').value = post.content || '';
+    document.getElementById('editAsuivre').checked = post.status === 'EN COURS';
     document.getElementById('editModal').style.display = 'flex';
 }
 
@@ -335,7 +396,7 @@ function closeEditModal() {
     currentEditStoryId = null;
 }
 
-function saveEdit() {
+async function saveEdit() {
     const content = document.getElementById('editContent').value.trim();
     const isAsuivre = document.getElementById('editAsuivre').checked;
     
@@ -344,28 +405,45 @@ function saveEdit() {
         return;
     }
     
-    const result = updateStory(currentEditStoryId, content, isAsuivre);
+    if (!currentEditStoryId) {
+        showToast('Erreur: ID du post manquant');
+        return;
+    }
     
-    if (result.success) {
+    // Trouver le post pour récupérer les autres infos
+    const post = allMyPosts.find(p => (p.post_id || p.id) == currentEditStoryId);
+    if (!post) {
+        showToast('Post introuvable');
+        return;
+    }
+    
+    try {
+        await api.updatePost(
+            currentEditStoryId,
+            post.title || 'Sans titre',
+            content,
+            post.category || 'autre',
+            isAsuivre ? 'EN COURS' : 'FINISH'
+        );
+        
         closeEditModal();
         showToast('Histoire modifiée !');
-        loadMyStories();
-        loadStats();
-    } else {
-        showToast(result.message);
+        loadMyStories(); // Recharger les posts
+    } catch (error) {
+        console.error('Erreur lors de la modification:', error);
+        showToast('Erreur: ' + (error.message || 'Impossible de modifier le post'));
     }
 }
 
-function confirmDeleteStory(storyId) {
+async function confirmDeleteStory(postId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ? Cette action est irréversible.')) {
-        const result = deleteStory(storyId);
-        
-        if (result.success) {
+        try {
+            await api.deletePost(postId);
             showToast('Histoire supprimée');
-            loadMyStories();
-            loadStats();
-        } else {
-            showToast(result.message);
+            loadMyStories(); // Recharger les posts
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            showToast('Erreur: ' + (error.message || 'Impossible de supprimer le post'));
         }
     }
 }
@@ -403,18 +481,22 @@ function confirmDeleteAccount() {
 }
 
 function updateNotifBadge() {
-    const session = getSession();
-    if (!session) return;
-    
-    const count = getUnreadCount(session.id);
     const badge = document.getElementById('notifBadge');
     
-    if (count > 0) {
-        badge.textContent = count > 9 ? '9+' : count;
-        badge.style.display = 'block';
-    } else {
+    // Charger depuis l'API
+    api.getNotifications().then(response => {
+        const notifs = Array.isArray(response) ? response : (response.notifications || []);
+        const unreadCount = response.unread_count || notifs.filter(n => !(n.is_read || n.read_at)).length;
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }).catch(err => {
+        console.error('Erreur badge:', err);
         badge.style.display = 'none';
-    }
+    });
 }
 
 // Fermer le modal en cliquant à l'extérieur

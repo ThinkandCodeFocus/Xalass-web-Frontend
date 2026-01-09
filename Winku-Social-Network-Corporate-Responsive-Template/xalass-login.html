@@ -523,6 +523,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             generateAvatars();
             checkSession();
+            
+            // Gérer les ancres dans l'URL (#login ou #register)
+            const hash = window.location.hash;
+            if (hash === '#register') {
+                showTab('register');
+            } else if (hash === '#login') {
+                showTab('login');
+            }
         });
     </script>
 </body>

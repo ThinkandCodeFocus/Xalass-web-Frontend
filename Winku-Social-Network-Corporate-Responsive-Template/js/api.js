@@ -188,8 +188,13 @@ class XalassAPI {
      */
     async searchPosts(query, category = null) {
         const body = {};
-        if (query) body.query = query;
-        if (category && category !== 'all') body.category = category;
+        // Inclure query même si vide (null ou string vide) pour permettre recherche par catégorie seule
+        if (query !== null && query !== undefined && query !== '') {
+            body.query = query;
+        }
+        if (category && category !== 'all' && category !== null) {
+            body.category = category;
+        }
 
         const response = await this.request('/search/posts', {
             method: 'POST',

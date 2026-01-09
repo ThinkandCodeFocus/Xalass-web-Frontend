@@ -215,8 +215,19 @@ async function performSearch() {
     header.style.display = 'none';
     
     try {
-        // Appeler l'API de recherche
-        const results = await api.searchPosts(currentQuery || null, currentFilter);
+        let results = [];
+        
+        // Si on a une catégorie spécifique (pas "all") et pas de texte de recherche
+        if (currentFilter !== 'all' && !currentQuery) {
+            // Utiliser l'endpoint de recherche avec juste la catégorie
+            results = await api.searchPosts(null, currentFilter);
+        } 
+        // Si on a du texte de recherche OU une catégorie
+        else if (currentQuery || currentFilter !== 'all') {
+            // Utiliser l'endpoint de recherche avec texte et/ou catégorie
+            results = await api.searchPosts(currentQuery || null, currentFilter !== 'all' ? currentFilter : null);
+        }
+        
         displayResults(results);
     } catch (error) {
         console.error('Erreur lors de la recherche:', error);

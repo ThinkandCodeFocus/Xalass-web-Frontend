@@ -113,6 +113,21 @@ class XalassAPI {
         return response.user;
     }
 
+    /**
+     * Met à jour le profil de l'utilisateur
+     */
+    async updateProfile(userId, data) {
+        const response = await this.request('/update/profile', {
+            method: 'POST',
+            body: JSON.stringify({
+                ...data,
+                author_internal_id: userId
+            })
+        });
+
+        return response.user;
+    }
+
     // ========== POSTS ==========
 
     /**

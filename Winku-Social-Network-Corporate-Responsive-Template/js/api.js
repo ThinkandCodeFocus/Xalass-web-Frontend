@@ -17,6 +17,10 @@ class XalassAPI {
         return session.anon_uuid || null;
     }
 
+    getSession() {
+        return JSON.parse(localStorage.getItem('xalass_session') || '{}');
+    }
+
     /**
      * Ajoute le header X-Anon-ID si l'utilisateur est connecté
      */
@@ -102,7 +106,7 @@ class XalassAPI {
      * Connecte un utilisateur anonyme
      */
     async loginAnonymousUser(codeName, password = null) {
-        const body = { code_name: codeName };
+        const body = { code_name: (codeName || '').trim() };
         if (password) body.password = password;
 
         const response = await this.request('/login/anoUser', {
@@ -230,7 +234,9 @@ class XalassAPI {
                 title,
                 content,
                 category,
-                status
+                status,
+                reset_reactions: true,
+                clear_likes_on_edit: true
             })
         });
 
@@ -249,6 +255,32 @@ class XalassAPI {
         });
 
         return response;
+    }
+
+    /**
+     * Supprime un post en supprimant d'abord ses commentaires/réponses
+     * (workaround côté frontend pour éviter les erreurs FK SQL)
+     */
+    async deletePostCascade(postId) {
+        const comments = await this.getCommentsByPost(postId);
+
+        // Supprimer d'abord les réponses, puis les commentaires parents
+        const idsToDelete = [];
+        comments.forEach(comment => {
+            const replies = Array.isArray(comment.replies) ? comment.replies : [];
+            replies.forEach(reply => {
+                const replyId = reply.comment_id || reply.id;
+                if (replyId) idsToDelete.push(replyId);
+            });
+            const commentId = comment.comment_id || comment.id;
+            if (commentId) idsToDelete.push(commentId);
+        });
+
+        for (const commentId of idsToDelete) {
+            await this.deleteComment(commentId);
+        }
+
+        return this.deletePost(postId);
     }
 
     // ========== RÉACTIONS (LIKES) ==========
@@ -331,10 +363,20 @@ class XalassAPI {
     /**
      * Signale un post
      */
-    async reportPost(postId) {
+    async reportPost(postId, reason = null) {
+        const session = this.getSession();
+        const body = {};
+        if (session && session.user_id) {
+            body.author_internal_id = session.user_id;
+            body.user_id = session.user_id;
+        }
+        if (reason) {
+            body.reason = reason;
+        }
+
         const response = await this.request(`/posts/${postId}/report`, {
             method: 'POST',
-            body: JSON.stringify({})
+            body: JSON.stringify(body)
         });
 
         return response;

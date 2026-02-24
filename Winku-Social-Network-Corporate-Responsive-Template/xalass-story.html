@@ -194,6 +194,38 @@
 let currentStoryId = null;
 let currentCommentId = null;
 let currentPost = null;
+let currentSession = null;
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    const bg = type === 'error'
+        ? 'rgba(220, 38, 38, 0.95)'
+        : type === 'success'
+        ? 'rgba(16, 185, 129, 0.95)'
+        : 'rgba(22, 27, 34, 0.95)';
+
+    toast.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        max-width: 360px;
+        background: ${bg};
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+        z-index: 1200;
+        font-size: 14px;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.2s ease';
+        setTimeout(() => toast.remove(), 220);
+    }, 2600);
+}
 
 // Format time
 function formatTime(dateString) {
@@ -213,6 +245,15 @@ function getAvatarUrl(seed) {
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed || 1}`;
 }
 
+function resolveAuthorSeed(author) {
+    const session = currentSession || JSON.parse(localStorage.getItem('xalass_session') || '{}');
+    if (author && author.user_id) return author.user_id;
+    if (author && author.code_name && session && session.code_name && author.code_name === session.code_name) {
+        return session.user_id || 1;
+    }
+    return session && session.user_id ? session.user_id : 1;
+}
+
 // Check auth
 function checkAuth() {
     const session = JSON.parse(localStorage.getItem('xalass_session'));
@@ -227,6 +268,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Vérifier l'authentification
     const session = checkAuth();
     if (!session) return;
+    currentSession = session;
     
     // Afficher les avatars
     const avatarUrl = getAvatarUrl(session.user_id);
@@ -270,7 +312,7 @@ async function loadStory() {
         document.getElementById('storyContent').innerHTML = `
             <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
                 <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
-                    <img src="${getAvatarUrl(post.author?.user_id)}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="${getAvatarUrl(resolveAuthorSeed(post.author))}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
                 </figure>
                 <div class="friend-name" style="flex: 1;">
                     <ins><a href="#" style="font-size: 18px;">${post.author?.code_name || 'Anonyme'}</a></ins>
@@ -348,7 +390,7 @@ async function loadComments() {
                 <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
                     <div style="display: flex; gap: 10px;">
                         <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                            <img src="${getAvatarUrl(comment.author?.user_id)}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="${getAvatarUrl(resolveAuthorSeed(comment.author))}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <div style="flex: 1;">
                             <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
@@ -375,7 +417,7 @@ async function loadComments() {
                                             <li style="padding: 10px 0;">
                                                 <div style="display: flex; gap: 10px;">
                                                     <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                                                        <img src="${getAvatarUrl(reply.author?.user_id)}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                        <img src="${getAvatarUrl(resolveAuthorSeed(reply.author))}" style="width: 100%; height: 100%; object-fit: cover;">
                                                     </div>
                                                     <div style="flex: 1;">
                                                         <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
@@ -417,7 +459,7 @@ async function handleLike() {
         // Recharger le post pour avoir les nouveaux compteurs
         await loadStory();
     } catch (error) {
-        alert('Erreur lors du like: ' + error.message);
+        showToast('Erreur lors du like: ' + error.message, 'error');
     }
 }
 
@@ -427,7 +469,7 @@ async function handleCommentLike(commentId) {
         // Recharger les commentaires
         await loadComments();
     } catch (error) {
-        alert('Erreur lors du like: ' + error.message);
+        showToast('Erreur lors du like: ' + error.message, 'error');
     }
 }
 
@@ -437,7 +479,7 @@ async function handleReplyLike(replyId) {
         // Recharger les commentaires
         await loadComments();
     } catch (error) {
-        alert('Erreur lors du like: ' + error.message);
+        showToast('Erreur lors du like: ' + error.message, 'error');
     }
 }
 
@@ -448,7 +490,7 @@ document.getElementById('commentForm').addEventListener('submit', async function
     const content = document.getElementById('commentText').value.trim();
     
     if (!content) {
-        alert('Veuillez écrire un commentaire');
+        showToast('Veuillez écrire un commentaire', 'error');
         return;
     }
     
@@ -460,10 +502,10 @@ document.getElementById('commentForm').addEventListener('submit', async function
     try {
         await api.createComment(currentStoryId, content);
         document.getElementById('commentText').value = '';
-        alert('Commentaire ajouté !');
+        showToast('Commentaire ajouté', 'success');
         await loadComments();
     } catch (error) {
-        alert('Erreur: ' + error.message);
+        showToast('Erreur: ' + error.message, 'error');
     } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -487,17 +529,17 @@ async function submitReply() {
     const content = document.getElementById('replyText').value.trim();
     
     if (!content) {
-        alert('Veuillez écrire une réponse');
+        showToast('Veuillez écrire une réponse', 'error');
         return;
     }
     
     try {
         await api.createComment(currentStoryId, content, currentCommentId);
         closeReplyModal();
-        alert('Réponse ajoutée !');
+        showToast('Réponse ajoutée', 'success');
         await loadComments();
     } catch (error) {
-        alert('Erreur: ' + error.message);
+        showToast('Erreur: ' + error.message, 'error');
     }
 }
 
@@ -515,16 +557,16 @@ async function submitReportForm() {
     const reason = document.querySelector('input[name="reportReason"]:checked');
     
     if (!reason) {
-        alert('Veuillez sélectionner une raison');
+        showToast('Veuillez sélectionner une raison', 'error');
         return;
     }
     
     try {
-        await api.reportPost(currentStoryId);
+        await api.reportPost(currentStoryId, reason.value);
         closeReportModal();
-        alert('Signalement enregistré. Merci pour votre vigilance.');
+        showToast('Signalement enregistré. Merci pour votre vigilance.', 'success');
     } catch (error) {
-        alert('Erreur lors du signalement: ' + error.message);
+        showToast('Erreur lors du signalement: ' + error.message, 'error');
     }
 }
 
@@ -556,11 +598,12 @@ function shareStory(postId, title) {
         });
     } else {
         navigator.clipboard.writeText(url);
-        alert('Lien copié !');
+        showToast('Lien copié', 'success');
     }
 }
 
 function logoutUser() {
+    if (!confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) return;
     localStorage.removeItem('xalass_session');
     window.location.href = 'xalass-login.html';
 }

@@ -82,8 +82,8 @@
 	mul:{
 	inc:function(x,delta){return x*delta},
 	dec:function(x,delta){return x/delta},
-	incfmt:function(delta){return "Ã—"+delta},
-	decfmt:function(delta){return "Ã·"+delta}
+	incfmt:function(delta){return "×"+delta},
+	decfmt:function(delta){return "÷"+delta}
 	}
 	};
 	$.fn.userincr.defaults={

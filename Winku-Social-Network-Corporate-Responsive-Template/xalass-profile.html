@@ -536,7 +536,7 @@
                         <img id="profileAvatar" class="profile-avatar" src="" alt="Avatar">
                     </div>
                     <h2 id="profileName" class="profile-name">Utilisateur</h2>
-                    <p id="profileDate" class="profile-date">Membre depuis...</p>
+                    <p id="profileDate" class="profile-date">Ton nom d'utilisateur n'est visible que par toi.</p>
                 </div>
 
                 <div class="stats-grid">
@@ -573,10 +573,10 @@
         <div>
             <div class="card">
                 <div class="tabs">
-                    <div class="tab active" onclick="showTab('published')">
+                    <div class="tab active" onclick="showTab('published', event)">
                         <i class="fa fa-book"></i> Mes histoires
                     </div>
-                    <div class="tab" onclick="showTab('asuivre')">
+                    <div class="tab" onclick="showTab('asuivre', event)">
                         <i class="fa fa-edit"></i> À suivre
                     </div>
                 </div>
@@ -656,6 +656,44 @@
         let currentEditStoryId = null;
         let allMyPosts = [];
 
+        function getCount(value, fallbackArray) {
+            if (typeof value === 'number' && Number.isFinite(value)) return value;
+            if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+                return Number(value);
+            }
+            return Array.isArray(fallbackArray) ? fallbackArray.length : 0;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bg = type === 'error'
+                ? 'rgba(220, 38, 38, 0.95)'
+                : type === 'success'
+                ? 'rgba(16, 185, 129, 0.95)'
+                : 'rgba(22, 27, 34, 0.95)';
+
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                max-width: 360px;
+                background: ${bg};
+                color: #fff;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+                z-index: 1200;
+                font-size: 14px;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => toast.remove(), 220);
+            }, 2600);
+        }
+
         function getAvatarUrl(seed) {
             return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
         }
@@ -699,11 +737,6 @@
             document.getElementById('headerAvatar').src = getAvatarUrl(avatarSeed);
             document.getElementById('profileAvatar').src = getAvatarUrl(avatarSeed);
             document.getElementById('profileName').textContent = session.code_name || session.pseudo || 'Utilisateur';
-            
-            if (session.date_creation || session.createdAt) {
-                const date = new Date(session.date_creation || session.createdAt);
-                document.getElementById('profileDate').textContent = 'Membre depuis ' + date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-            }
             
             loadMyStories();
         });
@@ -765,8 +798,8 @@
 
         function updateStats(posts) {
             const storiesCount = posts.length;
-            const likesCount = posts.reduce((sum, post) => sum + (post.reactions_count || 0), 0);
-            const commentsCount = posts.reduce((sum, post) => sum + (post.comments_count || 0), 0);
+            const likesCount = posts.reduce((sum, post) => sum + getCount(post.reactions_count, post.reactions), 0);
+            const commentsCount = posts.reduce((sum, post) => sum + getCount(post.comments_count, post.comments), 0);
             
             document.getElementById('statStories').textContent = storiesCount;
             document.getElementById('statLikes').textContent = likesCount;
@@ -794,8 +827,8 @@
                     <div class="story-content">${truncated}</div>
                     
                     <div class="story-stats">
-                        <span><i class="fa fa-heart"></i> ${post.reactions_count || 0}</span>
-                        <span><i class="fa fa-comment"></i> ${post.comments_count || 0}</span>
+                        <span><i class="fa fa-heart"></i> ${getCount(post.reactions_count, post.reactions)}</span>
+                        <span><i class="fa fa-comment"></i> ${getCount(post.comments_count, post.comments)}</span>
                     </div>
                     
                     <div class="story-actions">
@@ -813,9 +846,17 @@
             `;
         }
 
-        function showTab(tabName) {
+        function showTab(tabName, event) {
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            event.target.closest('.tab').classList.add('active');
+            const clickedTab = event && event.target ? event.target.closest('.tab') : null;
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            } else {
+                const firstMatchingTab = Array.from(document.querySelectorAll('.tab')).find(tab =>
+                    (tab.getAttribute('onclick') || '').includes(`'${tabName}'`)
+                );
+                if (firstMatchingTab) firstMatchingTab.classList.add('active');
+            }
             
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
@@ -839,17 +880,17 @@
             const passwordConfirm = document.getElementById('editPasswordConfirm').value;
             
             if (!pseudo) {
-                alert('Le pseudonyme ne peut pas être vide');
+                showToast('Le pseudonyme ne peut pas être vide', 'error');
                 return;
             }
             
             if (password && password !== passwordConfirm) {
-                alert('Les mots de passe ne correspondent pas');
+                showToast('Les mots de passe ne correspondent pas', 'error');
                 return;
             }
             
             if (password && password.length < 6) {
-                alert('Le mot de passe doit contenir au moins 6 caractères');
+                showToast('Le mot de passe doit contenir au moins 6 caractères', 'error');
                 return;
             }
             
@@ -871,10 +912,10 @@
                 document.getElementById('profileName').textContent = pseudo;
                 
                 closeEditProfileModal();
-                alert('Profil mis à jour avec succès !');
+                showToast('Profil mis à jour avec succès', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('Erreur: ' + (error.message || 'Impossible de mettre à jour le profil'));
+                showToast('Erreur: ' + (error.message || 'Impossible de mettre à jour le profil'), 'error');
             }
         }
 
@@ -898,7 +939,7 @@
             const isAsuivre = document.getElementById('editAsuivre').checked;
             
             if (!content) {
-                alert('Le contenu ne peut pas être vide');
+                showToast('Le contenu ne peut pas être vide', 'error');
                 return;
             }
             
@@ -913,25 +954,27 @@
                     post.category || 'autre',
                     isAsuivre ? 'EN COURS' : 'FINISH'
                 );
+                post.reactions_count = 0;
+                post.user_liked = false;
                 
                 closeEditStoryModal();
-                alert('Histoire modifiée avec succès !');
+                showToast('Histoire modifiée. Les likes ont été réinitialisés.', 'success');
                 loadMyStories();
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('Erreur: ' + (error.message || 'Impossible de modifier l\'histoire'));
+                showToast('Erreur: ' + (error.message || 'Impossible de modifier l\'histoire'), 'error');
             }
         }
 
         async function confirmDeleteStory(postId) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette histoire ? Cette action est irréversible.')) {
                 try {
-                    await api.deletePost(postId);
-                    alert('Histoire supprimée');
+                    await api.deletePostCascade(postId);
+                    showToast('Histoire supprimée', 'success');
                     loadMyStories();
                 } catch (error) {
                     console.error('Erreur:', error);
-                    alert('Erreur: ' + (error.message || 'Impossible de supprimer l\'histoire'));
+                    showToast('Erreur: ' + (error.message || 'Impossible de supprimer l\'histoire'), 'error');
                 }
             }
         }
@@ -947,7 +990,7 @@
                 if (confirm('Êtes-vous vraiment sûr ? Vous perdrez tout accès à ce compte.')) {
                     // TODO: Implémenter la suppression de compte côté backend
                     clearSession();
-                    alert('Compte supprimé');
+                    showToast('Compte supprimé', 'success');
                     window.location.href = 'xalass-login.html';
                 }
             }

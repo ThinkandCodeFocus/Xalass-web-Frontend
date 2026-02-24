@@ -1153,13 +1153,13 @@
 
         <!-- Filter Tabs -->
         <div class="filter-tabs">
-            <button class="filter-tab active" onclick="filterStories('all')">Tout</button>
-            <button class="filter-tab" onclick="filterStories('amour')">❤️ Amour</button>
-            <button class="filter-tab" onclick="filterStories('amitie')">💙 Amitié</button>
-            <button class="filter-tab" onclick="filterStories('famille')">💚 Famille</button>
-            <button class="filter-tab" onclick="filterStories('travail')">💛 Travail</button>
-            <button class="filter-tab" onclick="filterStories('social')">💜 Social</button>
-            <button class="filter-tab" onclick="filterStories('following')">📖 À suivre</button>
+            <button class="filter-tab active" onclick="filterStories('all', event)">Tout</button>
+            <button class="filter-tab" onclick="filterStories('amour', event)">❤️ Amour</button>
+            <button class="filter-tab" onclick="filterStories('amitie', event)">💙 Amitié</button>
+            <button class="filter-tab" onclick="filterStories('famille', event)">💚 Famille</button>
+            <button class="filter-tab" onclick="filterStories('travail', event)">💛 Travail</button>
+            <button class="filter-tab" onclick="filterStories('social', event)">💜 Social</button>
+            <button class="filter-tab" onclick="filterStories('following', event)">📖 À suivre</button>
         </div>
 
         <!-- Stories Feed -->
@@ -1212,6 +1212,45 @@
         let currentFilter = 'all';
         let session = null;
         let allPosts = [];
+
+        function getCount(value, fallbackArray) {
+            if (typeof value === 'number' && Number.isFinite(value)) return value;
+            if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+                return Number(value);
+            }
+            return Array.isArray(fallbackArray) ? fallbackArray.length : 0;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bg = type === 'error'
+                ? 'rgba(220, 38, 38, 0.95)'
+                : type === 'success'
+                ? 'rgba(16, 185, 129, 0.95)'
+                : 'rgba(22, 27, 34, 0.95)';
+
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                max-width: 360px;
+                background: ${bg};
+                color: #fff;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+                z-index: 1200;
+                font-size: 14px;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => toast.remove(), 220);
+            }, 2500);
+        }
 
         // Check auth
         function checkAuth() {
@@ -1355,8 +1394,8 @@
                 const isLiked = story.user_liked || false;
                 const categoryClass = 'badge-' + (story.category || 'autre');
                 const isFollowing = story.status === 'EN COURS';
-                const reactionsCount = story.reactions_count || 0;
-                const commentsCount = story.comments_count || 0;
+                const reactionsCount = getCount(story.reactions_count, story.reactions);
+                const commentsCount = getCount(story.comments_count, story.comments);
                 
                 return `
                     <article class="story-card">
@@ -1415,7 +1454,7 @@
             const isFollowing = document.getElementById('story-following').checked;
 
             if (!title || !content) {
-                alert('Remplis le titre et le contenu de ton histoire');
+                showToast('Remplis le titre et le contenu de ton histoire', 'error');
                 return;
             }
 
@@ -1445,7 +1484,7 @@
                     await loadPosts(true);
                 }
             } catch (error) {
-                alert('Erreur lors de la publication: ' + error.message);
+                showToast('Erreur lors de la publication: ' + error.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
@@ -1461,7 +1500,8 @@
             // Mise à jour optimiste (immédiate)
             const wasLiked = post.user_liked || false;
             post.user_liked = !wasLiked;
-            post.reactions_count = (post.reactions_count || 0) + (wasLiked ? -1 : 1);
+            const currentReactions = getCount(post.reactions_count, post.reactions);
+            post.reactions_count = currentReactions + (wasLiked ? -1 : 1);
             
             // Mettre à jour l'affichage immédiatement
             renderStories();
@@ -1474,9 +1514,10 @@
             } catch (error) {
                 // En cas d'erreur, annuler la mise à jour optimiste
                 post.user_liked = wasLiked;
-                post.reactions_count = (post.reactions_count || 0) + (wasLiked ? 1 : -1);
+                const rolledBackReactions = getCount(post.reactions_count, post.reactions);
+                post.reactions_count = rolledBackReactions + (wasLiked ? 1 : -1);
                 renderStories();
-                alert('Erreur lors du like: ' + error.message);
+                showToast('Erreur lors du like: ' + error.message, 'error');
             }
         }
 
@@ -1492,7 +1533,7 @@
                 });
             } else {
                 navigator.clipboard.writeText(url);
-                alert('Lien copié !');
+                showToast('Lien copié', 'success');
             }
         }
 
@@ -1501,24 +1542,33 @@
             if (!confirm('Signaler cette histoire comme inappropriée ?')) return;
             
             try {
-                await api.reportPost(postId);
-                alert('Signalement enregistré. Merci pour votre vigilance.');
+                await api.reportPost(postId, 'inappropriate');
+                showToast('Signalement enregistré. Merci pour votre vigilance.', 'success');
             } catch (error) {
-                alert('Erreur lors du signalement: ' + error.message);
+                showToast('Erreur lors du signalement: ' + error.message, 'error');
             }
         }
 
         // Filter stories
-        function filterStories(filter) {
+        function filterStories(filter, event) {
             currentFilter = filter;
             currentPage = 0; // Réinitialiser la pagination
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            const target = event && event.target ? event.target : null;
+            if (target && target.classList.contains('filter-tab')) {
+                target.classList.add('active');
+            } else {
+                const matchingTab = Array.from(document.querySelectorAll('.filter-tab')).find(tab =>
+                    (tab.getAttribute('onclick') || '').includes(`'${filter}'`)
+                );
+                if (matchingTab) matchingTab.classList.add('active');
+            }
             renderStories();
         }
 
         // Logout
         function logout() {
+            if (!confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) return;
             localStorage.removeItem('xalass_session');
             if (eventSource) {
                 eventSource.close();

@@ -10,6 +10,37 @@ class XalassAPI {
     }
 
     /**
+     * Extrait un tableau depuis une réponse API avec différents formats possibles
+     */
+    extractArray(response, keys = []) {
+        if (Array.isArray(response)) return response;
+        if (!response || typeof response !== 'object') return [];
+
+        for (const key of keys) {
+            if (Array.isArray(response[key])) {
+                return response[key];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Extrait un objet depuis une réponse API avec différents formats possibles
+     */
+    extractObject(response, keys = []) {
+        if (response && typeof response === 'object' && !Array.isArray(response)) {
+            for (const key of keys) {
+                if (response[key] && typeof response[key] === 'object') {
+                    return response[key];
+                }
+            }
+            return response;
+        }
+        return null;
+    }
+
+    /**
      * Récupère l'anon_uuid depuis la session
      */
     getAnonUuid() {
@@ -129,7 +160,7 @@ class XalassAPI {
             })
         });
 
-        return response.user;
+        return this.extractObject(response, ['user', 'data']) || response;
     }
 
     // ========== POSTS ==========
@@ -148,7 +179,7 @@ class XalassAPI {
             })
         });
 
-        return response.post;
+        return this.extractObject(response, ['post', 'data']) || response;
     }
 
     /**
@@ -160,7 +191,7 @@ class XalassAPI {
             body: JSON.stringify({})
         });
 
-        return Array.isArray(response) ? response : [];
+        return this.extractArray(response, ['posts', 'data', 'items']);
     }
 
     /**
@@ -171,7 +202,7 @@ class XalassAPI {
             method: 'GET'
         });
 
-        return response.post;
+        return this.extractObject(response, ['post', 'data']) || response;
     }
 
     /**
@@ -185,7 +216,7 @@ class XalassAPI {
             })
         });
 
-        return Array.isArray(response) ? response : [];
+        return this.extractArray(response, ['posts', 'data', 'items']);
     }
 
     /**
@@ -199,7 +230,7 @@ class XalassAPI {
             })
         });
 
-        return response.post_id || [];
+        return this.extractArray(response, ['posts', 'data', 'items', 'post_id']);
     }
 
     /**
@@ -207,7 +238,7 @@ class XalassAPI {
      */
     async searchPosts(query, category = null) {
         const body = {};
-        // Inclure query même si vide (null ou string vide) pour permettre recherche par catégorie seule
+        // Ne pas envoyer query vide pour éviter les rejets de validation backend
         if (query !== null && query !== undefined && query !== '') {
             body.query = query;
         }
@@ -220,7 +251,7 @@ class XalassAPI {
             body: JSON.stringify(body)
         });
 
-        return Array.isArray(response) ? response : [];
+        return this.extractArray(response, ['posts', 'data', 'items']);
     }
 
     /**
@@ -240,7 +271,7 @@ class XalassAPI {
             })
         });
 
-        return response.post;
+        return this.extractObject(response, ['post', 'data']) || response;
     }
 
     /**
@@ -330,7 +361,7 @@ class XalassAPI {
             body: JSON.stringify(body)
         });
 
-        return response.post; // Le backend retourne le commentaire dans 'post'
+        return this.extractObject(response, ['comment', 'post', 'data']) || response;
     }
 
     /**
@@ -341,7 +372,7 @@ class XalassAPI {
             method: 'GET'
         });
 
-        return response.comments || [];
+        return this.extractArray(response, ['comments', 'data', 'items']);
     }
 
     /**
@@ -392,7 +423,7 @@ class XalassAPI {
             method: 'GET'
         });
 
-        return Array.isArray(response) ? response : response.notifications || [];
+        return this.extractArray(response, ['notifications', 'data', 'items']);
     }
 
     /**
@@ -440,7 +471,7 @@ class XalassAPI {
             method: 'GET'
         });
 
-        return response.avatars || [];
+        return this.extractArray(response, ['avatars', 'data', 'items']);
     }
 
     // ========== SERVER-SENT EVENTS (SSE) ==========

@@ -13,7 +13,8 @@ const XALASS = {
     },
     CATEGORIES: ['amour', 'amitie', 'social', 'travail', 'autre'],
     AVATAR_COUNT: 18,
-    REPORT_THRESHOLD: 5
+    REPORT_THRESHOLD: 5,
+    DEMO_MODE: false
 };
 
 // === UTILITAIRES ===
@@ -76,11 +77,24 @@ function clearSession() {
     localStorage.removeItem(XALASS.STORAGE_KEYS.SESSION);
 }
 
+function isValidBackendSession(session) {
+    return !!(session && typeof session === 'object' && session.anon_uuid && (session.user_id || session.id));
+}
+
 function checkAuth(redirectToLogin = true) {
     const session = getSession();
-    if (!session && redirectToLogin) {
-        window.location.href = 'xalass-login.html';
+    if (!isValidBackendSession(session)) {
+        clearSession();
+        if (redirectToLogin) {
+            window.location.href = 'xalass-login.html';
+        }
         return null;
+    }
+
+    // Compatibilite: certaines pages utilisent user_id.
+    if (!session.user_id && session.id) {
+        session.user_id = session.id;
+        setSession(session);
     }
     return session;
 }
@@ -810,9 +824,28 @@ function incrementViews(storyId) {
 
 // === INITIALISATION ===
 
+function shouldInitDemoData() {
+    if (window.XALASS_ENABLE_DEMO_DATA === true) {
+        return true;
+    }
+
+    if (XALASS.DEMO_MODE) {
+        return true;
+    }
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('demo') === '1';
+    } catch (error) {
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser les données de démo au premier lancement
-    initDemoData();
+    if (shouldInitDemoData()) {
+        initDemoData();
+    }
     
     // Ajouter les styles pour les animations toast
     const style = document.createElement('style');

@@ -28,8 +28,6 @@ class XalassAPI {
         return `${this.baseURL}${this.normalizeEndpoint(endpoint)}`;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Extrait un tableau depuis une réponse API avec différents formats possibles
      */
@@ -42,7 +40,6 @@ class XalassAPI {
                 return response[key];
             }
         }
-
         return [];
     }
 
@@ -61,16 +58,11 @@ class XalassAPI {
         return null;
     }
 
-    /**
-     * Récupère l'anon_uuid depuis la session
-     */
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
     getAnonUuid() {
         const session = this.getSession();
         return session.anon_uuid || null;
     }
 
-<<<<<<< HEAD
     getSessionHash() {
         const session = this.getSession();
         return session.session_hash || null;
@@ -81,18 +73,7 @@ class XalassAPI {
             ...this.headers,
             ...extraHeaders
         };
-
-=======
-    getSession() {
-        return JSON.parse(localStorage.getItem('xalass_session') || '{}');
-    }
-
-    /**
-     * Ajoute le header X-Anon-ID si l'utilisateur est connecté
-     */
-    getHeaders() {
-        const headers = { ...this.headers };
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
+        
         const anonUuid = this.getAnonUuid();
         if (anonUuid) {
             headers['X-Anon-ID'] = anonUuid;
@@ -106,7 +87,6 @@ class XalassAPI {
         const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
         const hasBody = body !== undefined && body !== null;
 
-        // Evite des preflight CORS inutiles pour les requetes sans body.
         if (method === 'GET' || method === 'HEAD' || !hasBody || isFormData) {
             delete headers['Content-Type'];
         }
@@ -121,9 +101,7 @@ class XalassAPI {
         }
 
         const text = await response.text();
-        if (!text) {
-            return {};
-        }
+        if (!text) return {};
 
         try {
             return JSON.parse(text);
@@ -134,12 +112,8 @@ class XalassAPI {
 
     extractErrorMessage(data, response) {
         if (data && typeof data === 'object') {
-            if (typeof data.error === 'string' && data.error.trim()) {
-                return data.error;
-            }
-            if (typeof data.message === 'string' && data.message.trim()) {
-                return data.message;
-            }
+            if (typeof data.error === 'string' && data.error.trim()) return data.error;
+            if (typeof data.message === 'string' && data.message.trim()) return data.message;
             if (data.errors && typeof data.errors === 'object') {
                 const firstField = Object.keys(data.errors)[0];
                 if (firstField && Array.isArray(data.errors[firstField]) && data.errors[firstField][0]) {
@@ -147,7 +121,6 @@ class XalassAPI {
                 }
             }
         }
-
         return `Erreur ${response.status}: ${response.statusText}`;
     }
 
@@ -171,31 +144,17 @@ class XalassAPI {
         try {
             const response = await fetch(url, config);
             clearTimeout(timeoutId);
-
             const data = await this.parseResponse(response);
-
-            if (!response.ok) {
-                throw new Error(this.extractErrorMessage(data, response));
-            }
-
+            if (!response.ok) throw new Error(this.extractErrorMessage(data, response));
             return data;
         } catch (error) {
             clearTimeout(timeoutId);
-
-            console.error('API Error:', {
-                endpoint,
-                url,
-                error: error.message
-            });
-
             if (error.name === 'AbortError') {
-                throw new Error(`Le serveur met trop de temps a repondre (${Math.round(timeoutMs / 1000)}s). Render peut etre en phase de reveil, reessayez.`);
+                throw new Error(`Le serveur met trop de temps à répondre (${Math.round(timeoutMs / 1000)}s). Render peut être en phase de réveil.`);
             }
-
             if (error.name === 'TypeError') {
-                throw new Error(`Connexion impossible au backend (${this.baseURL}). Verifiez CORS et le deploiement Render.`);
+                throw new Error(`Connexion impossible au backend. Vérifiez CORS et le déploiement.`);
             }
-
             throw error;
         }
     }
@@ -209,36 +168,28 @@ class XalassAPI {
             body.password = password;
             body.password_confirmation = password;
         }
-
         const response = await this.request('/create/anoUser', {
             method: 'POST',
             body: JSON.stringify(body)
         });
-
         return response.user;
     }
 
     async loginAnonymousUser(codeName, password = null) {
         const body = { code_name: (codeName || '').trim() };
         if (password) body.password = password;
-
         const response = await this.request('/login/anoUser', {
             method: 'POST',
             body: JSON.stringify(body)
         });
-
         return response.user;
     }
 
     async updateProfile(userId, data) {
         const response = await this.request('/update/profile', {
             method: 'POST',
-            body: JSON.stringify({
-                ...data,
-                author_internal_id: userId
-            })
+            body: JSON.stringify({ ...data, author_internal_id: userId })
         });
-
         return this.extractObject(response, ['user', 'data']) || response;
     }
 
@@ -247,14 +198,8 @@ class XalassAPI {
     async createPost(title, content, category, status = 'FINISH') {
         const response = await this.request('/create/posts', {
             method: 'POST',
-            body: JSON.stringify({
-                title,
-                content,
-                category,
-                status
-            })
+            body: JSON.stringify({ title, content, category, status })
         });
-
         return this.extractObject(response, ['post', 'data']) || response;
     }
 
@@ -263,59 +208,23 @@ class XalassAPI {
             method: 'POST',
             body: JSON.stringify({})
         });
-
         return this.extractArray(response, ['posts', 'data', 'items']);
     }
 
     async getPostById(postId) {
-        const response = await this.request(`/posts/${postId}`, {
-            method: 'GET'
-        });
-
+        const response = await this.request(`/posts/${postId}`, { method: 'GET' });
         return this.extractObject(response, ['post', 'data']) || response;
-    }
-
-    async getPostsByAuthor(authorId) {
-        const response = await this.request('/author/posts', {
-            method: 'POST',
-            body: JSON.stringify({
-                author_internal_id: authorId
-            })
-        });
-
-        return this.extractArray(response, ['posts', 'data', 'items']);
-    }
-
-    async getPostsByCategory(category) {
-        const response = await this.request('/category/posts', {
-            method: 'POST',
-            body: JSON.stringify({
-                category
-            })
-        });
-
-        return this.extractArray(response, ['posts', 'data', 'items', 'post_id']);
     }
 
     async searchPosts(query, category = null) {
         const body = {};
-<<<<<<< HEAD
-
-=======
-        // Ne pas envoyer query vide pour éviter les rejets de validation backend
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
-        if (query !== null && query !== undefined && query !== '') {
-            body.query = query;
-        }
-        if (category && category !== 'all' && category !== null) {
-            body.category = category;
-        }
+        if (query) body.query = query;
+        if (category && category !== 'all') body.category = category;
 
         const response = await this.request('/search/posts', {
             method: 'POST',
             body: JSON.stringify(body)
         });
-
         return this.extractArray(response, ['posts', 'data', 'items']);
     }
 
@@ -324,218 +233,95 @@ class XalassAPI {
             method: 'POST',
             body: JSON.stringify({
                 post_id: postId,
-                title,
-                content,
-                category,
-                status,
+                title, content, category, status,
                 reset_reactions: true,
                 clear_likes_on_edit: true
             })
         });
-
         return this.extractObject(response, ['post', 'data']) || response;
     }
 
     async deletePost(postId) {
-        const response = await this.request('/delete/posts', {
+        return await this.request('/delete/posts', {
             method: 'POST',
-            body: JSON.stringify({
-                post_id: postId
-            })
+            body: JSON.stringify({ post_id: postId })
         });
-
-        return response;
     }
 
-<<<<<<< HEAD
-    // ========== REACTIONS (LIKES) ==========
-=======
-    /**
-     * Supprime un post en supprimant d'abord ses commentaires/réponses
-     * (workaround côté frontend pour éviter les erreurs FK SQL)
-     */
     async deletePostCascade(postId) {
         const comments = await this.getCommentsByPost(postId);
-
-        // Supprimer d'abord les réponses, puis les commentaires parents
         const idsToDelete = [];
         comments.forEach(comment => {
             const replies = Array.isArray(comment.replies) ? comment.replies : [];
-            replies.forEach(reply => {
-                const replyId = reply.comment_id || reply.id;
-                if (replyId) idsToDelete.push(replyId);
-            });
-            const commentId = comment.comment_id || comment.id;
-            if (commentId) idsToDelete.push(commentId);
+            replies.forEach(reply => idsToDelete.push(reply.comment_id || reply.id));
+            idsToDelete.push(comment.comment_id || comment.id);
         });
 
         for (const commentId of idsToDelete) {
             await this.deleteComment(commentId);
         }
-
         return this.deletePost(postId);
     }
 
-    // ========== RÉACTIONS (LIKES) ==========
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
+    // ========== RÉACTIONS & COMMENTAIRES ==========
 
     async togglePostReaction(postId) {
-        const response = await this.request(`/posts/${postId}/reactions`, {
+        return await this.request(`/posts/${postId}/reactions`, {
             method: 'POST',
-            body: JSON.stringify({
-                type: 'like'
-            })
+            body: JSON.stringify({ type: 'like' })
         });
-
-        return response;
     }
-
-    async toggleCommentReaction(commentId) {
-        const response = await this.request(`/comments/${commentId}/reactions`, {
-            method: 'POST',
-            body: JSON.stringify({
-                type: 'like'
-            })
-        });
-
-        return response;
-    }
-
-    // ========== COMMENTAIRES ==========
 
     async createComment(postId, content, parentId = null) {
-        const body = {
-            post_id: postId,
-            content
-        };
+        const body = { post_id: postId, content };
         if (parentId) body.parent_id = parentId;
-
         const response = await this.request('/create/comment', {
             method: 'POST',
             body: JSON.stringify(body)
         });
-
-<<<<<<< HEAD
-        return response.post;
-=======
         return this.extractObject(response, ['comment', 'post', 'data']) || response;
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
     }
 
     async getCommentsByPost(postId) {
-        const response = await this.request(`/posts/${postId}/comments`, {
-            method: 'GET'
-        });
-
+        const response = await this.request(`/posts/${postId}/comments`, { method: 'GET' });
         return this.extractArray(response, ['comments', 'data', 'items']);
     }
 
     async deleteComment(commentId) {
-        const response = await this.request('/delete/comment', {
+        return await this.request('/delete/comment', {
             method: 'POST',
-            body: JSON.stringify({
-                comment_id: commentId
-            })
+            body: JSON.stringify({ comment_id: commentId })
         });
-
-        return response;
     }
 
-    // ========== SIGNALEMENTS ==========
-
-<<<<<<< HEAD
-    async reportPost(postId) {
-=======
-    /**
-     * Signale un post
-     */
     async reportPost(postId, reason = null) {
         const session = this.getSession();
         const body = {};
-        if (session && session.user_id) {
-            body.author_internal_id = session.user_id;
-            body.user_id = session.user_id;
-        }
-        if (reason) {
-            body.reason = reason;
-        }
+        if (session?.user_id) body.user_id = session.user_id;
+        if (reason) body.reason = reason;
 
->>>>>>> 049f48976ce4d2853d47d71460fc58bf0378c3e6
-        const response = await this.request(`/posts/${postId}/report`, {
+        return await this.request(`/posts/${postId}/report`, {
             method: 'POST',
             body: JSON.stringify(body)
         });
-
-        return response;
     }
 
-    // ========== NOTIFICATIONS ==========
+    // ========== NOTIFICATIONS & SSE ==========
 
     async getNotifications() {
-        const response = await this.request('/notifications', {
-            method: 'GET'
-        });
-
+        const response = await this.request('/notifications', { method: 'GET' });
         return this.extractArray(response, ['notifications', 'data', 'items']);
     }
 
-    async markNotificationAsRead(notificationId) {
-        const response = await this.request(`/notifications/${notificationId}/read`, {
-            method: 'PUT',
-            body: JSON.stringify({})
-        });
-
-        return response;
-    }
-
-    async markAllNotificationsAsRead() {
-        const response = await this.request('/notifications/read-all', {
-            method: 'PUT',
-            body: JSON.stringify({})
-        });
-
-        return response;
-    }
-
-    async deleteNotification(notificationId) {
-        const response = await this.request(`/notifications/${notificationId}`, {
-            method: 'DELETE'
-        });
-
-        return response;
-    }
-
-    // ========== MEDIAS ==========
-
-    async getAvatars() {
-        const response = await this.request('/media/avatars', {
-            method: 'GET'
-        });
-
-        return this.extractArray(response, ['avatars', 'data', 'items']);
-    }
-
-    // ========== SERVER-SENT EVENTS (SSE) ==========
-
     createEventSource(lastPostId = 0) {
-        const params = new URLSearchParams({
-            last_post_id: String(lastPostId)
-        });
-
+        const params = new URLSearchParams({ last_post_id: String(lastPostId) });
         const anonUuid = this.getAnonUuid();
-        if (anonUuid) {
-            params.set('anon_uuid', anonUuid);
-        }
-
+        if (anonUuid) params.set('anon_uuid', anonUuid);
         const sessionHash = this.getSessionHash();
-        if (sessionHash) {
-            params.set('session_hash', sessionHash);
-        }
+        if (sessionHash) params.set('session_hash', sessionHash);
 
-        const url = `${this.baseURL}/stream/posts?${params.toString()}`;
-        return new EventSource(url);
+        return new EventSource(`${this.baseURL}/stream/posts?${params.toString()}`);
     }
 }
 
-// Instance globale de l'API
 const api = new XalassAPI();

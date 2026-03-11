@@ -216,6 +216,22 @@ class XalassAPI {
         return this.extractObject(response, ['post', 'data']) || response;
     }
 
+    async getPostsByAuthor(authorId) {
+        const response = await this.request('/author/posts', {
+            method: 'POST',
+            body: JSON.stringify({ author_internal_id: authorId })
+        });
+        return this.extractArray(response, ['posts', 'data', 'items']);
+    }
+
+    async getPostsByCategory(category) {
+        const response = await this.request('/category/posts', {
+            method: 'POST',
+            body: JSON.stringify({ category })
+        });
+        return this.extractArray(response, ['posts', 'data', 'items']);
+    }
+
     async searchPosts(query, category = null) {
         const body = {};
         if (query) body.query = query;
@@ -272,6 +288,13 @@ class XalassAPI {
         });
     }
 
+    async toggleCommentReaction(commentId) {
+        return await this.request(`/comments/${commentId}/reactions`, {
+            method: 'POST',
+            body: JSON.stringify({ type: 'like' })
+        });
+    }
+
     async createComment(postId, content, parentId = null) {
         const body = { post_id: postId, content };
         if (parentId) body.parent_id = parentId;
@@ -311,6 +334,31 @@ class XalassAPI {
     async getNotifications() {
         const response = await this.request('/notifications', { method: 'GET' });
         return this.extractArray(response, ['notifications', 'data', 'items']);
+    }
+
+    async markNotificationAsRead(notificationId) {
+        return await this.request(`/notifications/${notificationId}/read`, {
+            method: 'PUT',
+            body: JSON.stringify({})
+        });
+    }
+
+    async markAllNotificationsAsRead() {
+        return await this.request('/notifications/read-all', {
+            method: 'PUT',
+            body: JSON.stringify({})
+        });
+    }
+
+    async deleteNotification(notificationId) {
+        return await this.request(`/notifications/${notificationId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getAvatars() {
+        const response = await this.request('/media/avatars', { method: 'GET' });
+        return this.extractArray(response, ['avatars', 'data', 'items']);
     }
 
     createEventSource(lastPostId = 0) {

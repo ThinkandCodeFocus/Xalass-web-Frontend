@@ -161,12 +161,17 @@ class XalassAPI {
 
     // ========== UTILISATEURS ANONYMES ==========
 
-    async createAnonymousUser(codeName, password = null) {
+    async createAnonymousUser(codeName, password = null, avatarSeed = null) {
         const body = {};
         if (codeName) body.code_name = codeName;
         if (password) {
             body.password = password;
             body.password_confirmation = password;
+        }
+        if (avatarSeed !== null && avatarSeed !== undefined) {
+            body.avatar = avatarSeed;
+            body.avatar_id = avatarSeed;
+            body.avatar_seed = avatarSeed;
         }
         const response = await this.request('/create/anoUser', {
             method: 'POST',

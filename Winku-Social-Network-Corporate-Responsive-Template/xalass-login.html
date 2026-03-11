@@ -386,6 +386,51 @@
     <script src="js/api.js"></script>
     
     <script>
+        const AVATAR_MAP_KEY = 'xalass_avatars_by_code_name';
+
+        function loadAvatarMap() {
+            try {
+                return JSON.parse(localStorage.getItem(AVATAR_MAP_KEY) || '{}') || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveAvatarMap(map) {
+            localStorage.setItem(AVATAR_MAP_KEY, JSON.stringify(map || {}));
+        }
+
+        function rememberAvatarForCodeName(codeName, avatarSeed) {
+            const normalized = (codeName || '').trim().toLowerCase();
+            const seed = Number(avatarSeed);
+            if (!normalized || !Number.isFinite(seed)) return;
+            const map = loadAvatarMap();
+            map[normalized] = seed;
+            saveAvatarMap(map);
+        }
+
+        function getRememberedAvatarForCodeName(codeName) {
+            const normalized = (codeName || '').trim().toLowerCase();
+            if (!normalized) return null;
+            const map = loadAvatarMap();
+            const seed = map[normalized];
+            return Number.isFinite(seed) ? seed : null;
+        }
+
+        function resolveUserAvatarSeed(user, fallbackCodeName) {
+            const direct =
+                user?.avatar ??
+                user?.avatar_id ??
+                user?.avatar_seed;
+
+            if (direct !== undefined && direct !== null && direct !== '') {
+                const seed = Number(direct);
+                return Number.isFinite(seed) ? seed : direct;
+            }
+
+            return getRememberedAvatarForCodeName(user?.code_name || fallbackCodeName);
+        }
+
         // Tab switching
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -446,13 +491,18 @@
 
             try {
                 const user = await api.loginAnonymousUser(pseudo, password || null);
+                const avatarSeed = resolveUserAvatarSeed(user, pseudo);
+                if (avatarSeed !== null && avatarSeed !== undefined) {
+                    rememberAvatarForCodeName(user.code_name || pseudo, avatarSeed);
+                }
                 
                 // Sauvegarder la session
                 localStorage.setItem('xalass_session', JSON.stringify({
                     user_id: user.user_id,
                     anon_uuid: user.anon_uuid,
                     code_name: user.code_name,
-                    session_hash: user.session_hash
+                    session_hash: user.session_hash,
+                    avatar: avatarSeed
                 }));
 
                 window.location.href = 'xalass-feed.html';
@@ -494,7 +544,8 @@
             submitBtn.textContent = 'Création...';
 
             try {
-                const user = await api.createAnonymousUser(pseudo, password || null);
+                rememberAvatarForCodeName(pseudo, avatar);
+                const user = await api.createAnonymousUser(pseudo, password || null, avatar);
                 
                 successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
                 successEl.classList.add('show');
@@ -515,14 +566,17 @@
             try {
                 // Créer un utilisateur démo avec un nom unique
                 const demoCodeName = 'Demo' + Date.now();
-                const user = await api.createAnonymousUser(demoCodeName, null);
+                const demoAvatar = Math.floor(Math.random() * 18) + 1;
+                rememberAvatarForCodeName(demoCodeName, demoAvatar);
+                const user = await api.createAnonymousUser(demoCodeName, null, demoAvatar);
                 
                 // Sauvegarder la session
                 localStorage.setItem('xalass_session', JSON.stringify({
                     user_id: user.user_id,
                     anon_uuid: user.anon_uuid,
                     code_name: user.code_name,
-                    session_hash: user.session_hash
+                    session_hash: user.session_hash,
+                    avatar: resolveUserAvatarSeed(user, demoCodeName) || demoAvatar
                 }));
 
                 window.location.href = 'xalass-feed.html';

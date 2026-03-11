@@ -96,6 +96,21 @@ function checkAuth(redirectToLogin = true) {
         session.user_id = session.id;
         setSession(session);
     }
+
+    // Backfill de l'avatar choisi (stocke localement) si non present dans la session.
+    if ((session.avatar === undefined || session.avatar === null || session.avatar === '') && session.code_name) {
+        try {
+            const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+            const key = String(session.code_name).trim().toLowerCase();
+            const seed = map[key];
+            if (Number.isFinite(seed)) {
+                session.avatar = seed;
+                setSession(session);
+            }
+        } catch (e) {
+            // Ignore
+        }
+    }
     return session;
 }
 

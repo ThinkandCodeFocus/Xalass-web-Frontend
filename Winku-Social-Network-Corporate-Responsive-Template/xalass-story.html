@@ -242,16 +242,33 @@ function formatTime(dateString) {
 
 // Get avatar URL
 function getAvatarUrl(seed) {
-    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed || 1}`;
+    const normalized = (seed === undefined || seed === null || seed === '') ? 1 : seed;
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(normalized))}`;
 }
 
-function resolveAuthorSeed(author) {
+function resolveAuthorSeed(author, fallbackSeed = 1) {
     const session = currentSession || JSON.parse(localStorage.getItem('xalass_session') || '{}');
-    if (author && author.user_id) return author.user_id;
-    if (author && author.code_name && session && session.code_name && author.code_name === session.code_name) {
-        return session.user_id || 1;
+    const sessionSeed = session?.avatar ?? session?.avatar_id ?? session?.avatar_seed ?? session?.user_id ?? 1;
+
+    if (author === undefined || author === null || author === '') return fallbackSeed;
+    if (typeof author === 'string' || typeof author === 'number') return author;
+    if (typeof author !== 'object') return fallbackSeed;
+
+    const authorCodeName = author.code_name || author.pseudo || null;
+    if (authorCodeName && session?.code_name && authorCodeName === session.code_name) {
+        return sessionSeed;
     }
-    return session && session.user_id ? session.user_id : 1;
+
+    const direct =
+        author.avatar ??
+        author.avatar_id ??
+        author.avatar_seed ??
+        author.user_id ??
+        author.id ??
+        author.anon_uuid ??
+        authorCodeName;
+
+    return (direct !== undefined && direct !== null && direct !== '') ? direct : fallbackSeed;
 }
 
 // Check auth
@@ -260,6 +277,19 @@ function checkAuth() {
     if (!session || !session.anon_uuid) {
         window.location.href = 'xalass-login.html';
         return null;
+    }
+    if ((session.avatar === undefined || session.avatar === null || session.avatar === '') && session.code_name) {
+        try {
+            const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+            const key = String(session.code_name).trim().toLowerCase();
+            const seed = map[key];
+            if (Number.isFinite(seed)) {
+                session.avatar = seed;
+                localStorage.setItem('xalass_session', JSON.stringify(session));
+            }
+        } catch (e) {
+            // Ignore
+        }
     }
     return session;
 }
@@ -271,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     currentSession = session;
     
     // Afficher les avatars
-    const avatarUrl = getAvatarUrl(session.user_id);
+    const avatarUrl = getAvatarUrl(session.avatar || session.user_id);
     document.querySelector('#headerAvatar img').src = avatarUrl;
     document.querySelector('#myAvatar img').src = avatarUrl;
     
@@ -312,7 +342,7 @@ async function loadStory() {
         document.getElementById('storyContent').innerHTML = `
             <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
                 <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
-                    <img src="${getAvatarUrl(resolveAuthorSeed(post.author))}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="${getAvatarUrl(resolveAuthorSeed(post.author, post.author_id || post.post_id || 1))}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
                 </figure>
                 <div class="friend-name" style="flex: 1;">
                     <ins><a href="#" style="font-size: 18px;">${post.author?.code_name || 'Anonyme'}</a></ins>
@@ -390,7 +420,7 @@ async function loadComments() {
                 <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
                     <div style="display: flex; gap: 10px;">
                         <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                            <img src="${getAvatarUrl(resolveAuthorSeed(comment.author))}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="${getAvatarUrl(resolveAuthorSeed(comment.author, comment.author_id || comment.comment_id || 1))}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <div style="flex: 1;">
                             <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
@@ -417,7 +447,7 @@ async function loadComments() {
                                             <li style="padding: 10px 0;">
                                                 <div style="display: flex; gap: 10px;">
                                                     <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                                                        <img src="${getAvatarUrl(resolveAuthorSeed(reply.author))}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                        <img src="${getAvatarUrl(resolveAuthorSeed(reply.author, reply.author_id || reply.comment_id || reply.id || 1))}" style="width: 100%; height: 100%; object-fit: cover;">
                                                     </div>
                                                     <div style="flex: 1;">
                                                         <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">

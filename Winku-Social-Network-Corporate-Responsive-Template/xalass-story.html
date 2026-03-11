@@ -5,13 +5,345 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Xalass - Détail de l'histoire" />
     <title>Xalass - Histoire</title>
-    
+
     <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16"> 
     <link rel="stylesheet" href="css/main.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/color.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/xalass.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --x-bg: #0d1117;
+            --x-card: rgba(22, 27, 34, 0.92);
+            --x-card-solid: #161b22;
+            --x-border: rgba(99, 102, 241, 0.18);
+            --x-text: #e6edf3;
+            --x-muted: #8b949e;
+            --x-accent: #6366f1;
+            --x-accent2: #8b5cf6;
+            --x-like: #f43f5e;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--x-bg);
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.10) 0%, transparent 55%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.10) 0%, transparent 55%),
+                radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 55%);
+            min-height: 100vh;
+            color: var(--x-text);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .theme-layout {
+            position: relative;
+            z-index: 1;
+            background: transparent !important;
+        }
+
+        /* Header */
+        .sticky-header {
+            background: rgba(13, 17, 23, 0.80) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--x-border) !important;
+        }
+
+        .sticky-header .menu-area {
+            background: transparent !important;
+        }
+
+        .sticky-header .logo {
+            background: linear-gradient(135deg, var(--x-accent) 0%, var(--x-accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sticky-header .form-control {
+            background: rgba(22, 27, 34, 0.75) !important;
+            border: 1px solid var(--x-border) !important;
+            color: var(--x-text) !important;
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+
+        .sticky-header .form-control::placeholder {
+            color: var(--x-muted) !important;
+        }
+
+        .user-menu a {
+            color: var(--x-text) !important;
+        }
+
+        /* Cards */
+        .central-meta {
+            background: var(--x-card) !important;
+            border: 1px solid var(--x-border) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        /* Story content */
+        #storyContent h2 {
+            color: var(--x-text) !important;
+        }
+
+        #storyContent .story-text {
+            color: var(--x-text) !important;
+        }
+
+        #storyContent .time-ago {
+            color: var(--x-muted) !important;
+        }
+
+        #storyContent .post-actions {
+            border-top: 1px solid rgba(99, 102, 241, 0.15) !important;
+        }
+
+        #storyContent .post-actions a,
+        #storyContent .post-actions button {
+            color: var(--x-muted) !important;
+        }
+
+        #storyContent .post-actions a:hover,
+        #storyContent .post-actions button:hover {
+            color: var(--x-text) !important;
+        }
+
+        #storyContent .post-actions a.like.liked {
+            color: var(--x-like) !important;
+        }
+
+        /* Comment form */
+        #commentsCount {
+            color: var(--x-muted) !important;
+        }
+
+        #commentText,
+        #replyText {
+            background: rgba(13, 17, 23, 0.60) !important;
+            border: 1px solid var(--x-border) !important;
+            color: var(--x-text) !important;
+        }
+
+        #commentText::placeholder,
+        #replyText::placeholder {
+            color: var(--x-muted) !important;
+        }
+
+        /* Comments */
+        .comment-item {
+            padding: 14px 0 !important;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.12) !important;
+        }
+
+        /* Legacy comment markup (inline styles) */
+        #commentsList div[style*="background: #f8f9fa"] {
+            background: rgba(99, 102, 241, 0.08) !important;
+            border: 1px solid rgba(99, 102, 241, 0.16) !important;
+        }
+
+        #commentsList div[style*="background: #f0f0f0"] {
+            background: rgba(139, 92, 246, 0.08) !important;
+            border: 1px solid rgba(139, 92, 246, 0.16) !important;
+        }
+
+        #commentsList p[style*="color: #333"] {
+            color: var(--x-text) !important;
+        }
+
+        #commentsList .comment-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        #commentsList .comment-actions a {
+            color: var(--x-muted) !important;
+            text-decoration: none;
+        }
+
+        #commentsList .comment-actions a:hover {
+            color: var(--x-text) !important;
+        }
+
+        #commentsList .comment-actions a.liked {
+            color: var(--x-like) !important;
+        }
+
+        .xalass-comment-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .xalass-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .xalass-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .xalass-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .xalass-bubble {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.16);
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .xalass-author {
+            color: #a78bfa;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .xalass-time {
+            color: var(--x-muted);
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .xalass-text {
+            margin: 8px 0 0;
+            color: var(--x-text);
+        }
+
+        .xalass-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .xalass-actions a {
+            color: var(--x-muted);
+            text-decoration: none;
+        }
+
+        .xalass-actions a:hover {
+            color: var(--x-text);
+        }
+
+        .xalass-actions a.liked {
+            color: var(--x-like);
+        }
+
+        .replies-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0 0;
+        }
+
+        .replies-list .reply-item {
+            padding: 10px 0 0;
+        }
+
+        .replies-list .xalass-avatar {
+            width: 30px;
+            height: 30px;
+        }
+
+        .replies-list .xalass-bubble {
+            background: rgba(139, 92, 246, 0.08);
+            border-color: rgba(139, 92, 246, 0.16);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .replies-list .xalass-author {
+            color: #c4b5fd;
+            font-size: 13px;
+        }
+
+        .xalass-more-wrap {
+            display: flex;
+            justify-content: center;
+            padding-top: 12px;
+        }
+
+        .xalass-more-btn {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid var(--x-border);
+            color: var(--x-text);
+            padding: 10px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .xalass-more-btn:hover {
+            background: rgba(99, 102, 241, 0.18);
+        }
+
+        /* Modals */
+        #replyModal > div,
+        #reportModal > div {
+            background: var(--x-card-solid) !important;
+            border: 1px solid var(--x-border) !important;
+            color: var(--x-text) !important;
+        }
+
+        #replyModal h5,
+        #reportModal h5,
+        #reportModal span {
+            color: var(--x-text) !important;
+        }
+
+        #reportModal p {
+            color: var(--x-muted) !important;
+        }
+
+        #replyModal button:not(.mtr-btn),
+        #reportModal button[onclick="closeReportModal()"] {
+            background: rgba(99, 102, 241, 0.12) !important;
+            color: var(--x-text) !important;
+            border: 1px solid var(--x-border) !important;
+        }
+
+        /* Bottom nav */
+        nav.d-md-none {
+            background: rgba(13, 17, 23, 0.92) !important;
+            border-top: 1px solid var(--x-border) !important;
+        }
+
+        nav.d-md-none a,
+        nav.d-md-none small {
+            color: var(--x-muted) !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -59,19 +391,19 @@
                     <a href="xalass-feed.html" style="display: inline-block; margin-bottom: 20px; color: #667eea;">
                         <i class="fa fa-arrow-left"></i> Retour au fil
                     </a>
-                    
+
                     <!-- Contenu de l'histoire -->
                     <div id="storyContent" class="central-meta" style="background: #fff; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                         <!-- Chargé dynamiquement -->
                     </div>
-                    
+
                     <!-- Section commentaires -->
                     <div class="central-meta" style="background: #fff; border-radius: 8px; padding: 25px; margin-top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                         <h4 style="margin-bottom: 20px;">
                             <i class="fa fa-comments"></i> Commentaires 
                             <span id="commentsCount" style="color: #999; font-size: 14px;"></span>
                         </h4>
-                        
+
                         <!-- Formulaire de commentaire -->
                         <form id="commentForm" style="margin-bottom: 25px;">
                             <div style="display: flex; gap: 10px;">
@@ -86,7 +418,7 @@
                                 </div>
                             </div>
                         </form>
-                        
+
                         <!-- Liste des commentaires -->
                         <div id="commentsList">
                             <!-- Chargé dynamiquement -->
@@ -96,7 +428,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Modal de réponse -->
     <div id="replyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: #fff; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; margin: auto;">
@@ -112,13 +444,13 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de signalement -->
     <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: #fff; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; margin: auto;">
             <h5 style="margin-bottom: 15px;"><i class="fa fa-flag" style="color: #e91e63;"></i> Signaler cette histoire</h5>
             <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Pourquoi signalez-vous ce contenu ?</p>
-            
+
             <div class="report-options">
                 <label class="report-option">
                     <input type="radio" name="reportReason" value="inappropriate">
@@ -141,7 +473,7 @@
                     <span>Autre raison</span>
                 </label>
             </div>
-            
+
             <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
                 <button onclick="closeReportModal()" style="padding: 8px 20px; border: none; background: #eee; border-radius: 20px; cursor: pointer;">
                     Annuler
@@ -152,7 +484,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Bottom Navigation Mobile -->
     <nav class="d-md-none" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000;">
         <div class="container">
@@ -195,6 +527,7 @@ let currentStoryId = null;
 let currentCommentId = null;
 let currentPost = null;
 let currentSession = null;
+let moreCommentsExpanded = false;
 
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -273,7 +606,8 @@ function resolveAuthorSeed(author, fallbackSeed = 1) {
 
 // Check auth
 function checkAuth() {
-    const session = JSON.parse(localStorage.getItem('xalass_session'));
+    // Session is available via currentSession; kept localStorage access out of hot path.
+    const session = JSON.parse(localStorage.getItem('xalass_session') || '{}');
     if (!session || !session.anon_uuid) {
         window.location.href = 'xalass-login.html';
         return null;
@@ -299,24 +633,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     const session = checkAuth();
     if (!session) return;
     currentSession = session;
-    
+
     // Afficher les avatars
     const avatarUrl = getAvatarUrl(session.avatar || session.user_id);
     document.querySelector('#headerAvatar img').src = avatarUrl;
     document.querySelector('#myAvatar img').src = avatarUrl;
-    
+
     // Récupérer l'ID de l'histoire
     const urlParams = new URLSearchParams(window.location.search);
     currentStoryId = urlParams.get('id');
-    
+
     if (!currentStoryId) {
         window.location.href = 'xalass-feed.html';
         return;
     }
-    
+
     // Charger l'histoire
     await loadStory();
-    
+
     // Mettre à jour le badge de notifications
     await updateNotifBadge();
 });
@@ -325,11 +659,11 @@ async function loadStory() {
     try {
         const post = await api.getPostById(currentStoryId);
         currentPost = post;
-        
+
         const session = JSON.parse(localStorage.getItem('xalass_session'));
         const isLiked = post.user_liked || false;
         const isOwner = post.author_id === session.user_id;
-    
+
         const categoryLabels = {
             'amour': 'Amour',
             'amitie': 'Amitié',
@@ -338,7 +672,7 @@ async function loadStory() {
             'social': 'Social',
             'autre': 'Autre'
         };
-        
+
         document.getElementById('storyContent').innerHTML = `
             <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
                 <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
@@ -349,28 +683,28 @@ async function loadStory() {
                     <span class="time-ago" style="display: block; margin-top: 3px;">${formatTime(post.created_at)}</span>
                 </div>
             </div>
-            
+
             <div style="margin-bottom: 15px;">
                 <span class="category-badge category-${post.category}">${categoryLabels[post.category] || 'Autre'}</span>
                 ${post.status === 'EN COURS' ? '<span class="asuivre-badge">📖 À suivre</span>' : ''}
             </div>
-            
+
             <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 15px; color: #1f2937;">${post.title}</h2>
-            
+
             <div class="story-text" style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap; margin-bottom: 25px;">
                 ${post.content}
             </div>
-            
+
             <div class="post-actions" style="display: flex; align-items: center; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; gap: 15px;">
                 <a href="#" onclick="handleLike(); return false;" class="like ${isLiked ? 'liked' : ''}" id="likeBtn" style="font-size: 16px;">
                     <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
                     <span id="likeCount">${post.reactions_count || 0}</span> J'aime
                 </a>
-                
+
                 <button onclick="shareStory('${post.post_id}', '${post.title}')" class="share-btn">
                     <i class="fa fa-share-alt"></i> Partager
                 </button>
-                
+
                 ${!isOwner ? `
                     <a href="#" onclick="openReportModal(); return false;" style="color: #999; font-size: 14px; margin-left: auto;">
                         <i class="fa fa-flag"></i> Signaler
@@ -378,7 +712,7 @@ async function loadStory() {
                 ` : ''}
             </div>
         `;
-        
+
         // Charger les commentaires
         await loadComments();
     } catch (error) {
@@ -395,27 +729,93 @@ async function loadStory() {
     }
 }
 
+function getReactionCount(entity) {
+    if (!entity) return 0;
+    const direct = Number(entity.reactions_count ?? entity.reaction_count);
+    if (Number.isFinite(direct)) return direct;
+    if (Array.isArray(entity.reactions)) return entity.reactions.length;
+    if (Array.isArray(entity.likes)) return entity.likes.length;
+    return 0;
+}
+
+function applyCommentsCollapse(container) {
+    const items = Array.from(container.querySelectorAll('.comment-item'));
+    if (items.length <= 1) {
+        moreCommentsExpanded = false;
+        return;
+    }
+
+    const restCount = items.length - 1;
+    items.slice(1).forEach(item => {
+        item.style.display = moreCommentsExpanded ? '' : 'none';
+    });
+
+    const wrap = document.createElement('div');
+    wrap.className = 'xalass-more-wrap';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'xalass-more-btn';
+    btn.id = 'toggleMoreCommentsBtn';
+    btn.dataset.restCount = String(restCount);
+    btn.textContent = moreCommentsExpanded ? 'Masquer' : `Voir plus (${restCount})`;
+    btn.setAttribute('aria-expanded', moreCommentsExpanded ? 'true' : 'false');
+    btn.setAttribute('aria-controls', 'commentsList');
+    btn.addEventListener('click', toggleMoreComments);
+
+    wrap.appendChild(btn);
+    container.appendChild(wrap);
+}
+
+function toggleMoreComments() {
+    moreCommentsExpanded = !moreCommentsExpanded;
+
+    const container = document.getElementById('commentsList');
+    const btn = document.getElementById('toggleMoreCommentsBtn');
+    if (!container || !btn) return;
+
+    const items = Array.from(container.querySelectorAll('.comment-item'));
+    const restCount = Number(btn.dataset.restCount || Math.max(0, items.length - 1));
+
+    items.slice(1).forEach(item => {
+        item.style.display = moreCommentsExpanded ? '' : 'none';
+    });
+
+    btn.textContent = moreCommentsExpanded ? 'Masquer' : `Voir plus (${restCount})`;
+    btn.setAttribute('aria-expanded', moreCommentsExpanded ? 'true' : 'false');
+}
+
 async function loadComments() {
     const container = document.getElementById('commentsList');
-    const session = JSON.parse(localStorage.getItem('xalass_session'));
-    
+    const session = JSON.parse(localStorage.getItem('xalass_session') || '{}');
+
     try {
         const comments = await api.getCommentsByPost(currentStoryId);
-        
-        document.getElementById('commentsCount').textContent = `(${comments.length})`;
-        
-        if (!comments || comments.length === 0) {
+        const list = Array.isArray(comments) ? comments : [];
+
+        document.getElementById('commentsCount').textContent = `(${list.length})`;
+
+        if (list.length === 0) {
             container.innerHTML = `
-                <p style="color: #999; text-align: center; padding: 20px;">
+                <p style="color: #8b949e; text-align: center; padding: 20px;">
                     Aucun commentaire pour le moment. Soyez le premier à réagir !
                 </p>
             `;
+            moreCommentsExpanded = false;
             return;
         }
-        
-        container.innerHTML = comments.map(comment => {
+
+        const sorted = list.slice().sort((a, b) => {
+            const diff = getReactionCount(b) - getReactionCount(a);
+            if (diff !== 0) return diff;
+            const da = new Date(a?.created_at || 0).getTime();
+            const db = new Date(b?.created_at || 0).getTime();
+            return (Number.isFinite(db) ? db : 0) - (Number.isFinite(da) ? da : 0);
+        });
+
+        container.innerHTML = sorted.map(comment => {
             const isCommentLiked = comment.user_liked || false;
-            
+
             return `
                 <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
                     <div style="display: flex; gap: 10px;">
@@ -428,17 +828,17 @@ async function loadComments() {
                                 <span style="color: #999; font-size: 11px; margin-left: 10px;">${formatTime(comment.created_at)}</span>
                                 <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
                             </div>
-                            
+
                             <div class="comment-actions">
                                 <a href="#" onclick="handleCommentLike('${comment.comment_id}'); return false;" class="${isCommentLiked ? 'liked' : ''}" data-comment="${comment.comment_id}">
                                     <i class="fa ${isCommentLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
-                                    <span class="comment-like-count">${comment.reactions_count || 0}</span>
+                                    <span class="comment-like-count">${getReactionCount(comment)}</span>
                                 </a>
                                 <a href="#" onclick="openReplyModal('${comment.comment_id}'); return false;">
                                     <i class="fa fa-reply"></i> Répondre
                                 </a>
                             </div>
-                            
+
                             ${comment.replies && comment.replies.length > 0 ? `
                                 <ul class="replies-list">
                                     ${comment.replies.map(reply => {
@@ -458,7 +858,7 @@ async function loadComments() {
                                                         <div class="comment-actions" style="font-size: 12px;">
                                                             <a href="#" onclick="handleReplyLike('${reply.comment_id}'); return false;" class="${isReplyLiked ? 'liked' : ''}" data-reply="${reply.comment_id}">
                                                                 <i class="fa ${isReplyLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
-                                                                <span class="reply-like-count">${reply.reactions_count || 0}</span>
+                                                                <span class="reply-like-count">${getReactionCount(reply)}</span>
                                                             </a>
                                                         </div>
                                                     </div>
@@ -473,10 +873,11 @@ async function loadComments() {
                 </div>
             `;
         }).join('');
+        applyCommentsCollapse(container);
     } catch (error) {
         console.error('Erreur lors du chargement des commentaires:', error);
         container.innerHTML = `
-            <p style="color: #999; text-align: center; padding: 20px;">
+            <p style="color: #8b949e; text-align: center; padding: 20px;">
                 Erreur lors du chargement des commentaires.
             </p>
         `;
@@ -516,19 +917,19 @@ async function handleReplyLike(replyId) {
 // Formulaire de commentaire
 document.getElementById('commentForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const content = document.getElementById('commentText').value.trim();
-    
+
     if (!content) {
         showToast('Veuillez écrire un commentaire', 'error');
         return;
     }
-    
+
     const btn = e.target.querySelector('button[type="submit"]');
     const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Publication...';
-    
+
     try {
         await api.createComment(currentStoryId, content);
         document.getElementById('commentText').value = '';
@@ -557,12 +958,12 @@ function closeReplyModal() {
 
 async function submitReply() {
     const content = document.getElementById('replyText').value.trim();
-    
+
     if (!content) {
         showToast('Veuillez écrire une réponse', 'error');
         return;
     }
-    
+
     try {
         await api.createComment(currentStoryId, content, currentCommentId);
         closeReplyModal();
@@ -585,12 +986,12 @@ function closeReportModal() {
 
 async function submitReportForm() {
     const reason = document.querySelector('input[name="reportReason"]:checked');
-    
+
     if (!reason) {
         showToast('Veuillez sélectionner une raison', 'error');
         return;
     }
-    
+
     try {
         await api.reportPost(currentStoryId, reason.value);
         closeReportModal();
@@ -605,7 +1006,7 @@ async function updateNotifBadge() {
         const notifications = await api.getNotifications();
         const unreadCount = notifications.filter(n => !n.read).length;
         const badge = document.getElementById('notifBadge');
-        
+
         if (unreadCount > 0) {
             badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
             badge.style.display = 'block';
@@ -619,7 +1020,7 @@ async function updateNotifBadge() {
 
 function shareStory(postId, title) {
     const url = window.location.origin + window.location.pathname.replace('xalass-story.html', '') + 'xalass-story.html?id=' + postId;
-    
+
     if (navigator.share) {
         navigator.share({
             title: title,
@@ -650,4 +1051,3 @@ document.getElementById('reportModal').addEventListener('click', function(e) {
 
 </body>
 </html>
-

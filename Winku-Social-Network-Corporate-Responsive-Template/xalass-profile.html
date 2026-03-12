@@ -181,6 +181,12 @@
             margin-bottom: 8px;
         }
 
+        .profile-followers {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 8px;
+        }
+
         .profile-date {
             font-size: 13px;
             color: #8b949e;
@@ -497,6 +503,11 @@
             .stat-label {
                 font-size: 10px;
             }
+
+            .profile-followers {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
         }
     </style>
 </head>
@@ -514,6 +525,14 @@
                 <a href="xalass-search.html" class="nav-link">
                     <i class="fa fa-search"></i>
                     Recherche
+                </a>
+                <a href="xalass-friends.html" class="nav-link">
+                    <i class="fa fa-users"></i>
+                    Mes amis
+                </a>
+                <a href="xalass-notifications.html" class="nav-link">
+                    <i class="fa fa-bell"></i>
+                    Notifications
                 </a>
                 <a href="xalass-profile.html" class="nav-link active">
                     <i class="fa fa-user"></i>
@@ -536,6 +555,7 @@
                         <img id="profileAvatar" class="profile-avatar" src="" alt="Avatar">
                     </div>
                     <h2 id="profileName" class="profile-name">Utilisateur</h2>
+                    <p id="profileFollowers" class="profile-followers">0 Followers</p>
                     <p id="profileDate" class="profile-date">Ton nom d'utilisateur n'est visible que par toi.</p>
                 </div>
 
@@ -737,6 +757,10 @@
             document.getElementById('headerAvatar').src = getAvatarUrl(avatarSeed);
             document.getElementById('profileAvatar').src = getAvatarUrl(avatarSeed);
             document.getElementById('profileName').textContent = session.code_name || session.pseudo || 'Utilisateur';
+
+            const followersCount = session.user_id ? api.getFollowersCountLocal(session.user_id) : 0;
+            const followersText = document.getElementById('profileFollowers');
+            if (followersText) followersText.textContent = `${followersCount} Followers`;
             
             loadMyStories();
         });

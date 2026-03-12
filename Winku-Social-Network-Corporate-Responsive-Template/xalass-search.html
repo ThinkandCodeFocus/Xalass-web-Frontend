@@ -275,6 +275,36 @@
             color: #8b949e;
         }
 
+        .btn-follow {
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.08);
+            color: #c9d1d9;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-follow:hover {
+            background: rgba(99, 102, 241, 0.14);
+            border-color: rgba(99, 102, 241, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .btn-follow.is-following {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.45);
+            color: #34d399;
+        }
+
+        .btn-follow.is-following:hover {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.65);
+        }
+
         .post-badges {
             display: flex;
             gap: 8px;
@@ -468,6 +498,14 @@
                     <i class="fa fa-search"></i>
                     Recherche
                 </a>
+                <a href="xalass-friends.html" class="nav-link">
+                    <i class="fa fa-users"></i>
+                    Mes amis
+                </a>
+                <a href="xalass-notifications.html" class="nav-link">
+                    <i class="fa fa-bell"></i>
+                    Notifications
+                </a>
                 <a href="xalass-profile.html" class="nav-link">
                     <i class="fa fa-user"></i>
                     Profil
@@ -524,6 +562,7 @@
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script>
+        let session = null;
         let currentFilter = 'all';
         let currentQuery = '';
         let searchTimeout;
@@ -565,7 +604,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Vérifier l'authentification
-            const session = checkAuth();
+            session = checkAuth();
             if (!session) return;
             
             // Afficher l'avatar
@@ -591,6 +630,23 @@
                 searchTimeout = setTimeout(() => {
                     performSearch();
                 }, 300);
+            });
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-follow');
+                if (!btn) return;
+
+                const authorId = btn.dataset.followAuthorId;
+                if (!authorId) return;
+
+                const isFollowing = api.toggleFollowLocal({ author_id: authorId }, session);
+
+                resultsContainer.querySelectorAll('.btn-follow').forEach(b => {
+                    if (b.dataset.followAuthorId !== authorId) return;
+                    b.classList.toggle('is-following', isFollowing);
+                    b.textContent = isFollowing ? 'Abonne' : 'Suivre';
+                });
             });
         });
 
@@ -682,6 +738,9 @@
                 const author = post.author || {};
                 const authorPseudo = author.code_name || 'Anonyme';
                 const authorAvatar = author.avatar || author.avatar_id || author.avatar_seed || author.user_id || author.code_name || 1;
+                const authorId = post.author_id || author.user_id || author.id;
+                const isOwner = session && authorId && String(authorId) === String(session.user_id);
+                const isFollowing = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
                 const createdAt = post.created_at || post.createdAt;
                 const isAsuivre = post.status === 'EN COURS';
                 
@@ -711,6 +770,11 @@
                                 <div class="post-author-name">${authorPseudo}</div>
                                 <div class="post-time">${timeAgo(createdAt)}</div>
                             </div>
+                            ${!isOwner && authorId ? `
+                                <button class="btn-follow ${isFollowing ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">
+                                    ${isFollowing ? 'Abonne' : 'Suivre'}
+                                </button>
+                            ` : ''}
                         </div>
                         
                         <div class="post-badges">

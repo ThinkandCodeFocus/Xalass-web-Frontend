@@ -607,6 +607,37 @@
             margin-left: 6px;
         }
 
+        .follow-btn {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.08);
+            color: #c9d1d9;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        .follow-btn:hover {
+            background: rgba(99, 102, 241, 0.14);
+            border-color: rgba(99, 102, 241, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .follow-btn.is-following {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.45);
+            color: #34d399;
+        }
+
+        .follow-btn.is-following:hover {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.65);
+        }
+
         .story-title {
             font-size: 18px;
             font-weight: 700;
@@ -1068,6 +1099,7 @@
             <nav class="nav">
                 <a href="xalass-feed.html" class="nav-link active">📖 Histoires</a>
                 <a href="xalass-search.html" class="nav-link">🔍 Rechercher</a>
+                <a href="xalass-friends.html" class="nav-link">👥 Mes amis</a>
                 <a href="xalass-notifications.html" class="nav-link">🔔 Notifications</a>
                 <a href="xalass-profile.html" class="nav-link">👤 Profil</a>
             </nav>
@@ -1083,6 +1115,7 @@
         <div class="mobile-nav-links">
             <a href="xalass-feed.html" class="mobile-nav-link active" onclick="closeMobileNav()">📖 Histoires</a>
             <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">🔍 Rechercher</a>
+            <a href="xalass-friends.html" class="mobile-nav-link" onclick="closeMobileNav()">👥 Mes amis</a>
             <a href="xalass-notifications.html" class="mobile-nav-link" onclick="closeMobileNav()">🔔 Notifications</a>
             <a href="xalass-profile.html" class="mobile-nav-link" onclick="closeMobileNav()">👤 Profil</a>
         </div>
@@ -1259,6 +1292,10 @@
                 window.location.href = 'xalass-login.html';
                 return false;
             }
+            if (!session.user_id && session.id) {
+                session.user_id = session.id;
+                localStorage.setItem('xalass_session', JSON.stringify(session));
+            }
             if ((session.avatar === undefined || session.avatar === null || session.avatar === '') && session.code_name) {
                 try {
                     const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
@@ -1353,7 +1390,7 @@
             if (totalEl) totalEl.textContent = allPosts.length;
 
             // Mes posts
-            const myPosts = allPosts.filter(p => p.author_id === session.user_id);
+            const myPosts = allPosts.filter(p => session.user_id && p.author_id && String(p.author_id) === String(session.user_id));
             const myPostsEl = document.getElementById('my-posts');
             if (myPostsEl) myPostsEl.textContent = myPosts.length;
 
@@ -1409,6 +1446,12 @@
                 const isFollowing = story.status === 'EN COURS';
                 const reactionsCount = getCount(story.reactions_count, story.reactions);
                 const commentsCount = getCount(story.comments_count, story.comments);
+                const authorId = story.author_id || story.author?.user_id || story.author?.id;
+                const isOwner = session && authorId && String(authorId) === String(session.user_id);
+                const isFollowingAuthor = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
+                const followBtn = (!isOwner && authorId)
+                    ? `<button class="follow-btn ${isFollowingAuthor ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">${isFollowingAuthor ? 'Abonne' : 'Suivre'}</button>`
+                    : '';
                 
                 return `
                     <article class="story-card">
@@ -1420,6 +1463,7 @@
                             </div>
                             <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
                             ${isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
+                            ${followBtn}
                         </div>
                         <h2 class="story-title">
                             <a href="xalass-story.html?id=${story.post_id}">${story.title}</a>
@@ -1733,6 +1777,24 @@
             const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}`;
             document.getElementById('user-avatar').src = avatarUrl;
             document.getElementById('publish-avatar').src = avatarUrl;
+
+            const feed = document.getElementById('stories-feed');
+            feed.addEventListener('click', function(e) {
+                const btn = e.target.closest('.follow-btn');
+                if (!btn) return;
+
+                const authorId = btn.dataset.followAuthorId;
+                if (!authorId) return;
+
+                const isFollowing = api.toggleFollowLocal({ author_id: authorId }, session);
+
+                feed.querySelectorAll('.follow-btn').forEach(b => {
+                    if (b.dataset.followAuthorId !== authorId) return;
+                    b.classList.toggle('is-following', isFollowing);
+                    b.textContent = isFollowing ? 'Abonne' : 'Suivre';
+                });
+                showToast(isFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+            });
             
             // Charger les posts (avec cache)
             await loadPosts();

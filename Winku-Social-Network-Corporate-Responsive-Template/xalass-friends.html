@@ -495,7 +495,7 @@
             container.innerHTML = posts.map(post => {
                 const postId = post.post_id || post.id;
                 const author = post.author || {};
-                const authorPseudo = author.code_name || 'Anonyme';
+                const authorPseudo = 'Anonyme';
                 const authorAvatar = author.avatar || author.avatar_id || author.avatar_seed || author.user_id || author.code_name || 1;
                 const createdAt = post.created_at || post.createdAt;
                 const isAsuivre = post.status === 'EN COURS';

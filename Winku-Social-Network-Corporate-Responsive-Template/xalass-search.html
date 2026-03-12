@@ -736,7 +736,7 @@
                 const postId = post.post_id || post.id;
                 const isLiked = post.user_liked || false;
                 const author = post.author || {};
-                const authorPseudo = author.code_name || 'Anonyme';
+                const authorPseudo = 'Anonyme';
                 const authorAvatar = author.avatar || author.avatar_id || author.avatar_seed || author.user_id || author.code_name || 1;
                 const authorId = post.author_id || author.user_id || author.id;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);

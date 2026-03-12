@@ -1458,7 +1458,7 @@
                         <div class="story-header">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(story.author?.avatar || story.author?.avatar_id || story.author?.avatar_seed || story.author?.user_id || story.author?.code_name || 1))}" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
-                                <div class="story-author">${story.author?.code_name || 'Anonyme'}</div>
+                                <div class="story-author">Anonyme</div>
                                 <div class="story-time">${formatTime(story.created_at)}</div>
                             </div>
                             <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>

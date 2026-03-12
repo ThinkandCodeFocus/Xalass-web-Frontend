@@ -9,6 +9,7 @@ class XalassAPI {
         this.headers = { ...API_CONFIG.DEFAULT_HEADERS };
         this.sessionStorageKey = API_CONFIG.SESSION_STORAGE_KEY || 'xalass_session';
         this.timeoutMs = API_CONFIG.REQUEST_TIMEOUT_MS || 45000;
+        this.followMapStorageKey = 'xalass_follow_map_v1';
     }
 
     getSession() {
@@ -359,6 +360,173 @@ class XalassAPI {
         return await this.request(`/notifications/${notificationId}`, {
             method: 'DELETE'
         });
+    }
+
+    // ========== ABONNEMENTS (LOCAL STORAGE) ==========
+
+    getFollowerKey(session = null) {
+        const s = session || this.getSession() || {};
+        const key = s.user_id || s.id || s.anon_uuid || s.code_name;
+        return key !== undefined && key !== null && String(key).trim() ? String(key) : null;
+    }
+
+    readFollowMap() {
+        try {
+            const raw = localStorage.getItem(this.followMapStorageKey);
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+            return parsed;
+        } catch (e) {
+            return {};
+        }
+    }
+
+    writeFollowMap(map) {
+        try {
+            localStorage.setItem(this.followMapStorageKey, JSON.stringify(map || {}));
+        } catch (e) {
+            // Ignore (quota / disabled storage)
+        }
+    }
+
+    normalizeAuthorId(authorId) {
+        if (authorId === undefined || authorId === null) return null;
+        const str = String(authorId).trim();
+        return str ? str : null;
+    }
+
+    getFollowingLocal(session = null) {
+        const followerKey = this.getFollowerKey(session);
+        if (!followerKey) return [];
+
+        const map = this.readFollowMap();
+        const value = map[followerKey];
+        if (!Array.isArray(value)) return [];
+
+        // Support legacy formats (array of ids) + current (array of objects).
+        return value
+            .map(item => {
+                if (item && typeof item === 'object') {
+                    const id = this.normalizeAuthorId(item.author_id ?? item.user_id ?? item.id);
+                    if (!id) return null;
+                    return {
+                        author_id: id,
+                        code_name: item.code_name ?? item.pseudo ?? null,
+                        avatar_seed: item.avatar_seed ?? item.avatar ?? item.avatar_id ?? null
+                    };
+                }
+                const id = this.normalizeAuthorId(item);
+                if (!id) return null;
+                return { author_id: id, code_name: null, avatar_seed: null };
+            })
+            .filter(Boolean);
+    }
+
+    getFollowingIdsLocal(session = null) {
+        return this.getFollowingLocal(session).map(t => String(t.author_id));
+    }
+
+    isFollowingLocal(authorId, session = null) {
+        const id = this.normalizeAuthorId(authorId);
+        if (!id) return false;
+        const ids = this.getFollowingIdsLocal(session);
+        return ids.includes(id);
+    }
+
+    followLocal(target, session = null) {
+        const followerKey = this.getFollowerKey(session);
+        if (!followerKey) return false;
+
+        const targetId = this.normalizeAuthorId(
+            target && typeof target === 'object' ? (target.author_id ?? target.user_id ?? target.id) : target
+        );
+        if (!targetId) return false;
+
+        const s = session || this.getSession() || {};
+        const selfId = this.normalizeAuthorId(s.user_id ?? s.id);
+        if (selfId && selfId === targetId) return false;
+
+        const map = this.readFollowMap();
+        const list = Array.isArray(map[followerKey]) ? map[followerKey] : [];
+
+        // If already following, no-op.
+        const exists = list.some(item => {
+            if (item && typeof item === 'object') {
+                return this.normalizeAuthorId(item.author_id ?? item.user_id ?? item.id) === targetId;
+            }
+            return this.normalizeAuthorId(item) === targetId;
+        });
+        if (exists) return true;
+
+        const normalizedTarget = target && typeof target === 'object'
+            ? {
+                author_id: targetId,
+                code_name: target.code_name ?? target.pseudo ?? null,
+                avatar_seed: target.avatar_seed ?? target.avatar ?? target.avatar_id ?? null
+            }
+            : { author_id: targetId, code_name: null, avatar_seed: null };
+
+        map[followerKey] = [...list, normalizedTarget];
+        this.writeFollowMap(map);
+        return true;
+    }
+
+    unfollowLocal(authorId, session = null) {
+        const followerKey = this.getFollowerKey(session);
+        if (!followerKey) return false;
+
+        const targetId = this.normalizeAuthorId(authorId);
+        if (!targetId) return false;
+
+        const map = this.readFollowMap();
+        const list = Array.isArray(map[followerKey]) ? map[followerKey] : [];
+
+        const next = list.filter(item => {
+            if (item && typeof item === 'object') {
+                return this.normalizeAuthorId(item.author_id ?? item.user_id ?? item.id) !== targetId;
+            }
+            return this.normalizeAuthorId(item) !== targetId;
+        });
+
+        map[followerKey] = next;
+        this.writeFollowMap(map);
+        return true;
+    }
+
+    toggleFollowLocal(target, session = null) {
+        const targetId = this.normalizeAuthorId(
+            target && typeof target === 'object' ? (target.author_id ?? target.user_id ?? target.id) : target
+        );
+        if (!targetId) return false;
+
+        if (this.isFollowingLocal(targetId, session)) {
+            this.unfollowLocal(targetId, session);
+            return false;
+        }
+
+        this.followLocal(target, session);
+        return true;
+    }
+
+    getFollowersCountLocal(authorId) {
+        const targetId = this.normalizeAuthorId(authorId);
+        if (!targetId) return 0;
+
+        const map = this.readFollowMap();
+        let count = 0;
+
+        for (const followerKey of Object.keys(map)) {
+            const list = Array.isArray(map[followerKey]) ? map[followerKey] : [];
+            const isFollower = list.some(item => {
+                if (item && typeof item === 'object') {
+                    return this.normalizeAuthorId(item.author_id ?? item.user_id ?? item.id) === targetId;
+                }
+                return this.normalizeAuthorId(item) === targetId;
+            });
+            if (isFollower) count += 1;
+        }
+
+        return count;
     }
 
     async getAvatars() {

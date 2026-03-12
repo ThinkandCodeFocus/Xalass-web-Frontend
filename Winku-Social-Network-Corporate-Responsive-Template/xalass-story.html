@@ -732,10 +732,10 @@ async function loadStory() {
         document.getElementById('storyContent').innerHTML = `
              <div class="friend-info" style="display: flex; align-items: center; margin-bottom: 20px;">
                  <figure style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; margin-right: 15px; flex-shrink: 0;">
-                     <img src="${getAvatarUrl(resolveAuthorSeed(post.author, post.author_id || post.post_id || 1))}" alt="${post.author?.code_name || 'Anonyme'}" style="width: 100%; height: 100%; object-fit: cover;">
+                     <img src="${getAvatarUrl(resolveAuthorSeed(post.author, post.author_id || post.post_id || 1))}" alt="Anonyme" style="width: 100%; height: 100%; object-fit: cover;">
                  </figure>
                  <div class="friend-name" style="flex: 1;">
-                     <ins><a href="#" style="font-size: 18px;">${post.author?.code_name || 'Anonyme'}</a></ins>
+                     <ins><a href="#" style="font-size: 18px;">Anonyme</a></ins>
                      <span class="time-ago" style="display: block; margin-top: 3px;">${formatTime(post.created_at)}</span>
                  </div>
                  ${followBtn}
@@ -881,7 +881,7 @@ async function loadComments() {
                         </div>
                         <div style="flex: 1;">
                             <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
-                                <strong style="color: #667eea;">${comment.author?.code_name || 'Anonyme'}</strong>
+                                <strong style="color: #667eea;">Anonyme</strong>
                                 <span style="color: #999; font-size: 11px; margin-left: 10px;">${formatTime(comment.created_at)}</span>
                                 <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
                             </div>
@@ -908,7 +908,7 @@ async function loadComments() {
                                                     </div>
                                                     <div style="flex: 1;">
                                                         <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
-                                                            <strong style="color: #667eea; font-size: 13px;">${reply.author?.code_name || 'Anonyme'}</strong>
+                                                            <strong style="color: #667eea; font-size: 13px;">Anonyme</strong>
                                                             <span style="color: #999; font-size: 10px; margin-left: 8px;">${formatTime(reply.created_at)}</span>
                                                             <p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>
                                                         </div>

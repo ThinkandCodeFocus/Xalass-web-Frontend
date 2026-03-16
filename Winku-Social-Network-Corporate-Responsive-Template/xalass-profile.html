@@ -749,7 +749,7 @@
             return labels[category] || 'Autre';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const session = checkAuth();
             if (!session) return;
             
@@ -758,7 +758,7 @@
             document.getElementById('profileAvatar').src = getAvatarUrl(avatarSeed);
             document.getElementById('profileName').textContent = session.code_name || session.pseudo || 'Utilisateur';
 
-            const followersCount = session.user_id ? api.getFollowersCountLocal(session.user_id) : 0;
+            const followersCount = session.user_id ? await api.getFollowersCount(session.user_id) : 0;
             const followersText = document.getElementById('profileFollowers');
             if (followersText) followersText.textContent = `${followersCount} Followers`;
             

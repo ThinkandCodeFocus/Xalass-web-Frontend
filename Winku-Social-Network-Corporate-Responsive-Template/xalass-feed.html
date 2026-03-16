@@ -1779,23 +1779,37 @@
             document.getElementById('publish-avatar').src = avatarUrl;
 
             const feed = document.getElementById('stories-feed');
-            feed.addEventListener('click', function(e) {
+            feed.addEventListener('click', async function(e) {
                 const btn = e.target.closest('.follow-btn');
                 if (!btn) return;
 
                 const authorId = btn.dataset.followAuthorId;
                 if (!authorId) return;
 
-                const isFollowing = api.toggleFollowLocal({ author_id: authorId }, session);
-
-                feed.querySelectorAll('.follow-btn').forEach(b => {
-                    if (b.dataset.followAuthorId !== authorId) return;
-                    b.classList.toggle('is-following', isFollowing);
-                    b.textContent = isFollowing ? 'Abonne' : 'Suivre';
-                });
-                showToast(isFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+                btn.disabled = true;
+                try {
+                    const wasFollowing = api.isFollowingLocal(authorId, session);
+                    if (wasFollowing) {
+                        await api.unfollow(authorId);
+                    } else {
+                        await api.follow(authorId);
+                    }
+                    const nowFollowing = api.isFollowingLocal(authorId, session);
+                    feed.querySelectorAll('.follow-btn').forEach(b => {
+                        if (b.dataset.followAuthorId !== authorId) return;
+                        b.classList.toggle('is-following', nowFollowing);
+                        b.textContent = nowFollowing ? 'Abonne' : 'Suivre';
+                    });
+                    showToast(nowFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+                } catch (err) {
+                    showToast('Erreur réseau, réessayez.', 'error');
+                } finally {
+                    btn.disabled = false;
+                }
             });
-            
+
+            // Hydrater le cache des abonnements depuis le backend
+            await api.hydrateFollowCache(session);
             // Charger les posts (avec cache)
             await loadPosts();
             

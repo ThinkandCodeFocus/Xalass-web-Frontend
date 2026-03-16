@@ -581,32 +581,46 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             session = checkAuth();
             if (!session) return;
 
             const avatarSeed = session.avatar || session.user_id || 1;
             document.getElementById('headerAvatar').src = getAvatarUrl(avatarSeed);
 
+            // Hydrater le cache des abonnements depuis le backend
+            await api.hydrateFollowCache(session);
+
             const container = document.getElementById('resultsContainer');
-            container.addEventListener('click', function(e) {
+            container.addEventListener('click', async function(e) {
                 const btn = e.target.closest('.btn-follow');
                 if (!btn) return;
 
                 const authorId = btn.dataset.followAuthorId;
                 if (!authorId) return;
 
-                const isFollowing = api.toggleFollowLocal({ author_id: authorId }, session);
-
-                container.querySelectorAll('.btn-follow').forEach(b => {
-                    if (b.dataset.followAuthorId !== authorId) return;
-                    b.classList.toggle('is-following', isFollowing);
-                    b.textContent = isFollowing ? 'Abonne' : 'Suivre';
-                });
-
-                // Si on se desabonne, le post doit disparaitre du feed "Mes amis".
-                if (!isFollowing) {
-                    loadFriendsFeed();
+                btn.disabled = true;
+                try {
+                    const wasFollowing = api.isFollowingLocal(authorId, session);
+                    if (wasFollowing) {
+                        await api.unfollow(authorId);
+                    } else {
+                        await api.follow(authorId);
+                    }
+                    const nowFollowing = api.isFollowingLocal(authorId, session);
+                    container.querySelectorAll('.btn-follow').forEach(b => {
+                        if (b.dataset.followAuthorId !== authorId) return;
+                        b.classList.toggle('is-following', nowFollowing);
+                        b.textContent = nowFollowing ? 'Abonne' : 'Suivre';
+                    });
+                    // Si on se desabonne, le post doit disparaitre du feed "Mes amis".
+                    if (!nowFollowing) {
+                        loadFriendsFeed();
+                    }
+                } catch (err) {
+                    console.warn('Erreur follow:', err);
+                } finally {
+                    btn.disabled = false;
                 }
             });
 

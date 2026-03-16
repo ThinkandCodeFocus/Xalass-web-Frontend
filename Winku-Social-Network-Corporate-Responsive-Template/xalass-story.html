@@ -677,17 +677,30 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelector('#myAvatar img').src = avatarUrl;
 
     const storyContainer = document.getElementById('storyContent');
-    storyContainer.addEventListener('click', function(e) {
+    storyContainer.addEventListener('click', async function(e) {
         const btn = e.target.closest('.xalass-follow-btn');
         if (!btn) return;
 
         const authorId = btn.dataset.followAuthorId;
         if (!authorId) return;
 
-        const isFollowing = api.toggleFollowLocal({ author_id: authorId }, currentSession);
-        btn.classList.toggle('is-following', isFollowing);
-        btn.textContent = isFollowing ? 'Abonne' : 'Suivre';
-        showToast(isFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+        btn.disabled = true;
+        try {
+            const wasFollowing = api.isFollowingLocal(authorId, currentSession);
+            if (wasFollowing) {
+                await api.unfollow(authorId);
+            } else {
+                await api.follow(authorId);
+            }
+            const nowFollowing = api.isFollowingLocal(authorId, currentSession);
+            btn.classList.toggle('is-following', nowFollowing);
+            btn.textContent = nowFollowing ? 'Abonne' : 'Suivre';
+            showToast(nowFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+        } catch (err) {
+            showToast('Erreur réseau, réessayez.', 'error');
+        } finally {
+            btn.disabled = false;
+        }
     });
 
     // Récupérer l'ID de l'histoire
@@ -699,6 +712,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
+    // Hydrater le cache des abonnements depuis le backend
+    await api.hydrateFollowCache(currentSession);
     // Charger l'histoire
     await loadStory();
 

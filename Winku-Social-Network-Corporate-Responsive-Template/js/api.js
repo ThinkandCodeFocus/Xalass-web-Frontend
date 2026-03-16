@@ -534,6 +534,74 @@ class XalassAPI {
         return this.extractArray(response, ['avatars', 'data', 'items']);
     }
 
+    // ========== ABONNEMENTS (BACKEND) ==========
+
+    /**
+     * Follow a user via the backend API, then sync the local cache.
+     */
+    async follow(authorId) {
+        const id = this.normalizeAuthorId(authorId);
+        if (!id) throw new Error('ID auteur invalide.');
+        const data = await this.request('/follow', {
+            method: 'POST',
+            body: JSON.stringify({ followed_id: Number(id) }),
+        });
+        this.followLocal({ author_id: id }, this.getSession());
+        return data;
+    }
+
+    /**
+     * Unfollow a user via the backend API, then sync the local cache.
+     */
+    async unfollow(authorId) {
+        const id = this.normalizeAuthorId(authorId);
+        if (!id) throw new Error('ID auteur invalide.');
+        const data = await this.request('/unfollow', {
+            method: 'POST',
+            body: JSON.stringify({ followed_id: Number(id) }),
+        });
+        this.unfollowLocal(id, this.getSession());
+        return data;
+    }
+
+    /**
+     * Get the real followers count for an author from the backend.
+     * Falls back to the local count on network error.
+     */
+    async getFollowersCount(authorId) {
+        const id = this.normalizeAuthorId(authorId);
+        if (!id) return 0;
+        try {
+            const data = await this.request(`/follow/count/${id}`, { method: 'GET' });
+            return data.followers_count ?? 0;
+        } catch (e) {
+            return this.getFollowersCountLocal(id);
+        }
+    }
+
+    /**
+     * Fetch the current user's following list from the backend and overwrite
+     * the local cache entry for this session. Silent on network errors.
+     */
+    async hydrateFollowCache(session = null) {
+        try {
+            const data = await this.request('/me/following', { method: 'GET' });
+            const following = Array.isArray(data.following) ? data.following : [];
+            const s = session || this.getSession();
+            const followerKey = this.getFollowerKey(s);
+            if (!followerKey) return;
+            const map = this.readFollowMap();
+            map[followerKey] = following.map(item => ({
+                author_id: String(item.author_id),
+                code_name: item.code_name ?? null,
+                avatar_seed: null,
+            }));
+            this.writeFollowMap(map);
+        } catch (e) {
+            // Silently fallback to existing local state
+        }
+    }
+
     createEventSource(lastPostId = 0) {
         const params = new URLSearchParams({ last_post_id: String(lastPostId) });
         const anonUuid = this.getAnonUuid();

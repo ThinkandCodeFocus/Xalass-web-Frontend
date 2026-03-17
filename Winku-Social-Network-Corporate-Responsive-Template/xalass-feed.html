@@ -1418,12 +1418,110 @@
         let session = null;
         let allPosts = [];
 
+        // === Gestion des avatars stockés ===
+        const USER_AVATARS_KEY = 'xalass_user_avatars';
+
+        function loadUserAvatars() {
+            try {
+                return JSON.parse(localStorage.getItem(USER_AVATARS_KEY) || '{}') || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveUserAvatarSeed(userId, avatarSeed) {
+            if (!userId || avatarSeed === undefined || avatarSeed === null) return;
+            try {
+                const userAvatars = loadUserAvatars();
+                userAvatars[String(userId)] = Number(avatarSeed);
+                localStorage.setItem(USER_AVATARS_KEY, JSON.stringify(userAvatars));
+            } catch (e) {
+                // Ignorer les erreurs de stockage
+            }
+        }
+
+        function getRememberedAvatarForUserId(userId) {
+            if (!userId) return null;
+            const userAvatars = loadUserAvatars();
+            const seed = userAvatars[String(userId)];
+            return Number.isFinite(seed) ? seed : null;
+        }
+
         function getCount(value, fallbackArray) {
             if (typeof value === 'number' && Number.isFinite(value)) return value;
             if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
                 return Number(value);
             }
             return Array.isArray(fallbackArray) ? fallbackArray.length : 0;
+        }
+
+        function getRememberedAvatarSeedForCodeName(codeName) {
+            if (!codeName) return null;
+            try {
+                const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+                const key = String(codeName).trim().toLowerCase();
+                const seed = map[key];
+                return Number.isFinite(seed) ? seed : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function resolveAvatarSeedFromStory(story) {
+            if (!story) return 1;
+
+            const author = story.author && typeof story.author === 'object' ? story.author : null;
+            const authorId = story.author_id ?? author?.user_id ?? author?.id;
+
+            const sessionSeed =
+                session?.avatar ??
+                session?.avatar_id ??
+                session?.avatar_seed ??
+                session?.user_id ??
+                1;
+
+            // Si c'est mon post, afficher mon avatar choisi (meme si le backend ne renvoie pas l'avatar).
+            if (session?.user_id && authorId !== undefined && authorId !== null && String(authorId) === String(session.user_id)) {
+                return sessionSeed;
+            }
+
+            const authorCodeName = author?.code_name ?? author?.pseudo ?? null;
+            if (authorCodeName && session?.code_name && String(authorCodeName) === String(session.code_name)) {
+                return sessionSeed;
+            }
+
+            // Chercher d'abord l'avatar stocké localement pour cet auteur par son ID
+            if (authorId !== undefined && authorId !== null && authorId !== '') {
+                const avatarByUserId = getRememberedAvatarForUserId(authorId);
+                if (avatarByUserId !== null) {
+                    return avatarByUserId;
+                }
+            }
+
+            // Chercher ensuite les données directes de l'API
+            const direct =
+                author?.avatar ??
+                author?.avatar_id ??
+                author?.avatar_seed ??
+                author?.avatarSeed ??
+                author?.avatarId ??
+                story.author_avatar ??
+                story.author_avatar_id ??
+                story.author_avatar_seed ??
+                story.avatar ??
+                story.avatar_id ??
+                story.avatar_seed ??
+                story.avatarSeed ??
+                story.avatarId;
+
+            if (direct !== undefined && direct !== null && direct !== '') return direct;
+
+            const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
+            if (remembered !== null) return remembered;
+
+            // Utiliser l'ID de l'auteur comme seed si disponible (crée des avatars uniques et persistants)
+            if (authorId !== undefined && authorId !== null && authorId !== '') return authorId;
+            return story.post_id ?? story.id ?? 1;
         }
 
         function showToast(message, type = 'info') {
@@ -1524,6 +1622,16 @@
                 // Charger depuis l'API
                 allPosts = await api.getAllPosts();
                 
+                // Mémoriser les avatars des auteurs pour les futures lectures
+                allPosts.forEach(post => {
+                    if (!post) return;
+                    const authorId = post.author_id || (post.author && post.author.user_id);
+                    const avatarSeed = resolveAvatarSeedFromStory(post);
+                    if (authorId && avatarSeed) {
+                        saveUserAvatarSeed(authorId, avatarSeed);
+                    }
+                });
+                
                 // Mettre à jour le cache
                 postsCache.data = allPosts;
                 postsCache.timestamp = now;
@@ -1618,6 +1726,7 @@
                 const isFollowing = story.status === 'EN COURS';
                 const reactionsCount = getCount(story.reactions_count, story.reactions);
                 const commentsCount = getCount(story.comments_count, story.comments);
+                const avatarSeed = resolveAvatarSeedFromStory(story);
                 const authorId = story.author_id || story.author?.user_id || story.author?.id;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);
                 const isFollowingAuthor = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
@@ -1628,7 +1737,7 @@
                 return `
                     <article class="story-card">
                         <div class="story-header">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(story.author?.avatar || story.author?.avatar_id || story.author?.avatar_seed || story.author?.user_id || story.author?.code_name || 1))}" alt="Avatar" class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
                                 <div class="story-author">Anonyme</div>
                                 <div class="story-time">${formatTime(story.created_at)}</div>

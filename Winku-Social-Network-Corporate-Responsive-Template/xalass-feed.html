@@ -1089,6 +1089,135 @@
                 padding: 12px;
             }
         }
+
+        /* Report modal */
+        .report-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 2000;
+        }
+
+        .report-modal.active {
+            display: flex;
+        }
+
+        .report-card {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(22, 27, 34, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+            padding: 18px 18px 16px 18px;
+        }
+
+        .report-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .report-title h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: rgba(99, 102, 241, 0.10);
+            color: #c9d1d9;
+            cursor: pointer;
+        }
+
+        .report-close:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.45);
+        }
+
+        .report-hint {
+            color: #8b949e;
+            font-size: 13px;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+
+        .report-options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .report-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            background: rgba(99, 102, 241, 0.06);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .report-option:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.10);
+        }
+
+        .report-option input {
+            accent-color: #8b5cf6;
+        }
+
+        .report-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: rgba(99, 102, 241, 0.10);
+            color: #c9d1d9;
+            transition: all 0.2s;
+        }
+
+        .btn-modal:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-modal.danger {
+            border: none;
+            background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+        }
+
+        .btn-modal.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35);
+        }
     </style>
 </head>
 <body>
@@ -1235,6 +1364,49 @@
                 </p>
             </div>
         </aside>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" onclick="closeReportModal()">
+        <div class="report-card" role="document" onclick="event.stopPropagation()">
+            <div class="report-title">
+                <h3 id="reportTitle">Signaler cette histoire</h3>
+                <button class="report-close" type="button" aria-label="Fermer" onclick="closeReportModal()">✕</button>
+            </div>
+            <p class="report-hint">Choisis une raison. Le signalement sera envoye a la moderation.</p>
+
+            <div class="report-options">
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="inappropriate" checked>
+                    <span>Contenu inapproprie</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="violence">
+                    <span>Violence</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="harassment">
+                    <span>Harcelement / intimidation</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="fake">
+                    <span>Fausse information</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="spam">
+                    <span>Spam / publicite</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="other">
+                    <span>Autre</span>
+                </label>
+            </div>
+
+            <div class="report-actions">
+                <button type="button" class="btn-modal" onclick="closeReportModal()">Annuler</button>
+                <button type="button" class="btn-modal danger" onclick="submitReportModal()">Signaler</button>
+            </div>
+        </div>
     </div>
 
     <!-- Charger les scripts API -->
@@ -1594,17 +1766,63 @@
             }
         }
 
-        // Report story - Utilise l'API
-        async function reportStory(postId) {
-            if (!confirm('Signaler cette histoire comme inappropriée ?')) return;
-            
+        // Report story - UI personnalisee
+        let reportTargetPostId = null;
+        let reportSubmitting = false;
+
+        function openReportModal(postId) {
+            reportTargetPostId = postId;
+            reportSubmitting = false;
+
+            const modal = document.getElementById('reportModal');
+            if (!modal) return;
+
+            const defaultRadio = modal.querySelector('input[name=\"reportReason\"][value=\"inappropriate\"]');
+            if (defaultRadio) defaultRadio.checked = true;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            if (modal) modal.classList.remove('active');
+            reportTargetPostId = null;
+            reportSubmitting = false;
+            document.body.style.overflow = '';
+        }
+
+        function getSelectedReportReason() {
+            const modal = document.getElementById('reportModal');
+            const selected = modal ? modal.querySelector('input[name=\"reportReason\"]:checked') : null;
+            return selected && selected.value ? selected.value : 'inappropriate';
+        }
+
+        async function submitReportModal() {
+            if (!reportTargetPostId) return;
+            if (reportSubmitting) return;
+            reportSubmitting = true;
+
             try {
-                await api.reportPost(postId, 'inappropriate');
-                showToast('Signalement enregistré. Merci pour votre vigilance.', 'success');
+                const reason = getSelectedReportReason();
+                await api.reportPost(reportTargetPostId, reason);
+                showToast('Signalement enregistre. Merci pour votre vigilance.', 'success');
+                closeReportModal();
             } catch (error) {
+                reportSubmitting = false;
                 showToast('Erreur lors du signalement: ' + error.message, 'error');
             }
         }
+
+        function reportStory(postId) {
+            openReportModal(postId);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+            }
+        });
 
         // Filter stories
         function filterStories(filter, event) {

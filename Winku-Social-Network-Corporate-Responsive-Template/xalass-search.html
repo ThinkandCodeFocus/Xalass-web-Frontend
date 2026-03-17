@@ -571,6 +571,64 @@
             return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
         }
 
+        function getRememberedAvatarSeedForCodeName(codeName) {
+            if (!codeName) return null;
+            try {
+                const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+                const key = String(codeName).trim().toLowerCase();
+                const seed = map[key];
+                return Number.isFinite(seed) ? seed : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function resolveAvatarSeedFromPost(post) {
+            if (!post) return 1;
+
+            const author = post.author && typeof post.author === 'object' ? post.author : {};
+            const authorId = post.author_id ?? author.user_id ?? author.id;
+
+            const sessionSeed =
+                session?.avatar ??
+                session?.avatar_id ??
+                session?.avatar_seed ??
+                session?.user_id ??
+                1;
+
+            if (session?.user_id && authorId !== undefined && authorId !== null && String(authorId) === String(session.user_id)) {
+                return sessionSeed;
+            }
+
+            const authorCodeName = author.code_name ?? author.pseudo ?? null;
+            if (authorCodeName && session?.code_name && String(authorCodeName) === String(session.code_name)) {
+                return sessionSeed;
+            }
+
+            const direct =
+                author.avatar ??
+                author.avatar_id ??
+                author.avatar_seed ??
+                author.avatarSeed ??
+                author.avatarId ??
+                post.author_avatar ??
+                post.author_avatar_id ??
+                post.author_avatar_seed ??
+                post.avatar ??
+                post.avatar_id ??
+                post.avatar_seed ??
+                post.avatarSeed ??
+                post.avatarId;
+
+            if (direct !== undefined && direct !== null && direct !== '') return direct;
+
+            const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
+            if (remembered !== null) return remembered;
+
+            if (authorId !== undefined && authorId !== null && authorId !== '') return authorId;
+            return post.post_id ?? post.id ?? 1;
+        }
+
         function timeAgo(date) {
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
             const intervals = {
@@ -752,7 +810,7 @@
                 const isLiked = post.user_liked || false;
                 const author = post.author || {};
                 const authorPseudo = 'Anonyme';
-                const authorAvatar = author.avatar || author.avatar_id || author.avatar_seed || author.user_id || author.code_name || 1;
+                const authorAvatar = resolveAvatarSeedFromPost(post);
                 const authorId = post.author_id || author.user_id || author.id;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);
                 const isFollowing = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;

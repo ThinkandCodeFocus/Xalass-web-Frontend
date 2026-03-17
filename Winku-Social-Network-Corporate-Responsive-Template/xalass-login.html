@@ -387,6 +387,7 @@
     
     <script>
         const AVATAR_MAP_KEY = 'xalass_avatars_by_code_name';
+        const USER_AVATARS_KEY = 'xalass_user_avatars';
 
         function loadAvatarMap() {
             try {
@@ -398,6 +399,29 @@
 
         function saveAvatarMap(map) {
             localStorage.setItem(AVATAR_MAP_KEY, JSON.stringify(map || {}));
+        }
+
+        function loadUserAvatars() {
+            try {
+                return JSON.parse(localStorage.getItem(USER_AVATARS_KEY) || '{}') || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveUserAvatars(map) {
+            localStorage.setItem(USER_AVATARS_KEY, JSON.stringify(map || {}));
+        }
+
+        function rememberAvatarForUser(userId, codeName, avatarSeed) {
+            // Stocker par user_id
+            if (userId) {
+                const userAvatars = loadUserAvatars();
+                userAvatars[String(userId)] = Number(avatarSeed);
+                saveUserAvatars(userAvatars);
+            }
+            // Stocker aussi par code_name pour la compatibilité
+            rememberAvatarForCodeName(codeName, avatarSeed);
         }
 
         function rememberAvatarForCodeName(codeName, avatarSeed) {
@@ -417,6 +441,13 @@
             return Number.isFinite(seed) ? seed : null;
         }
 
+        function getRememberedAvatarForUserId(userId) {
+            if (!userId) return null;
+            const userAvatars = loadUserAvatars();
+            const seed = userAvatars[String(userId)];
+            return Number.isFinite(seed) ? seed : null;
+        }
+
         function resolveUserAvatarSeed(user, fallbackCodeName) {
             const direct =
                 user?.avatar ??
@@ -426,6 +457,12 @@
             if (direct !== undefined && direct !== null && direct !== '') {
                 const seed = Number(direct);
                 return Number.isFinite(seed) ? seed : direct;
+            }
+
+            // Chercher d'abord par user_id
+            if (user?.user_id) {
+                const avatarByUserId = getRememberedAvatarForUserId(user.user_id);
+                if (avatarByUserId !== null) return avatarByUserId;
             }
 
             return getRememberedAvatarForCodeName(user?.code_name || fallbackCodeName);
@@ -493,7 +530,7 @@
                 const user = await api.loginAnonymousUser(pseudo, password || null);
                 const avatarSeed = resolveUserAvatarSeed(user, pseudo);
                 if (avatarSeed !== null && avatarSeed !== undefined) {
-                    rememberAvatarForCodeName(user.code_name || pseudo, avatarSeed);
+                    rememberAvatarForUser(user.user_id, user.code_name || pseudo, avatarSeed);
                 }
                 
                 // Sauvegarder la session
@@ -546,6 +583,7 @@
             try {
                 rememberAvatarForCodeName(pseudo, avatar);
                 const user = await api.createAnonymousUser(pseudo, password || null, avatar);
+                rememberAvatarForUser(user.user_id, user.code_name || pseudo, avatar);
                 
                 successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
                 successEl.classList.add('show');
@@ -569,6 +607,7 @@
                 const demoAvatar = Math.floor(Math.random() * 18) + 1;
                 rememberAvatarForCodeName(demoCodeName, demoAvatar);
                 const user = await api.createAnonymousUser(demoCodeName, null, demoAvatar);
+                rememberAvatarForUser(user.user_id, user.code_name || demoCodeName, resolveUserAvatarSeed(user, demoCodeName) || demoAvatar);
                 
                 // Sauvegarder la session
                 localStorage.setItem('xalass_session', JSON.stringify({

@@ -727,9 +727,27 @@ function getAvatarUrl(seed) {
     return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(normalized))}`;
 }
 
+function normalizeCodeName(value) {
+    if (value === undefined || value === null) return null;
+    const s = String(value).trim().toLowerCase();
+    return s ? s : null;
+}
+
+function getRememberedAvatarSeedForCodeName(codeName) {
+    const key = normalizeCodeName(codeName);
+    if (!key) return null;
+    try {
+        const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+        const seed = map[key];
+        return (seed === undefined || seed === null || seed === '') ? null : seed;
+    } catch (e) {
+        return null;
+    }
+}
+
 function resolveAuthorSeed(author, fallbackSeed = 1) {
     const session = currentSession || JSON.parse(localStorage.getItem('xalass_session') || '{}');
-    const sessionSeed = session?.avatar ?? session?.avatar_id ?? session?.avatar_seed ?? session?.user_id ?? 1;
+    const sessionSeed = session?.avatar ?? session?.avatar_id ?? session?.avatar_seed ?? session?.user_id ?? session?.id ?? 1;
 
     if (author === undefined || author === null || author === '') return fallbackSeed;
     if (typeof author === 'string' || typeof author === 'number') return author;
@@ -740,16 +758,98 @@ function resolveAuthorSeed(author, fallbackSeed = 1) {
         return sessionSeed;
     }
 
+    const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
     const direct =
         author.avatar ??
         author.avatar_id ??
         author.avatar_seed ??
+        remembered ??
         author.user_id ??
         author.id ??
         author.anon_uuid ??
         authorCodeName;
 
     return (direct !== undefined && direct !== null && direct !== '') ? direct : fallbackSeed;
+}
+
+function resolveAvatarSeedFromComment(comment) {
+    const session = currentSession || JSON.parse(localStorage.getItem('xalass_session') || '{}');
+    const sessionId = session?.user_id ?? session?.id ?? null;
+    const sessionSeed = session?.avatar ?? session?.avatar_id ?? session?.avatar_seed ?? sessionId ?? 1;
+
+    const c = (comment && typeof comment === 'object') ? comment : {};
+    const authorObj = (c.author && typeof c.author === 'object') ? c.author : null;
+    const authorPrimitive = (!authorObj && (typeof c.author === 'string' || typeof c.author === 'number')) ? c.author : null;
+
+    const authorId =
+        c.author_id ??
+        c.user_id ??
+        c.authorId ??
+        c.userId ??
+        authorObj?.user_id ??
+        authorObj?.id ??
+        (typeof authorPrimitive === 'number' ? authorPrimitive : null) ??
+        null;
+
+    const authorAnonUuid =
+        c.author_anon_uuid ??
+        c.anon_uuid ??
+        c.anonUuid ??
+        authorObj?.anon_uuid ??
+        authorObj?.anonUuid ??
+        null;
+
+    const authorCodeName =
+        authorObj?.code_name ??
+        authorObj?.pseudo ??
+        authorObj?.codeName ??
+        authorObj?.username ??
+        c.author_code_name ??
+        c.code_name ??
+        c.pseudo ??
+        c.codeName ??
+        c.username ??
+        (typeof authorPrimitive === 'string' ? authorPrimitive : null) ??
+        null;
+
+    if (sessionId !== null && authorId !== null && String(sessionId) === String(authorId)) return sessionSeed;
+    if (session?.anon_uuid && authorAnonUuid && String(session.anon_uuid) === String(authorAnonUuid)) return sessionSeed;
+    if (normalizeCodeName(session?.code_name) && normalizeCodeName(authorCodeName) && normalizeCodeName(session.code_name) === normalizeCodeName(authorCodeName)) {
+        return sessionSeed;
+    }
+
+    const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
+
+    const direct =
+        authorObj?.avatar ??
+        authorObj?.avatar_id ??
+        authorObj?.avatar_seed ??
+        authorObj?.avatarSeed ??
+        authorObj?.avatarId ??
+        c.author_avatar ??
+        c.author_avatar_id ??
+        c.author_avatar_seed ??
+        c.authorAvatar ??
+        c.authorAvatarId ??
+        c.authorAvatarSeed ??
+        c.avatar ??
+        c.avatar_id ??
+        c.avatar_seed ??
+        c.avatarSeed ??
+        c.avatarId ??
+        null;
+
+    const seed =
+        direct ??
+        remembered ??
+        authorId ??
+        authorAnonUuid ??
+        authorCodeName ??
+        c.comment_id ??
+        c.id ??
+        1;
+
+    return (seed === undefined || seed === null || seed === '') ? 1 : seed;
 }
 
 // Check auth
@@ -787,7 +887,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     currentSession = session;
 
     // Afficher les avatars
-    const avatarUrl = getAvatarUrl(session.avatar || session.user_id);
+    const avatarUrl = getAvatarUrl(session.avatar ?? session.user_id);
     document.querySelector('#headerAvatar img').src = avatarUrl;
     document.querySelector('#myAvatar img').src = avatarUrl;
 
@@ -1007,7 +1107,7 @@ async function loadComments() {
                 <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
                     <div style="display: flex; gap: 10px;">
                         <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                            <img src="${getAvatarUrl(resolveAuthorSeed(comment.author, comment.author_id || comment.comment_id || 1))}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="${getAvatarUrl(resolveAvatarSeedFromComment(comment))}" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <div style="flex: 1;">
                             <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
@@ -1034,7 +1134,7 @@ async function loadComments() {
                                             <li style="padding: 10px 0;">
                                                 <div style="display: flex; gap: 10px;">
                                                     <div style="width: 30px; height: 30px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
-                                                        <img src="${getAvatarUrl(resolveAuthorSeed(reply.author, reply.author_id || reply.comment_id || reply.id || 1))}" style="width: 100%; height: 100%; object-fit: cover;">
+                                                        <img src="${getAvatarUrl(resolveAvatarSeedFromComment(reply))}" style="width: 100%; height: 100%; object-fit: cover;">
                                                     </div>
                                                     <div style="flex: 1;">
                                                         <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">

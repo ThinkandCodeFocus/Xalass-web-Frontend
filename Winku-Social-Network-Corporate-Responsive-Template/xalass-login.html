@@ -638,11 +638,24 @@
                 setTimeout(() => showTab('login'), 1500);
             } catch (error) {
                 // Gestion personnalisée du message d'erreur du backend
-                let customMsg = error.message || 'Erreur lors de la création du compte.';
-                if (error && error.message === 'Validation Failed' && error.messages && error.messages.code_name && error.messages.code_name[0]) {
-                    customMsg = error.messages.code_name[0];
-                } else if (error && error.message && error.message.includes('Ce nom d\'utilisateur est déjà utilisé')) {
-                    customMsg = 'Ce nom d\'utilisateur est déjà utilisé.';
+                let customMsg = 'Erreur lors de la création du compte.';
+                let errObj = error;
+                // Si error est une string JSON, on tente de parser
+                if (typeof error === 'string') {
+                    try {
+                        errObj = JSON.parse(error);
+                    } catch (e) {}
+                }
+                // Si error est une Error JS, on tente d'accéder à error.message
+                if (errObj && errObj.message) {
+                    // Si le message est "Validation Failed" et qu'il y a des messages détaillés
+                    if (errObj.message === 'Validation Failed' && errObj.messages && errObj.messages.code_name && errObj.messages.code_name[0]) {
+                        customMsg = errObj.messages.code_name[0];
+                    } else if (errObj.message.includes('Ce nom d\'utilisateur est déjà utilisé')) {
+                        customMsg = 'Ce nom d\'utilisateur est déjà utilisé.';
+                    } else {
+                        customMsg = errObj.message;
+                    }
                 }
                 errorEl.textContent = customMsg;
                 errorEl.classList.add('show');

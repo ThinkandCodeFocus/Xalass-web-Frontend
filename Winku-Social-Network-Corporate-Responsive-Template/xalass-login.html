@@ -326,7 +326,7 @@
                 <form id="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label class="form-label">Pseudonyme</label>
-                        <input type="text" class="form-input" id="login-pseudo" placeholder="Ton pseudo anonyme" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+">
+                        <input type="text" class="form-input" id="login-pseudo" placeholder="Ton pseudo anonyme" required minlength="3" maxlength="10" pattern="[a-zA-Z0-9_]+">
                     </div>
 
                     <div class="form-group">
@@ -352,7 +352,7 @@
                 <form id="register-form" onsubmit="handleRegister(event)">
                     <div class="form-group">
                         <label class="form-label">Pseudonyme</label>
-                        <input type="text" class="form-input" id="register-pseudo" placeholder="Choisis un pseudo unique" required minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+">
+                        <input type="text" class="form-input" id="register-pseudo" placeholder="Choisis un pseudo unique" required minlength="3" maxlength="10" pattern="[a-zA-Z0-9_]+">
                     </div>
 
                     <div class="form-group">
@@ -388,6 +388,41 @@
     <script>
         const AVATAR_MAP_KEY = 'xalass_avatars_by_code_name';
         const USER_AVATARS_KEY = 'xalass_user_avatars';
+        const LAST_CREATED_USER_KEY = 'xalass_last_created_user_v1';
+
+        function readJsonStorage(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function writeJsonStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                // Ignore (quota / disabled storage)
+            }
+        }
+
+        function getLastCreatedUser() {
+            const u = readJsonStorage(LAST_CREATED_USER_KEY, null);
+            return (u && typeof u === 'object') ? u : null;
+        }
+
+        function saveLastCreatedUser(user, avatarSeed) {
+            if (!user || typeof user !== 'object') return;
+            writeJsonStorage(LAST_CREATED_USER_KEY, {
+                user_id: user.user_id,
+                anon_uuid: user.anon_uuid,
+                code_name: user.code_name,
+                session_hash: user.session_hash,
+                avatar: avatarSeed,
+                saved_at: Date.now()
+            });
+        }
 
         function loadAvatarMap() {
             try {
@@ -503,7 +538,7 @@
         }
 
         function validatePseudo(pseudo) {
-            return /^[a-zA-Z0-9_]{3,30}$/.test(pseudo);
+            return /^[a-zA-Z0-9_]{3,10}$/.test(pseudo);
         }
 
         // Login handler - Utilise l'API
@@ -519,7 +554,7 @@
             submitBtn.textContent = 'Connexion...';
 
             if (!validatePseudo(pseudo)) {
-                errorEl.textContent = 'Pseudo invalide: 3 à 30 caractères, lettres/chiffres/_ uniquement.';
+                errorEl.textContent = 'Pseudo invalide: 3 à 10 caractères, lettres/chiffres/_ uniquement.';
                 errorEl.classList.add('show');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Se connecter';
@@ -572,7 +607,7 @@
             }
 
             if (!validatePseudo(pseudo)) {
-                errorEl.textContent = 'Pseudo invalide: 3 à 30 caractères, lettres/chiffres/_ uniquement.';
+                errorEl.textContent = 'Pseudo invalide: 3 à 10 caractères, lettres/chiffres/_ uniquement.';
                 errorEl.classList.add('show');
                 return;
             }
@@ -584,15 +619,32 @@
                 rememberAvatarForCodeName(pseudo, avatar);
                 const user = await api.createAnonymousUser(pseudo, password || null, avatar);
                 rememberAvatarForUser(user.user_id, user.code_name || pseudo, avatar);
-                
-                successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
+                const finalCodeName = String(user?.code_name || pseudo || '').trim();
+                if (finalCodeName && finalCodeName !== pseudo) {
+                    successEl.textContent = `Compte créé avec succès ! Ton identifiant de connexion est: ${finalCodeName}`;
+                } else {
+                    successEl.textContent = 'Compte créé avec succès ! Tu peux te connecter.';
+                }
                 successEl.classList.add('show');
-                
+
+                // Pré-remplir la connexion avec le code_name réellement créé par le backend.
+                const loginPseudoInput = document.getElementById('login-pseudo');
+                if (loginPseudoInput && finalCodeName) {
+                    loginPseudoInput.value = finalCodeName;
+                }
+
                 document.getElementById('register-form').reset();
-                
+
                 setTimeout(() => showTab('login'), 1500);
             } catch (error) {
-                errorEl.textContent = error.message || 'Erreur lors de la création du compte.';
+                // Gestion personnalisée du message d'erreur du backend
+                let customMsg = error.message || 'Erreur lors de la création du compte.';
+                if (error && error.message === 'Validation Failed' && error.messages && error.messages.code_name && error.messages.code_name[0]) {
+                    customMsg = error.messages.code_name[0];
+                } else if (error && error.message && error.message.includes('Ce nom d\'utilisateur est déjà utilisé')) {
+                    customMsg = 'Ce nom d\'utilisateur est déjà utilisé.';
+                }
+                errorEl.textContent = customMsg;
                 errorEl.classList.add('show');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Créer mon compte';

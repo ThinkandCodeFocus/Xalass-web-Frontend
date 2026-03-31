@@ -660,17 +660,30 @@
                 // Si error est imbriqué dans error.cause ou error.response
                 if (errObj && errObj.cause) errObj = errObj.cause;
                 if (errObj && errObj.response) errObj = errObj.response;
-                // Extraction du message personnalisé
-                if (errObj && errObj.message === 'Validation Failed' && errObj.messages && errObj.messages.code_name && errObj.messages.code_name[0]) {
-                    customMsg = errObj.messages.code_name[0];
-                } else if (errObj && errObj.messages && errObj.messages.code_name && errObj.messages.code_name[0]) {
-                    customMsg = errObj.messages.code_name[0];
-                } else if (errObj && errObj.message && errObj.message.includes('Ce nom d\'utilisateur est déjà utilisé')) {
-                    customMsg = 'Ce nom d\'utilisateur est déjà utilisé.';
-                } else if (errObj && errObj.message && errObj.message !== 'Validation Failed') {
-                    customMsg = errObj.message;
+                // Extraction du message utilisateur le plus pertinent dans tout l'objet d'erreur
+                // Affiche l'objet d'erreur pour debug
+                console.error('Erreur backend brut:', errObj);
+                let userMsg = null;
+                // 1. Structure stricte
+                if (
+                    errObj &&
+                    (errObj.error === 'Validation Failed' || errObj.message === 'Validation Failed') &&
+                    errObj.messages &&
+                    errObj.messages.code_name &&
+                    Array.isArray(errObj.messages.code_name) &&
+                    errObj.messages.code_name[0]
+                ) {
+                    userMsg = errObj.messages.code_name[0];
                 }
-                errorEl.textContent = customMsg;
+                // 2. Fallback : si messages.code_name existe, on l'affiche même si error n'est pas exactement 'Validation Failed'
+                if (!userMsg && errObj && errObj.messages && errObj.messages.code_name && Array.isArray(errObj.messages.code_name) && errObj.messages.code_name[0]) {
+                    userMsg = errObj.messages.code_name[0];
+                }
+                // 3. Fallback sur message générique
+                if (!userMsg && errObj && errObj.message && errObj.message !== 'Validation Failed') {
+                    userMsg = errObj.message;
+                }
+                errorEl.textContent = userMsg || customMsg;
                 errorEl.classList.add('show');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Créer mon compte';

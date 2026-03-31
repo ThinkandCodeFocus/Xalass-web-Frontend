@@ -146,7 +146,14 @@ class XalassAPI {
             const response = await fetch(url, config);
             clearTimeout(timeoutId);
             const data = await this.parseResponse(response);
-            if (!response.ok) throw new Error(this.extractErrorMessage(data, response));
+            if (!response.ok) {
+                // On lève une erreur enrichie avec toutes les propriétés de la réponse JSON
+                const err = new Error(this.extractErrorMessage(data, response));
+                if (data && typeof data === 'object') {
+                    Object.assign(err, data);
+                }
+                throw err;
+            }
             return data;
         } catch (error) {
             clearTimeout(timeoutId);

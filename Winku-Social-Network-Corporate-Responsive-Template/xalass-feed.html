@@ -1321,6 +1321,234 @@
             }
         }
 
+        /* === VOCAL RECORDING STYLES === */
+        .content-mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding-bottom: 12px;
+        }
+
+        .mode-tab {
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -12px;
+        }
+
+        .mode-tab:hover {
+            color: #e6edf3;
+        }
+
+        .mode-tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Voice Recorder */
+        .voice-recorder {
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .recorder-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .recorder-btn {
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            color: #8b949e;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .recorder-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: #e6edf3;
+        }
+
+        .recorder-btn.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #dc2626;
+            color: #fff;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+
+        .recorder-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            font-size: 13px;
+        }
+
+        .recording-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .recording-time {
+            font-family: monospace;
+            color: #e6edf3;
+            font-weight: 600;
+        }
+
+        .visualizer-canvas {
+            width: 100%;
+            height: 60px;
+            background: rgba(22, 27, 34, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            margin-bottom: 12px;
+        }
+
+        .recordings-list {
+            background: rgba(22, 27, 34, 0.6);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .recording-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(13, 17, 23, 0.5);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .recording-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .recording-item-thumbnail {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .recording-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recording-item-duration {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .recording-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .recording-item-btn {
+            padding: 6px 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            color: #8b949e;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .recording-item-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #e6edf3;
+        }
+
+        .voice-options {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .voice-option-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .voice-option-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: #6366f1;
+            cursor: pointer;
+        }
+
+        .voice-info {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .voice-info strong {
+            color: #8b5cf6;
+        }
+
     </style>
 </head>
 <body>
@@ -1398,7 +1626,54 @@
                     <input type="text" class="publish-title" id="story-title" placeholder="Titre de ton histoire...">
                 </div>
             </div>
-            <textarea class="publish-content" id="story-content" placeholder="Raconte ton histoire ici... Qu'est-ce que tu veux partager anonymement ?"></textarea>
+
+            <!-- Mode Tabs: Texte/Vocal -->
+            <div class="content-mode-tabs">
+                <button class="mode-tab active" onclick="switchContentMode('text')">📝 Texte</button>
+                <button class="mode-tab" onclick="switchContentMode('voice')">🎙️ Vocal (Anonyme)</button>
+            </div>
+
+            <!-- Text Content -->
+            <div class="content-section active" id="text-section">
+                <textarea class="publish-content" id="story-content" placeholder="Raconte ton histoire ici... Qu'est-ce que tu veux partager anonymement ?"></textarea>
+            </div>
+
+            <!-- Voice Content -->
+            <div class="content-section" id="voice-section">
+                <div class="voice-info">
+                    🔐 <strong>Confidentialité:</strong> Tes messages vocaux seront traités avec un <strong>effet d'anonymat</strong> pour que personne ne puisse reconnaître ta voix. C'est totalement anonyme et sécurisé !
+                </div>
+
+                <div class="voice-recorder">
+                    <div class="recorder-controls">
+                        <button class="recorder-btn" id="recordBtn" onclick="startVoiceRecording()">
+                            🎙️ Commencer l'enregistrement
+                        </button>
+                        <button class="recorder-btn" id="stopBtn" onclick="stopVoiceRecording()" style="display: none;">
+                            ⏹️ Arrêter l'enregistrement
+                        </button>
+                        <div class="recorder-status" id="recorderStatus" style="display: none;">
+                            <span class="recording-indicator"></span>
+                            <span>Enregistrement en cours</span>
+                            <span class="recording-time" id="recordingTime">0:00</span>
+                        </div>
+                    </div>
+
+                    <canvas class="visualizer-canvas" id="visualizer" style="display: none;"></canvas>
+                </div>
+
+                <div class="voice-options">
+                    <label class="voice-option-label">
+                        <input type="checkbox" id="applyAnonymityEffect" checked>
+                        Appliquer l'effet d'anonymat à ma voix ✨
+                    </label>
+                </div>
+
+                <div class="recordings-list" id="recordingsList" style="display: none;"></div>
+
+                <div id="voiceContentStore" style="display: none;"></div>
+            </div>
+
             <div class="publish-options">
                 <select class="category-select" id="story-category">
                     <option value="autre">📁 Catégorie</option>
@@ -1528,6 +1803,7 @@
     <!-- Charger les scripts API -->
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/voice-recorder.js"></script>
     
     <script>
         let currentFilter = 'all';
@@ -1900,15 +2176,222 @@
             renderStories();
         }
 
+        // === VOCAL RECORDING MANAGEMENT ===
+        let currentContentMode = 'text';
+        let voiceRecordings = [];
+        let selectedVoiceRecording = null;
+
+        function switchContentMode(mode) {
+            currentContentMode = mode;
+            
+            // Mettre à jour les onglets
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mettre à jour les sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (mode === 'text') {
+                document.getElementById('text-section').classList.add('active');
+            } else {
+                document.getElementById('voice-section').classList.add('active');
+                // Initialiser le recorder si nécessaire
+                if (!VoiceRecorder.mediaRecorder) {
+                    initializeVoiceRecorder();
+                }
+            }
+        }
+
+        async function initializeVoiceRecorder() {
+            const initialized = await VoiceRecorder.init();
+            if (!initialized) {
+                showToast('Impossible d\'accéder au microphone', 'error');
+            }
+        }
+
+        function startVoiceRecording() {
+            const started = VoiceRecorder.start();
+            if (started) {
+                document.getElementById('recordBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+                document.getElementById('recorderStatus').style.display = 'flex';
+                document.getElementById('visualizer').style.display = 'block';
+                
+                // Démarrer le dessin de la visualisation
+                drawVisualizer();
+            }
+        }
+
+        function stopVoiceRecording() {
+            VoiceRecorder.stop();
+            document.getElementById('recordBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('recorderStatus').style.display = 'none';
+            document.getElementById('visualizer').style.display = 'none';
+        }
+
+        function drawVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const drawFrame = () => {
+                ctx.fillStyle = 'rgba(13, 17, 23, 0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if (VoiceRecorder.isRecording && VoiceRecorder.analyser) {
+                    const dataArray = new Uint8Array(VoiceRecorder.analyser.frequencyBinCount);
+                    VoiceRecorder.analyser.getByteFrequencyData(dataArray);
+                    
+                    const barWidth = canvas.width / dataArray.length * 2.5;
+                    let x = 0;
+                    
+                    for (let i = 0; i < dataArray.length; i++) {
+                        const barHeight = (dataArray[i] / 255) * canvas.height;
+                        
+                        const hue = (i / dataArray.length) * 360;
+                        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                        
+                        x += barWidth + 1;
+                    }
+                }
+                
+                if (VoiceRecorder.isRecording) {
+                    requestAnimationFrame(drawFrame);
+                }
+            };
+            
+            drawFrame();
+        }
+
+        // Écouter les événements de recording
+        document.addEventListener('recordingTime', (e) => {
+            const duration = e.detail.duration;
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.getElementById('recordingTime').textContent = 
+                `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        });
+
+        document.addEventListener('recordingComplete', async (e) => {
+            const audioData = e.detail.audioData;
+            const duration = e.detail.duration;
+            
+            // Appliquer l'effet d'anonymat si demandé
+            const shouldApplyEffect = document.getElementById('applyAnonymityEffect').checked;
+            let finalAudioData = audioData;
+            
+            if (shouldApplyEffect) {
+                showToast('Application de l\'effet d\'anonymat...', 'info');
+                finalAudioData = await VoiceEffects.applyAnonymityEffect(audioData);
+            }
+            
+            // Créer un objet d'enregistrement
+            const recording = {
+                id: generateId(),
+                audioData: finalAudioData,
+                duration: duration,
+                timestamp: new Date().toISOString(),
+                withEffect: shouldApplyEffect
+            };
+            
+            voiceRecordings.push(recording);
+            selectedVoiceRecording = recording;
+            
+            // Mettre à jour l'UI
+            updateRecordingsList();
+            showToast(`Enregistrement sauvegardé (${duration}s)`, 'success');
+        });
+
+        function updateRecordingsList() {
+            if (voiceRecordings.length === 0) {
+                document.getElementById('recordingsList').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('recordingsList').style.display = 'block';
+            const list = document.getElementById('recordingsList');
+            
+            list.innerHTML = voiceRecordings.map(recording => `
+                <div class="recording-item" ${selectedVoiceRecording?.id === recording.id ? 'style="border-color: #6366f1; background: rgba(99, 102, 241, 0.1);"' : ''}>
+                    <div class="recording-item-thumbnail">
+                        🎙️
+                    </div>
+                    <div class="recording-item-info">
+                        <div style="font-weight: 600; color: #e6edf3;">
+                            Enregistrement ${voiceRecordings.indexOf(recording) + 1}
+                        </div>
+                        <div class="recording-item-duration">
+                            ⏱️ ${recording.duration}s ${recording.withEffect ? '✨ Anonyme' : ''}
+                        </div>
+                    </div>
+                    <div class="recording-item-actions">
+                        <button class="recording-item-btn" onclick="playRecording('${recording.id}')">
+                            ▶️ Écouter
+                        </button>
+                        <button class="recording-item-btn" onclick="deleteRecording('${recording.id}')">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function playRecording(recordingId) {
+            const recording = voiceRecordings.find(r => r.id === recordingId);
+            if (!recording) return;
+            
+            VoicePlayer.play(recording.audioData, recording.withEffect);
+        }
+
+        function deleteRecording(recordingId) {
+            voiceRecordings = voiceRecordings.filter(r => r.id !== recordingId);
+            if (selectedVoiceRecording?.id === recordingId) {
+                selectedVoiceRecording = voiceRecordings.length > 0 ? voiceRecordings[0] : null;
+            }
+            updateRecordingsList();
+            showToast('Enregistrement supprimé', 'success');
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
         // Publish story - Utilise l'API
         async function publishStory() {
             const title = document.getElementById('story-title').value.trim();
-            const content = document.getElementById('story-content').value.trim();
             const category = document.getElementById('story-category').value;
             const isFollowing = document.getElementById('story-following').checked;
 
-            if (!title || !content) {
-                showToast('Remplis le titre et le contenu de ton histoire', 'error');
+            let content = '';
+
+            // Déterminer la source du contenu
+            if (currentContentMode === 'text') {
+                content = document.getElementById('story-content').value.trim();
+                if (!content) {
+                    showToast('Remplis le contenu de ton histoire', 'error');
+                    return;
+                }
+            } else {
+                // Mode vocal
+                if (!selectedVoiceRecording) {
+                    showToast('Enregistre au moins un message vocal', 'error');
+                    return;
+                }
+                // Le contenu sera le données audio encodées
+                content = selectedVoiceRecording.audioData;
+            }
+
+            if (!title) {
+                showToast('Remplis le titre de ton histoire', 'error');
                 return;
             }
 
@@ -1926,6 +2409,14 @@
                 document.getElementById('story-content').value = '';
                 document.getElementById('story-category').value = 'autre';
                 document.getElementById('story-following').checked = false;
+                
+                // Réinitialiser les enregistrements vocaux
+                if (currentContentMode === 'voice') {
+                    voiceRecordings = [];
+                    selectedVoiceRecording = null;
+                    updateRecordingsList();
+                    switchContentMode('text'); // Retour au mode texte
+                }
 
                 // Ajouter le nouveau post au début de la liste (mise à jour optimiste)
                 if (newPost) {

@@ -1,6 +1,6 @@
-// Configuration de l'API Backend (Render en production par defaut)
+// Configuration de l'API Backend (local en developpement par defaut)
 const API_CONFIG = (() => {
-    const DEFAULT_BASE_URL = 'https://xalass-backend-hjqg.onrender.com/api';
+    const DEFAULT_BASE_URL = 'http://127.0.0.1:8000/api';
     const STORAGE_KEY = 'xalass_api_base_url';
     const QUERY_KEY = 'api_base_url';
 
@@ -12,8 +12,6 @@ const API_CONFIG = (() => {
         if (queryOverride) {
             localStorage.setItem(STORAGE_KEY, queryOverride);
             overrideBaseUrl = queryOverride;
-        } else {
-            overrideBaseUrl = localStorage.getItem(STORAGE_KEY);
         }
     } catch (error) {
         // Fallback silencieux sur l'URL par defaut.

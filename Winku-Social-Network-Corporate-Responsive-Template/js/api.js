@@ -161,7 +161,7 @@ class XalassAPI {
                 throw new Error(`Le serveur met trop de temps à répondre (${Math.round(timeoutMs / 1000)}s). Render peut être en phase de réveil.`);
             }
             if (error.name === 'TypeError') {
-                throw new Error(`Connexion impossible au backend. Vérifiez CORS et le déploiement.`);
+                throw new Error(`Connexion impossible au backend (${url}). Verifiez CORS et l'URL appelee.`);
             }
             throw error;
         }

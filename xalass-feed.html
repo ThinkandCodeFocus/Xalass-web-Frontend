@@ -1,0 +1,2785 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xalass - Fil d'histoires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #e6edf3;
+            position: relative;
+        }
+
+        /* Pattern de points subtil comme GitHub */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Assurer que le contenu est au-dessus du pattern */
+        .header,
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: #8b949e;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #e6edf3;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Menu hamburger pour mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e6edf3;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 16px;
+            z-index: 99;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-nav.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav-link {
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #8b949e;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #8b5cf6;
+        }
+
+        .mobile-nav-link.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            color: #8b5cf6;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 8px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #f85149;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
+        }
+
+        /* Main Layout - 3 colonnes */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 24px;
+        }
+
+        /* Sidebar gauche */
+        .sidebar-left {
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+        }
+
+        .sidebar-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .sidebar-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .sidebar-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #e6edf3;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats-label {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .stats-value {
+            font-weight: 700;
+            color: #8b5cf6;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e6edf3;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #8b5cf6;
+            transform: translateX(4px);
+        }
+
+        /* Colonne centrale */
+        .main {
+            min-width: 0; /* Important pour grid */
+        }
+
+        /* Sidebar droite */
+        .sidebar-right {
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+        }
+
+        .trending-topics {
+            list-style: none;
+        }
+
+        .trending-topic {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trending-topic:last-child {
+            border-bottom: none;
+        }
+
+        .trending-topic:hover {
+            color: #8b5cf6;
+            transform: translateX(4px);
+        }
+
+        .trending-topic-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #e6edf3;
+        }
+
+        .trending-topic-count {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        /* Publish Card */
+        .publish-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .publish-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .publish-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .publish-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f3f4f6;
+        }
+
+        .publish-input-wrapper {
+            flex: 1;
+        }
+
+        .publish-title {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
+        }
+
+        .publish-title::placeholder {
+            color: #6b7280;
+        }
+
+        .publish-title:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(13, 17, 23, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .publish-content {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.2s;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
+            margin-bottom: 16px;
+        }
+
+        .publish-content::placeholder {
+            color: #6b7280;
+        }
+
+        .publish-content:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(13, 17, 23, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .publish-options {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .category-select {
+            padding: 10px 14px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: rgba(13, 17, 23, 0.5);
+            color: #e6edf3;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #8b949e;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: #6366f1;
+        }
+
+        .btn-publish {
+            margin-left: auto;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: rgba(22, 27, 34, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8b949e;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #8b5cf6;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Story Card */
+        .story-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .story-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .story-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .story-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #f3f4f6;
+        }
+
+        .story-meta {
+            flex: 1;
+        }
+
+        .story-author {
+            font-weight: 600;
+            font-size: 15px;
+            color: #e6edf3;
+        }
+
+        .story-time {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .story-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-amour { background: #fce7f3; color: #db2777; }
+        .badge-amitie { background: #dbeafe; color: #2563eb; }
+        .badge-famille { background: #d1fae5; color: #059669; }
+        .badge-travail { background: #fef3c7; color: #d97706; }
+        .badge-social { background: #e0e7ff; color: #4f46e5; }
+        .badge-autre { background: #f3f4f6; color: #6b7280; }
+
+        .badge-following {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: #fff;
+            margin-left: 6px;
+        }
+
+        .follow-btn {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.08);
+            color: #c9d1d9;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        .follow-btn:hover {
+            background: rgba(99, 102, 241, 0.14);
+            border-color: rgba(99, 102, 241, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .follow-btn.is-following {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.45);
+            color: #34d399;
+        }
+
+        .follow-btn.is-following:hover {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.65);
+        }
+
+        .story-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e6edf3;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .story-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .story-title a:hover {
+            color: #8b5cf6;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .story-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #c9d1d9;
+            margin-bottom: 16px;
+        }
+
+        .story-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8b949e;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #e6edf3;
+        }
+
+        .action-btn.liked {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f85149;
+        }
+
+        .action-btn.reported {
+            background: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.3);
+            color: #f59e0b;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b949e;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Responsive - Desktop Large */
+        @media (max-width: 1400px) {
+            .main-container {
+                max-width: 1200px;
+                grid-template-columns: 260px 1fr 300px;
+                gap: 20px;
+            }
+        }
+
+        /* Responsive - Desktop */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 240px 1fr 280px;
+                gap: 18px;
+            }
+
+            .header-inner {
+                max-width: 100%;
+                padding: 0 16px;
+            }
+
+            .sidebar-card {
+                padding: 16px;
+            }
+        }
+
+        /* Responsive - Tablette */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .sidebar-left,
+            .sidebar-right {
+                display: none;
+            }
+
+            .header-inner {
+                padding: 0 12px;
+            }
+
+            .nav {
+                gap: 4px;
+            }
+
+            .nav-link {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+        }
+
+        /* Responsive - Mobile Large */
+        @media (max-width: 768px) {
+            .header-inner {
+                height: 56px;
+                padding: 0 12px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .mobile-nav {
+                top: 56px;
+            }
+
+            .user-menu {
+                gap: 8px;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .btn-logout {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .main-container {
+                padding: 16px 12px;
+                gap: 16px;
+            }
+
+            .publish-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .publish-header {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .publish-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .publish-title {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            .publish-content {
+                padding: 12px 14px;
+                font-size: 14px;
+                min-height: 80px;
+            }
+
+            .publish-options {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .category-select {
+                width: 100%;
+                padding: 10px 12px;
+            }
+
+            .btn-publish {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0;
+                padding: 12px;
+            }
+
+            .filter-tabs {
+                gap: 6px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .filter-tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-tab {
+                padding: 6px 12px;
+                font-size: 12px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .story-card {
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
+
+            .story-header {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .story-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .story-author {
+                font-size: 14px;
+            }
+
+            .story-time {
+                font-size: 12px;
+            }
+
+            .story-title {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .story-content {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .story-actions {
+                gap: 6px;
+                padding-top: 12px;
+                flex-wrap: wrap;
+            }
+
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .sidebar-card h3 {
+                font-size: 15px;
+            }
+
+            .stats-value {
+                font-size: 16px;
+            }
+        }
+
+        /* Responsive - Mobile Small */
+        @media (max-width: 480px) {
+            .header-inner {
+                height: 52px;
+                padding: 0 10px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .menu-toggle {
+                font-size: 20px;
+                padding: 6px;
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+            }
+
+            .btn-logout {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .mobile-nav {
+                top: 52px;
+                padding: 12px;
+            }
+
+            .main-container {
+                padding: 12px 10px;
+            }
+
+            .publish-card {
+                padding: 12px;
+            }
+
+            .publish-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .publish-title {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .publish-content {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-height: 70px;
+            }
+
+            .filter-tab {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .story-card {
+                padding: 12px;
+            }
+
+            .story-title {
+                font-size: 15px;
+            }
+
+            .story-content {
+                font-size: 13px;
+            }
+
+            .action-btn {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+        }
+
+        /* Responsive - Très petit mobile */
+        @media (max-width: 360px) {
+            .header-inner {
+                padding: 0 8px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .main-container {
+                padding: 10px 8px;
+            }
+
+            .publish-card {
+                padding: 10px;
+            }
+
+            .story-card {
+                padding: 10px;
+            }
+        }
+
+        /* Amélioration du scroll sur mobile */
+        @media (max-width: 768px) {
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .filter-tabs {
+                scroll-snap-type: x mandatory;
+            }
+
+            .filter-tab {
+                scroll-snap-align: start;
+            }
+        }
+
+        /* Amélioration de l'affichage tactile */
+        @media (hover: none) and (pointer: coarse) {
+            .action-btn,
+            .filter-tab,
+            .nav-link,
+            .quick-action-btn,
+            .mobile-nav-link {
+                min-height: 44px; /* Taille minimale pour le touch */
+            }
+
+            .btn-publish,
+            .btn-logout {
+                min-height: 44px;
+            }
+        }
+
+        /* Amélioration du viewport sur mobile */
+        @media (max-width: 768px) {
+            .main-container {
+                min-height: calc(100vh - 56px);
+            }
+        }
+
+        /* Optimisation pour les écrans en mode paysage mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header-inner {
+                height: 48px;
+            }
+
+            .mobile-nav {
+                top: 48px;
+            }
+
+            .main-container {
+                padding: 12px;
+            }
+        }
+
+        /* Report modal */
+        .report-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 2000;
+        }
+
+        .report-modal.active {
+            display: flex;
+        }
+
+        .report-card {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(22, 27, 34, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+            padding: 18px 18px 16px 18px;
+        }
+
+        .report-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .report-title h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: rgba(99, 102, 241, 0.10);
+            color: #c9d1d9;
+            cursor: pointer;
+        }
+
+        .report-close:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.45);
+        }
+
+        .report-hint {
+            color: #8b949e;
+            font-size: 13px;
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+
+        .report-options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .report-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            background: rgba(99, 102, 241, 0.06);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .report-option:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.10);
+        }
+
+        .report-option input {
+            accent-color: #8b5cf6;
+        }
+
+        .report-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: rgba(99, 102, 241, 0.10);
+            color: #c9d1d9;
+            transition: all 0.2s;
+        }
+
+        .btn-modal:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-modal.danger {
+            border: none;
+            background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+        }
+
+        .btn-modal.danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35);
+        }
+
+        /* Logout Modal */
+        .logout-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 2000;
+        }
+
+        .logout-modal.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .logout-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(22, 27, 34, 0.98);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+            padding: 24px;
+        }
+
+        .logout-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .logout-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .logout-description {
+            color: #8b949e;
+            font-size: 14px;
+            margin: 0 0 24px 0;
+            line-height: 1.6;
+        }
+
+        .logout-actions {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .logout-actions button {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-logout-cancel {
+            background: rgba(99, 102, 241, 0.10);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #c9d1d9;
+        }
+
+        .btn-logout-cancel:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-logout-confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+        }
+
+        .btn-logout-confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* === VOCAL RECORDING STYLES === */
+        .content-mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding-bottom: 12px;
+        }
+
+        .mode-tab {
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -12px;
+        }
+
+        .mode-tab:hover {
+            color: #e6edf3;
+        }
+
+        .mode-tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Voice Recorder */
+        .voice-recorder {
+            background: rgba(13, 17, 23, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .recorder-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .recorder-btn {
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            color: #8b949e;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .recorder-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: #e6edf3;
+        }
+
+        .recorder-btn.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #dc2626;
+            color: #fff;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+
+        .recorder-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            font-size: 13px;
+        }
+
+        .recording-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .recording-time {
+            font-family: monospace;
+            color: #e6edf3;
+            font-weight: 600;
+        }
+
+        .visualizer-canvas {
+            width: 100%;
+            height: 60px;
+            background: rgba(22, 27, 34, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            margin-bottom: 12px;
+        }
+
+        .recordings-list {
+            background: rgba(22, 27, 34, 0.6);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .recording-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(13, 17, 23, 0.5);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .recording-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .recording-item-thumbnail {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .recording-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recording-item-duration {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .recording-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .recording-item-btn {
+            padding: 6px 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            color: #8b949e;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .recording-item-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #e6edf3;
+        }
+
+        .voice-options {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .voice-option-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .voice-option-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: #6366f1;
+            cursor: pointer;
+        }
+
+        .voice-info {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .voice-info strong {
+            color: #8b5cf6;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+            <a href="xalass-feed.html" class="logo">Xalass</a>
+            <nav class="nav">
+                <a href="xalass-feed.html" class="nav-link active">📖 Histoires</a>
+                <a href="xalass-search.html" class="nav-link">🔍 Rechercher</a>
+                <a href="xalass-friends.html" class="nav-link">👥 Mes amis</a>
+                <a href="xalass-notifications.html" class="nav-link">🔔 Notifications</a>
+                <a href="xalass-profile.html" class="nav-link">👤 Profil</a>
+            </nav>
+            <div class="user-menu">
+                <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="location.href='xalass-profile.html'">
+                <button class="btn-logout" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu mobile -->
+    <nav class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-links">
+            <a href="xalass-feed.html" class="mobile-nav-link active" onclick="closeMobileNav()">📖 Histoires</a>
+            <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">🔍 Rechercher</a>
+            <a href="xalass-friends.html" class="mobile-nav-link" onclick="closeMobileNav()">👥 Mes amis</a>
+            <a href="xalass-notifications.html" class="mobile-nav-link" onclick="closeMobileNav()">🔔 Notifications</a>
+            <a href="xalass-profile.html" class="mobile-nav-link" onclick="closeMobileNav()">👤 Profil</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Sidebar gauche -->
+        <aside class="sidebar-left">
+            <div class="sidebar-card">
+                <h3>📊 Statistiques</h3>
+                <div class="stats-item">
+                    <span class="stats-label">Total posts</span>
+                    <span class="stats-value" id="total-posts">-</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">Mes posts</span>
+                    <span class="stats-value" id="my-posts">-</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">Mes likes</span>
+                    <span class="stats-value" id="my-likes">-</span>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>⚡ Actions rapides</h3>
+                <div class="quick-actions">
+                    <a href="xalass-profile.html" class="quick-action-btn">
+                        👤 Mon profil
+                    </a>
+                    <a href="xalass-notifications.html" class="quick-action-btn">
+                        🔔 Notifications
+                    </a>
+                    <a href="xalass-search.html" class="quick-action-btn">
+                        🔍 Rechercher
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Colonne centrale -->
+        <main class="main">
+        <!-- Publish Story -->
+        <div class="publish-card">
+            <div class="publish-header">
+                <img src="" alt="Avatar" class="publish-avatar" id="publish-avatar">
+                <div class="publish-input-wrapper">
+                    <input type="text" class="publish-title" id="story-title" placeholder="Titre de ton histoire...">
+                </div>
+            </div>
+
+            <!-- Mode Tabs: Texte/Vocal -->
+            <div class="content-mode-tabs">
+                <button class="mode-tab active" onclick="switchContentMode('text')">📝 Texte</button>
+                <button class="mode-tab" onclick="switchContentMode('voice')">🎙️ Vocal (Anonyme)</button>
+            </div>
+
+            <!-- Text Content -->
+            <div class="content-section active" id="text-section">
+                <textarea class="publish-content" id="story-content" placeholder="Raconte ton histoire ici... Qu'est-ce que tu veux partager anonymement ?"></textarea>
+            </div>
+
+            <!-- Voice Content -->
+            <div class="content-section" id="voice-section">
+                <div class="voice-info">
+                    🔐 <strong>Confidentialité:</strong> Tes messages vocaux seront traités avec un <strong>effet d'anonymat</strong> pour que personne ne puisse reconnaître ta voix. C'est totalement anonyme et sécurisé !
+                </div>
+
+                <div class="voice-recorder">
+                    <div class="recorder-controls">
+                        <button class="recorder-btn" id="recordBtn" onclick="startVoiceRecording()">
+                            🎙️ Commencer l'enregistrement
+                        </button>
+                        <button class="recorder-btn" id="stopBtn" onclick="stopVoiceRecording()" style="display: none;">
+                            ⏹️ Arrêter l'enregistrement
+                        </button>
+                        <div class="recorder-status" id="recorderStatus" style="display: none;">
+                            <span class="recording-indicator"></span>
+                            <span>Enregistrement en cours</span>
+                            <span class="recording-time" id="recordingTime">0:00</span>
+                        </div>
+                    </div>
+
+                    <canvas class="visualizer-canvas" id="visualizer" style="display: none;"></canvas>
+                </div>
+
+                <div class="voice-options">
+                    <label class="voice-option-label">
+                        <input type="checkbox" id="applyAnonymityEffect" checked>
+                        Appliquer l'effet d'anonymat à ma voix ✨
+                    </label>
+                </div>
+
+                <div class="recordings-list" id="recordingsList" style="display: none;"></div>
+
+                <div id="voiceContentStore" style="display: none;"></div>
+            </div>
+
+            <div class="publish-options">
+                <select class="category-select" id="story-category">
+                    <option value="autre">📁 Catégorie</option>
+                    <option value="amour">❤️ Amour</option>
+                    <option value="amitie">💙 Amitié</option>
+                    <option value="famille">💚 Famille</option>
+                    <option value="travail">💛 Travail</option>
+                    <option value="social">💜 Social</option>
+                </select>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="story-following">
+                    À suivre... (histoire incomplète)
+                </label>
+                <button class="btn-publish" onclick="publishStory()">Publier ✨</button>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterStories('all', event)">Tout</button>
+            <button class="filter-tab" onclick="filterStories('amour', event)">❤️ Amour</button>
+            <button class="filter-tab" onclick="filterStories('amitie', event)">💙 Amitié</button>
+            <button class="filter-tab" onclick="filterStories('famille', event)">💚 Famille</button>
+            <button class="filter-tab" onclick="filterStories('travail', event)">💛 Travail</button>
+            <button class="filter-tab" onclick="filterStories('social', event)">💜 Social</button>
+            <button class="filter-tab" onclick="filterStories('following', event)">📖 À suivre</button>
+        </div>
+
+        <!-- Stories Feed -->
+        <div id="stories-feed"></div>
+        </main>
+
+        <!-- Sidebar droite -->
+        <aside class="sidebar-right">
+            <div class="sidebar-card">
+                <h3>🔥 Tendances</h3>
+                <ul class="trending-topics" id="trending-topics">
+                    <li class="trending-topic" onclick="filterStories('amour')">
+                        <div class="trending-topic-name">❤️ Amour</div>
+                        <div class="trending-topic-count" id="trend-amour">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('amitie')">
+                        <div class="trending-topic-name">💙 Amitié</div>
+                        <div class="trending-topic-count" id="trend-amitie">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('famille')">
+                        <div class="trending-topic-name">💚 Famille</div>
+                        <div class="trending-topic-count" id="trend-famille">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('travail')">
+                        <div class="trending-topic-name">💛 Travail</div>
+                        <div class="trending-topic-count" id="trend-travail">-</div>
+                    </li>
+                    <li class="trending-topic" onclick="filterStories('social')">
+                        <div class="trending-topic-name">💜 Social</div>
+                        <div class="trending-topic-count" id="trend-social">-</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>💡 Suggestions</h3>
+                <p style="color: #8b949e; font-size: 14px; line-height: 1.6;">
+                    Partagez vos histoires anonymement et découvrez celles des autres. 
+                    Chaque histoire compte ! ✨
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="logout-modal" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" onclick="closeLogoutModal()">
+        <div class="logout-card" role="document" onclick="event.stopPropagation()">
+            <div class="logout-icon">👋</div>
+            <h3 class="logout-title" id="logoutTitle">Déconnexion</h3>
+            <p class="logout-description">Es-tu sûr de vouloir te déconnecter ? Tu pourras te reconnecter à tout moment.</p>
+            <div class="logout-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Annuler</button>
+                <button type="button" class="btn-logout-confirm" onclick="confirmLogout()">Oui, me déconnecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" onclick="closeReportModal()">
+        <div class="report-card" role="document" onclick="event.stopPropagation()">
+            <div class="report-title">
+                <h3 id="reportTitle">Signaler cette histoire</h3>
+                <button class="report-close" type="button" aria-label="Fermer" onclick="closeReportModal()">✕</button>
+            </div>
+            <p class="report-hint">Choisis une raison. Le signalement sera envoye a la moderation.</p>
+
+            <div class="report-options">
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="inappropriate" checked>
+                    <span>Contenu inapproprie</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="violence">
+                    <span>Violence</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="harassment">
+                    <span>Harcelement / intimidation</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="fake">
+                    <span>Fausse information</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="spam">
+                    <span>Spam / publicite</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="other">
+                    <span>Autre</span>
+                </label>
+            </div>
+
+            <div class="report-actions">
+                <button type="button" class="btn-modal" onclick="closeReportModal()">Annuler</button>
+                <button type="button" class="btn-modal danger" onclick="submitReportModal()">Signaler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charger les scripts API -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/voice-recorder.js"></script>
+    
+    <script>
+        let currentFilter = 'all';
+        let session = null;
+        let allPosts = [];
+
+        // === Gestion des avatars stockés ===
+        const USER_AVATARS_KEY = 'xalass_user_avatars';
+
+        function loadUserAvatars() {
+            try {
+                return JSON.parse(localStorage.getItem(USER_AVATARS_KEY) || '{}') || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveUserAvatarSeed(userId, avatarSeed) {
+            if (!userId || avatarSeed === undefined || avatarSeed === null) return;
+            try {
+                const userAvatars = loadUserAvatars();
+                userAvatars[String(userId)] = Number(avatarSeed);
+                localStorage.setItem(USER_AVATARS_KEY, JSON.stringify(userAvatars));
+            } catch (e) {
+                // Ignorer les erreurs de stockage
+            }
+        }
+
+        function getRememberedAvatarForUserId(userId) {
+            if (!userId) return null;
+            const userAvatars = loadUserAvatars();
+            const seed = userAvatars[String(userId)];
+            return Number.isFinite(seed) ? seed : null;
+        }
+
+        function getCount(value, fallbackArray) {
+            if (typeof value === 'number' && Number.isFinite(value)) return value;
+            if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+                return Number(value);
+            }
+            return Array.isArray(fallbackArray) ? fallbackArray.length : 0;
+        }
+
+        function getRememberedAvatarSeedForCodeName(codeName) {
+            if (!codeName) return null;
+            try {
+                const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+                const key = String(codeName).trim().toLowerCase();
+                const seed = map[key];
+                return Number.isFinite(seed) ? seed : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function resolveAvatarSeedFromStory(story) {
+            if (!story) return 1;
+
+            const author = story.author && typeof story.author === 'object' ? story.author : null;
+            const authorId = story.author_id ?? author?.user_id ?? author?.id;
+
+            const sessionSeed =
+                session?.avatar ??
+                session?.avatar_id ??
+                session?.avatar_seed ??
+                session?.user_id ??
+                1;
+
+            // Si c'est mon post, afficher mon avatar choisi (meme si le backend ne renvoie pas l'avatar).
+            if (session?.user_id && authorId !== undefined && authorId !== null && String(authorId) === String(session.user_id)) {
+                return sessionSeed;
+            }
+
+            const authorCodeName = author?.code_name ?? author?.pseudo ?? null;
+            if (authorCodeName && session?.code_name && String(authorCodeName) === String(session.code_name)) {
+                return sessionSeed;
+            }
+
+            // Chercher d'abord l'avatar stocké localement pour cet auteur par son ID
+            if (authorId !== undefined && authorId !== null && authorId !== '') {
+                const avatarByUserId = getRememberedAvatarForUserId(authorId);
+                if (avatarByUserId !== null) {
+                    return avatarByUserId;
+                }
+            }
+
+            // Chercher ensuite les données directes de l'API
+            const direct =
+                author?.avatar ??
+                author?.avatar_id ??
+                author?.avatar_seed ??
+                author?.avatarSeed ??
+                author?.avatarId ??
+                story.author_avatar ??
+                story.author_avatar_id ??
+                story.author_avatar_seed ??
+                story.avatar ??
+                story.avatar_id ??
+                story.avatar_seed ??
+                story.avatarSeed ??
+                story.avatarId;
+
+            if (direct !== undefined && direct !== null && direct !== '') return direct;
+
+            const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
+            if (remembered !== null) return remembered;
+
+            // Utiliser l'ID de l'auteur comme seed si disponible (crée des avatars uniques et persistants)
+            if (authorId !== undefined && authorId !== null && authorId !== '') return authorId;
+            return story.post_id ?? story.id ?? 1;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bg = type === 'error'
+                ? 'rgba(220, 38, 38, 0.95)'
+                : type === 'success'
+                ? 'rgba(16, 185, 129, 0.95)'
+                : 'rgba(22, 27, 34, 0.95)';
+
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                max-width: 360px;
+                background: ${bg};
+                color: #fff;
+                padding: 12px 16px;
+                border-radius: 10px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+                z-index: 1200;
+                font-size: 14px;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => toast.remove(), 220);
+            }, 2500);
+        }
+
+        // Check auth
+        function checkAuth() {
+            session = JSON.parse(localStorage.getItem('xalass_session'));
+            if (!session || !session.anon_uuid) {
+                window.location.href = 'xalass-login.html';
+                return false;
+            }
+            if (!session.user_id && session.id) {
+                session.user_id = session.id;
+                localStorage.setItem('xalass_session', JSON.stringify(session));
+            }
+            if ((session.avatar === undefined || session.avatar === null || session.avatar === '') && session.code_name) {
+                try {
+                    const map = JSON.parse(localStorage.getItem('xalass_avatars_by_code_name') || '{}') || {};
+                    const key = String(session.code_name).trim().toLowerCase();
+                    const seed = map[key];
+                    if (Number.isFinite(seed)) {
+                        session.avatar = seed;
+                        localStorage.setItem('xalass_session', JSON.stringify(session));
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
+            return true;
+        }
+
+        // Format time
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return "À l'instant";
+            if (diff < 3600) return Math.floor(diff / 60) + ' min';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' j';
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        // Cache des posts
+        let postsCache = {
+            data: [],
+            timestamp: null,
+            cacheDuration: 30000 // 30 secondes
+        };
+
+        // Load posts from API avec cache
+        async function loadPosts(forceRefresh = false) {
+            const feed = document.getElementById('stories-feed');
+            
+            // Afficher un indicateur de chargement
+            feed.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Chargement...</div>';
+            
+            try {
+                // Vérifier le cache
+                const now = Date.now();
+                if (!forceRefresh && postsCache.data.length > 0 && postsCache.timestamp && (now - postsCache.timestamp) < postsCache.cacheDuration) {
+                    console.log('Utilisation du cache');
+                    allPosts = postsCache.data;
+                    renderStories();
+                    return;
+                }
+
+                // Charger depuis l'API
+                allPosts = await api.getAllPosts();
+                
+                // Mémoriser les avatars des auteurs pour les futures lectures
+                allPosts.forEach(post => {
+                    if (!post) return;
+                    const authorId = post.author_id || (post.author && post.author.user_id);
+                    const avatarSeed = resolveAvatarSeedFromStory(post);
+                    if (authorId && avatarSeed) {
+                        saveUserAvatarSeed(authorId, avatarSeed);
+                    }
+                });
+                
+                // Mettre à jour le cache
+                postsCache.data = allPosts;
+                postsCache.timestamp = now;
+                
+                renderStories();
+            } catch (error) {
+                console.error('Erreur lors du chargement des posts:', error);
+                
+                // Essayer d'utiliser le cache en cas d'erreur
+                if (postsCache.data.length > 0) {
+                    console.log('Utilisation du cache en cas d\'erreur');
+                    allPosts = postsCache.data;
+                    renderStories();
+                } else {
+                    feed.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-state-text">Erreur de chargement. Vérifie ta connexion.</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Pagination
+        let currentPage = 0;
+        const postsPerPage = 20;
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            const session = JSON.parse(localStorage.getItem('xalass_session'));
+            if (!session || !allPosts.length) return;
+
+            // Total posts
+            const totalEl = document.getElementById('total-posts');
+            if (totalEl) totalEl.textContent = allPosts.length;
+
+            // Mes posts
+            const myPosts = allPosts.filter(p => session.user_id && p.author_id && String(p.author_id) === String(session.user_id));
+            const myPostsEl = document.getElementById('my-posts');
+            if (myPostsEl) myPostsEl.textContent = myPosts.length;
+
+            // Mes likes
+            const myLikes = allPosts.filter(p => p.user_liked).length;
+            const myLikesEl = document.getElementById('my-likes');
+            if (myLikesEl) myLikesEl.textContent = myLikes;
+
+            // Tendances par catégorie
+            const categories = ['amour', 'amitie', 'famille', 'travail', 'social'];
+            categories.forEach(cat => {
+                const count = allPosts.filter(p => p.category === cat).length;
+                const el = document.getElementById(`trend-${cat}`);
+                if (el) el.textContent = `${count} posts`;
+            });
+        }
+
+        // Render stories avec pagination
+        function renderStories() {
+            const feed = document.getElementById('stories-feed');
+            let stories = [...allPosts];
+            
+            // Filter
+            if (currentFilter === 'following') {
+                stories = stories.filter(s => s.status === 'EN COURS');
+            } else if (currentFilter !== 'all') {
+                stories = stories.filter(s => s.category === currentFilter);
+            }
+
+            // Sort by date (déjà trié par le backend, mais on peut re-trier)
+            stories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (stories.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">Aucune histoire pour le moment</div>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+
+            // Pagination : afficher seulement les premiers posts
+            const startIndex = 0;
+            const endIndex = (currentPage + 1) * postsPerPage;
+            const postsToShow = stories.slice(startIndex, endIndex);
+            const hasMore = stories.length > endIndex;
+
+            feed.innerHTML = postsToShow.map(story => {
+                const isLiked = story.user_liked || false;
+                const categoryClass = 'badge-' + (story.category || 'autre');
+                const isFollowing = story.status === 'EN COURS';
+                const reactionsCount = getCount(story.reactions_count, story.reactions);
+                const commentsCount = getCount(story.comments_count, story.comments);
+                const avatarSeed = resolveAvatarSeedFromStory(story);
+                const authorId = story.author_id || story.author?.user_id || story.author?.id;
+                const isOwner = session && authorId && String(authorId) === String(session.user_id);
+                const isFollowingAuthor = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
+                const followBtn = (!isOwner && authorId)
+                    ? `<button class="follow-btn ${isFollowingAuthor ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">${isFollowingAuthor ? 'Abonne' : 'Suivre'}</button>`
+                    : '';
+                
+                return `
+                    <article class="story-card">
+                        <div class="story-header">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}" alt="Avatar" class="story-avatar">
+                            <div class="story-meta">
+                                <div class="story-author">Anonyme</div>
+                                <div class="story-time">${formatTime(story.created_at)}</div>
+                            </div>
+                            <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
+                            ${isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
+                            ${followBtn}
+                        </div>
+                        <h2 class="story-title">
+                            <a href="xalass-story.html?id=${story.post_id}">${story.title}</a>
+                        </h2>
+                        <p class="story-content">${story.content.substring(0, 300)}${story.content.length > 300 ? '...' : ''}</p>
+                        <div class="story-actions">
+                            <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.post_id})">
+                                ${isLiked ? '❤️' : '🤍'} ${reactionsCount}
+                            </button>
+                            <button class="action-btn" onclick="location.href='xalass-story.html?id=${story.post_id}'">
+                                💬 ${commentsCount}
+                            </button>
+                            <button class="action-btn" onclick="shareStory(${story.post_id}, '${story.title}')">
+                                📤 Partager
+                            </button>
+                            <button class="action-btn" onclick="reportStory(${story.post_id})">
+                                ⚠️ Signaler
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('') + (hasMore ? `
+                <div style="text-align: center; padding: 20px;">
+                    <button onclick="loadMorePosts()" style="padding: 12px 24px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                        Charger plus de posts (${stories.length - endIndex} restants)
+                    </button>
+                </div>
+            ` : '');
+            
+            // Mettre à jour les statistiques
+            updateStats();
+        }
+
+        // Charger plus de posts
+        function loadMorePosts() {
+            currentPage++;
+            renderStories();
+        }
+
+        // === VOCAL RECORDING MANAGEMENT ===
+        let currentContentMode = 'text';
+        let voiceRecordings = [];
+        let selectedVoiceRecording = null;
+
+        function switchContentMode(mode) {
+            currentContentMode = mode;
+            
+            // Mettre à jour les onglets
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mettre à jour les sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (mode === 'text') {
+                document.getElementById('text-section').classList.add('active');
+            } else {
+                document.getElementById('voice-section').classList.add('active');
+                // Initialiser le recorder si nécessaire
+                if (!VoiceRecorder.mediaRecorder) {
+                    initializeVoiceRecorder();
+                }
+            }
+        }
+
+        async function initializeVoiceRecorder() {
+            const initialized = await VoiceRecorder.init();
+            if (!initialized) {
+                showToast('Impossible d\'accéder au microphone', 'error');
+            }
+        }
+
+        function startVoiceRecording() {
+            const started = VoiceRecorder.start();
+            if (started) {
+                document.getElementById('recordBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'block';
+                document.getElementById('recorderStatus').style.display = 'flex';
+                document.getElementById('visualizer').style.display = 'block';
+                
+                // Démarrer le dessin de la visualisation
+                drawVisualizer();
+            }
+        }
+
+        function stopVoiceRecording() {
+            VoiceRecorder.stop();
+            document.getElementById('recordBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('recorderStatus').style.display = 'none';
+            document.getElementById('visualizer').style.display = 'none';
+        }
+
+        function drawVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const drawFrame = () => {
+                ctx.fillStyle = 'rgba(13, 17, 23, 0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                if (VoiceRecorder.isRecording && VoiceRecorder.analyser) {
+                    const dataArray = new Uint8Array(VoiceRecorder.analyser.frequencyBinCount);
+                    VoiceRecorder.analyser.getByteFrequencyData(dataArray);
+                    
+                    const barWidth = canvas.width / dataArray.length * 2.5;
+                    let x = 0;
+                    
+                    for (let i = 0; i < dataArray.length; i++) {
+                        const barHeight = (dataArray[i] / 255) * canvas.height;
+                        
+                        const hue = (i / dataArray.length) * 360;
+                        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                        
+                        x += barWidth + 1;
+                    }
+                }
+                
+                if (VoiceRecorder.isRecording) {
+                    requestAnimationFrame(drawFrame);
+                }
+            };
+            
+            drawFrame();
+        }
+
+        // Écouter les événements de recording
+        document.addEventListener('recordingTime', (e) => {
+            const duration = e.detail.duration;
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.getElementById('recordingTime').textContent = 
+                `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        });
+
+        document.addEventListener('recordingComplete', async (e) => {
+            const audioData = e.detail.audioData;
+            const duration = e.detail.duration;
+            
+            // Appliquer l'effet d'anonymat si demandé
+            const shouldApplyEffect = document.getElementById('applyAnonymityEffect').checked;
+            let finalAudioData = audioData;
+            
+            if (shouldApplyEffect) {
+                showToast('Application de l\'effet d\'anonymat...', 'info');
+                finalAudioData = await VoiceEffects.applyAnonymityEffect(audioData);
+            }
+            
+            // Créer un objet d'enregistrement
+            const recording = {
+                id: generateId(),
+                audioData: finalAudioData,
+                duration: duration,
+                timestamp: new Date().toISOString(),
+                withEffect: shouldApplyEffect
+            };
+            
+            voiceRecordings.push(recording);
+            selectedVoiceRecording = recording;
+            
+            // Mettre à jour l'UI
+            updateRecordingsList();
+            showToast(`Enregistrement sauvegardé (${duration}s)`, 'success');
+        });
+
+        function updateRecordingsList() {
+            if (voiceRecordings.length === 0) {
+                document.getElementById('recordingsList').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('recordingsList').style.display = 'block';
+            const list = document.getElementById('recordingsList');
+            
+            list.innerHTML = voiceRecordings.map(recording => `
+                <div class="recording-item" ${selectedVoiceRecording?.id === recording.id ? 'style="border-color: #6366f1; background: rgba(99, 102, 241, 0.1);"' : ''}>
+                    <div class="recording-item-thumbnail">
+                        🎙️
+                    </div>
+                    <div class="recording-item-info">
+                        <div style="font-weight: 600; color: #e6edf3;">
+                            Enregistrement ${voiceRecordings.indexOf(recording) + 1}
+                        </div>
+                        <div class="recording-item-duration">
+                            ⏱️ ${recording.duration}s ${recording.withEffect ? '✨ Anonyme' : ''}
+                        </div>
+                    </div>
+                    <div class="recording-item-actions">
+                        <button class="recording-item-btn" onclick="playRecording('${recording.id}')">
+                            ▶️ Écouter
+                        </button>
+                        <button class="recording-item-btn" onclick="deleteRecording('${recording.id}')">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function playRecording(recordingId) {
+            const recording = voiceRecordings.find(r => r.id === recordingId);
+            if (!recording) return;
+            
+            VoicePlayer.play(recording.audioData, recording.withEffect);
+        }
+
+        function deleteRecording(recordingId) {
+            voiceRecordings = voiceRecordings.filter(r => r.id !== recordingId);
+            if (selectedVoiceRecording?.id === recordingId) {
+                selectedVoiceRecording = voiceRecordings.length > 0 ? voiceRecordings[0] : null;
+            }
+            updateRecordingsList();
+            showToast('Enregistrement supprimé', 'success');
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Publish story - Utilise l'API
+        async function publishStory() {
+            const title = document.getElementById('story-title').value.trim();
+            const category = document.getElementById('story-category').value;
+            const isFollowing = document.getElementById('story-following').checked;
+
+            let content = '';
+
+            // Déterminer la source du contenu
+            if (currentContentMode === 'text') {
+                content = document.getElementById('story-content').value.trim();
+                if (!content) {
+                    showToast('Remplis le contenu de ton histoire', 'error');
+                    return;
+                }
+            } else {
+                // Mode vocal
+                if (!selectedVoiceRecording) {
+                    showToast('Enregistre au moins un message vocal', 'error');
+                    return;
+                }
+                // Le contenu sera le données audio encodées
+                content = selectedVoiceRecording.audioData;
+            }
+
+            if (!title) {
+                showToast('Remplis le titre de ton histoire', 'error');
+                return;
+            }
+
+            const status = isFollowing ? 'EN COURS' : 'FINISH';
+            const btn = document.querySelector('.btn-publish');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Publication...';
+
+            try {
+                const newPost = await api.createPost(title, content, category, status);
+                
+                // Clear form
+                document.getElementById('story-title').value = '';
+                document.getElementById('story-content').value = '';
+                document.getElementById('story-category').value = 'autre';
+                document.getElementById('story-following').checked = false;
+                
+                // Réinitialiser les enregistrements vocaux
+                if (currentContentMode === 'voice') {
+                    voiceRecordings = [];
+                    selectedVoiceRecording = null;
+                    updateRecordingsList();
+                    switchContentMode('text'); // Retour au mode texte
+                }
+
+                // Ajouter le nouveau post au début de la liste (mise à jour optimiste)
+                if (newPost) {
+                    allPosts.unshift(newPost);
+                    postsCache.data = allPosts;
+                    postsCache.timestamp = Date.now();
+                    renderStories();
+                } else {
+                    // Si pas de retour, recharger (force refresh)
+                    await loadPosts(true);
+                }
+            } catch (error) {
+                showToast('Erreur lors de la publication: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        // Toggle like - Utilise l'API avec mise à jour optimiste
+        async function toggleLike(postId) {
+            // Trouver le post dans la liste
+            const post = allPosts.find(p => p.post_id === postId);
+            if (!post) return;
+
+            // Mise à jour optimiste (immédiate)
+            const wasLiked = post.user_liked || false;
+            post.user_liked = !wasLiked;
+            const currentReactions = getCount(post.reactions_count, post.reactions);
+            post.reactions_count = currentReactions + (wasLiked ? -1 : 1);
+            
+            // Mettre à jour l'affichage immédiatement
+            renderStories();
+
+            // Ensuite, mettre à jour via l'API
+            try {
+                await api.togglePostReaction(postId);
+                // Mettre à jour le cache
+                postsCache.data = allPosts;
+            } catch (error) {
+                // En cas d'erreur, annuler la mise à jour optimiste
+                post.user_liked = wasLiked;
+                const rolledBackReactions = getCount(post.reactions_count, post.reactions);
+                post.reactions_count = rolledBackReactions + (wasLiked ? 1 : -1);
+                renderStories();
+                showToast('Erreur lors du like: ' + error.message, 'error');
+            }
+        }
+
+        // Share story
+        function shareStory(postId, title) {
+            const url = window.location.origin + window.location.pathname.replace('xalass-feed.html', '') + 'xalass-story.html?id=' + postId;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: 'Découvre cette histoire sur Xalass',
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                showToast('Lien copié', 'success');
+            }
+        }
+
+        // Report story - UI personnalisee
+        let reportTargetPostId = null;
+        let reportSubmitting = false;
+
+        function openReportModal(postId) {
+            reportTargetPostId = postId;
+            reportSubmitting = false;
+
+            const modal = document.getElementById('reportModal');
+            if (!modal) return;
+
+            const defaultRadio = modal.querySelector('input[name=\"reportReason\"][value=\"inappropriate\"]');
+            if (defaultRadio) defaultRadio.checked = true;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            if (modal) modal.classList.remove('active');
+            reportTargetPostId = null;
+            reportSubmitting = false;
+            document.body.style.overflow = '';
+        }
+
+        function getSelectedReportReason() {
+            const modal = document.getElementById('reportModal');
+            const selected = modal ? modal.querySelector('input[name=\"reportReason\"]:checked') : null;
+            return selected && selected.value ? selected.value : 'inappropriate';
+        }
+
+        async function submitReportModal() {
+            if (!reportTargetPostId) return;
+            if (reportSubmitting) return;
+            reportSubmitting = true;
+
+            try {
+                const reason = getSelectedReportReason();
+                await api.reportPost(reportTargetPostId, reason);
+                showToast('Signalement enregistre. Merci pour votre vigilance.', 'success');
+                closeReportModal();
+            } catch (error) {
+                reportSubmitting = false;
+                showToast('Erreur lors du signalement: ' + error.message, 'error');
+            }
+        }
+
+        function reportStory(postId) {
+            openReportModal(postId);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+            }
+        });
+
+        // Filter stories
+        function filterStories(filter, event) {
+            currentFilter = filter;
+            currentPage = 0; // Réinitialiser la pagination
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            const target = event && event.target ? event.target : null;
+            if (target && target.classList.contains('filter-tab')) {
+                target.classList.add('active');
+            } else {
+                const matchingTab = Array.from(document.querySelectorAll('.filter-tab')).find(tab =>
+                    (tab.getAttribute('onclick') || '').includes(`'${filter}'`)
+                );
+                if (matchingTab) matchingTab.classList.add('active');
+            }
+            renderStories();
+        }
+
+        // Logout
+        // Logout avec modal personnalisé
+        function logout() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function confirmLogout() {
+            localStorage.removeItem('xalass_session');
+            if (eventSource) {
+                eventSource.close();
+            }
+            window.location.href = 'xalass-login.html';
+        }
+
+        // Fermer le modal en appuyant sur Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLogoutModal();
+            }
+        });
+
+        // Menu mobile
+        function toggleMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.classList.toggle('active');
+        }
+
+        function closeMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.classList.remove('active');
+        }
+
+        // Fermer le menu mobile en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            const mobileNav = document.getElementById('mobile-nav');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (mobileNav && menuToggle && 
+                !mobileNav.contains(event.target) && 
+                !menuToggle.contains(event.target) &&
+                mobileNav.classList.contains('active')) {
+                closeMobileNav();
+            }
+        });
+
+        // Connexion SSE pour les mises à jour en temps réel
+        let eventSource = null;
+
+        function connectSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            const lastPostId = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.post_id)) : 0;
+            eventSource = api.createEventSource(lastPostId);
+
+            // Écouter les nouveaux posts
+            eventSource.addEventListener('message', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'new_posts' && data.posts && data.posts.length > 0) {
+                        // Ajouter les nouveaux posts au début de la liste
+                        data.posts.reverse(); // Inverser pour avoir les plus récents en premier
+                        allPosts = [...data.posts, ...allPosts];
+                        postsCache.data = allPosts;
+                        postsCache.timestamp = Date.now();
+                        renderStories();
+                        
+                        // Notification discrète
+                        showNotification(`${data.posts.length} nouveau(x) post(s) !`);
+                    }
+                    
+                    if (data.type === 'post_updates' && data.updates) {
+                        // Mettre à jour les compteurs des posts existants
+                        data.updates.forEach(update => {
+                            const post = allPosts.find(p => p.post_id === update.post_id);
+                            if (post) {
+                                post.reactions_count = update.reactions_count;
+                                post.comments_count = update.comments_count;
+                                post.user_liked = update.user_liked;
+                            }
+                        });
+                        renderStories();
+                    }
+                } catch (error) {
+                    console.error('Erreur SSE:', error);
+                }
+            });
+
+            // Gérer les erreurs
+            eventSource.onerror = function(error) {
+                console.error('Erreur de connexion SSE:', error);
+                // Réessayer après 5 secondes
+                setTimeout(() => {
+                    if (eventSource && eventSource.readyState === EventSource.CLOSED) {
+                        connectSSE();
+                    }
+                }, 5000);
+            };
+        }
+
+        // Fonction pour afficher une notification discrète
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: rgba(22, 27, 34, 0.95);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                color: #e6edf3;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                font-size: 14px;
+                font-weight: 500;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Ajouter les animations CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Init
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!checkAuth()) return;
+            
+            // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
+            const avatarSeed = session.avatar || session.user_id || 1;
+            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}`;
+            document.getElementById('user-avatar').src = avatarUrl;
+            document.getElementById('publish-avatar').src = avatarUrl;
+
+            const feed = document.getElementById('stories-feed');
+            feed.addEventListener('click', async function(e) {
+                const btn = e.target.closest('.follow-btn');
+                if (!btn) return;
+
+                const authorId = btn.dataset.followAuthorId;
+                if (!authorId) return;
+
+                btn.disabled = true;
+                try {
+                    const wasFollowing = api.isFollowingLocal(authorId, session);
+                    if (wasFollowing) {
+                        await api.unfollow(authorId);
+                    } else {
+                        await api.follow(authorId);
+                    }
+                    const nowFollowing = api.isFollowingLocal(authorId, session);
+                    feed.querySelectorAll('.follow-btn').forEach(b => {
+                        if (b.dataset.followAuthorId !== authorId) return;
+                        b.classList.toggle('is-following', nowFollowing);
+                        b.textContent = nowFollowing ? 'Abonne' : 'Suivre';
+                    });
+                    showToast(nowFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+                } catch (err) {
+                    showToast('Erreur réseau, réessayez.', 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+
+            // Hydrater le cache des abonnements depuis le backend
+            await api.hydrateFollowCache(session);
+            // Charger les posts (avec cache)
+            await loadPosts();
+            
+            // Connecter SSE pour les mises à jour en temps réel
+            connectSSE();
+            
+            // Nettoyer la connexion SSE quand on quitte la page
+            window.addEventListener('beforeunload', function() {
+                if (eventSource) {
+                    eventSource.close();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

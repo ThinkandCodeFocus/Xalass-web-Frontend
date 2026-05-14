@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xalass - Recherche</title>
+    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #e6edf3;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header,
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50px;
+            color: #e6edf3;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #8b949e;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: #8b949e;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #e6edf3;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* Filters */
+        .filters-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .filters-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .filter-btn {
+            padding: 12px 16px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            color: #8b949e;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #e6edf3;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Results Header */
+        .results-header {
+            display: none;
+            padding: 16px 0;
+            margin-bottom: 16px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .results-header.visible {
+            display: block;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .post-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .post-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            flex-shrink: 0;
+        }
+
+        .post-author {
+            flex: 1;
+        }
+
+        .post-author-name {
+            font-weight: 600;
+            color: #8b5cf6;
+            font-size: 15px;
+        }
+
+        .post-time {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .post-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-category {
+            background: rgba(99, 102, 241, 0.2);
+            color: #8b5cf6;
+        }
+
+        .badge-asuivre {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .post-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .post-content {
+            color: #c9d1d9;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .search-highlight {
+            background: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .post-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .post-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .post-stat i {
+            font-size: 16px;
+        }
+
+        .post-stat.liked {
+            color: #f85149;
+        }
+
+        .btn-view {
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-view:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: rgba(99, 102, 241, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: #8b949e;
+            font-size: 15px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .loading i {
+            font-size: 48px;
+            color: #8b5cf6;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-inner {
+                gap: 12px;
+            }
+
+            .logo {
+                font-size: 22px;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .search-container {
+                flex: 1;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .post-footer {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .btn-view {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="xalass-feed.html" class="logo">Xalass</a>
+            
+            <div class="search-container">
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input" 
+                       placeholder="Rechercher une histoire..." 
+                       autofocus>
+            </div>
+
+            <nav class="nav">
+                <a href="xalass-feed.html" class="nav-link">
+                    <i class="fa fa-home"></i>
+                    Accueil
+                </a>
+                <a href="xalass-search.html" class="nav-link active">
+                    <i class="fa fa-search"></i>
+                    Recherche
+                </a>
+                <a href="xalass-profile.html" class="nav-link">
+                    <i class="fa fa-user"></i>
+                    Profil
+                </a>
+            </nav>
+
+            <a href="xalass-profile.html">
+                <img id="headerAvatar" class="user-avatar" src="" alt="Avatar">
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="filters-title">
+                <i class="fa fa-filter"></i>
+                Filtrer par catégorie
+            </div>
+            <div class="filters-grid">
+                <button class="filter-btn active" data-category="all" onclick="setFilter('all')">
+                    <i class="fa fa-list"></i> Toutes
+                </button>
+                <button class="filter-btn" data-category="amour" onclick="setFilter('amour')">
+                    ❤️ Amour
+                </button>
+                <button class="filter-btn" data-category="amitie" onclick="setFilter('amitie')">
+                    👥 Amitié
+                </button>
+                <button class="filter-btn" data-category="social" onclick="setFilter('social')">
+                    🌍 Social
+                </button>
+                <button class="filter-btn" data-category="travail" onclick="setFilter('travail')">
+                    💼 Travail
+                </button>
+                <button class="filter-btn" data-category="autre" onclick="setFilter('autre')">
+                    ⭐ Autre
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div id="resultsHeader" class="results-header">
+            <span id="resultCount"></span>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer"></div>
+    </div>
+
+    <script src="js/main.min.js"></script>
+    <script src="js/xalass.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        let currentFilter = 'all';
+        let currentQuery = '';
+        let searchTimeout;
+
+        function getAvatarUrl(seed) {
+            return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            const intervals = {
+                an: 31536000,
+                mois: 2592000,
+                semaine: 604800,
+                jour: 86400,
+                heure: 3600,
+                minute: 60
+            };
+            
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `Il y a ${interval} ${unit}${interval > 1 && unit !== 'mois' ? 's' : ''}`;
+                }
+            }
+            return 'À l\'instant';
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'amour': 'Amour',
+                'amitie': 'Amitié',
+                'social': 'Social',
+                'travail': 'Travail',
+                'autre': 'Autre'
+            };
+            return labels[category] || 'Autre';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier l'authentification
+            const session = checkAuth();
+            if (!session) return;
+            
+            // Afficher l'avatar
+            const avatarSeed = session.avatar || session.user_id || 1;
+            document.getElementById('headerAvatar').src = getAvatarUrl(avatarSeed);
+            
+            // Récupérer la recherche depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            
+            if (query) {
+                document.getElementById('searchInput').value = query;
+                currentQuery = query;
+                performSearch();
+            } else {
+                showInitialState();
+            }
+            
+            // Écouter les changements de recherche
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                currentQuery = e.target.value;
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch();
+                }, 300);
+            });
+        });
+
+        function showInitialState() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa fa-search"></i>
+                    <h3>Rechercher des histoires</h3>
+                    <p>Entrez un mot-clé ou filtrez par catégorie pour trouver des histoires</p>
+                </div>
+            `;
+            document.getElementById('resultsHeader').classList.remove('visible');
+        }
+
+        function setFilter(category) {
+            currentFilter = category;
+            
+            // Mettre à jour l'UI
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            performSearch();
+        }
+
+        async function performSearch() {
+            const container = document.getElementById('resultsContainer');
+            const header = document.getElementById('resultsHeader');
+            
+            // Si pas de recherche et filtre "all", afficher l'état initial
+            if (!currentQuery && currentFilter === 'all') {
+                showInitialState();
+                return;
+            }
+            
+            // Afficher le chargement
+            container.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i></div>';
+            header.classList.remove('visible');
+            
+            try {
+                let results = [];
+                
+                if (currentFilter !== 'all' && !currentQuery) {
+                    results = await api.searchPosts(null, currentFilter);
+                } else if (currentQuery || currentFilter !== 'all') {
+                    results = await api.searchPosts(currentQuery || null, currentFilter !== 'all' ? currentFilter : null);
+                }
+                
+                displayResults(results);
+            } catch (error) {
+                console.error('Erreur lors de la recherche:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa fa-exclamation-triangle" style="color: #f85149;"></i>
+                        <h3>Erreur lors de la recherche</h3>
+                        <p>${error.message || 'Une erreur est survenue. Veuillez réessayer.'}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResults(posts) {
+            const container = document.getElementById('resultsContainer');
+            const header = document.getElementById('resultsHeader');
+            
+            if (posts.length === 0) {
+                header.classList.remove('visible');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa fa-search"></i>
+                        <h3>Aucun résultat</h3>
+                        <p>${currentQuery ? `Aucune histoire ne correspond à "${currentQuery}"` : 'Aucune histoire dans cette catégorie'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Afficher le header
+            header.classList.add('visible');
+            document.getElementById('resultCount').textContent = `${posts.length} histoire${posts.length > 1 ? 's' : ''} trouvée${posts.length > 1 ? 's' : ''}`;
+            
+            container.innerHTML = posts.map(post => {
+                const postId = post.post_id || post.id;
+                const isLiked = post.user_liked || false;
+                const author = post.author || {};
+                const authorPseudo = 'Anonyme';
+                const authorAvatar = author.avatar || author.avatar_id || author.avatar_seed || author.user_id || author.code_name || 1;
+                const createdAt = post.created_at || post.createdAt;
+                const isAsuivre = post.status === 'EN COURS';
+                
+                let displayContent = post.content || '';
+                let displayTitle = post.title || '';
+                
+                // Surligner les termes de recherche
+                if (currentQuery) {
+                    const terms = currentQuery.split(' ').filter(t => t.trim());
+                    terms.forEach(term => {
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        displayContent = displayContent.replace(regex, '<span class="search-highlight">$1</span>');
+                        displayTitle = displayTitle.replace(regex, '<span class="search-highlight">$1</span>');
+                    });
+                }
+                
+                // Tronquer le contenu
+                if (displayContent.length > 300) {
+                    displayContent = displayContent.substring(0, 300) + '...';
+                }
+                
+                return `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <img src="${getAvatarUrl(authorAvatar)}" alt="${authorPseudo}" class="post-avatar">
+                            <div class="post-author">
+                                <div class="post-author-name">${authorPseudo}</div>
+                                <div class="post-time">${timeAgo(createdAt)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="post-badges">
+                            <span class="badge badge-category">${getCategoryLabel(post.category)}</span>
+                            ${isAsuivre ? '<span class="badge badge-asuivre">📖 À suivre</span>' : ''}
+                        </div>
+                        
+                        ${displayTitle ? `<div class="post-title">${displayTitle}</div>` : ''}
+                        
+                        <div class="post-content">${displayContent}</div>
+                        
+                        <div class="post-footer">
+                            <div class="post-stats">
+                                <span class="post-stat ${isLiked ? 'liked' : ''}">
+                                    <i class="fa ${isLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
+                                    ${post.reactions_count || 0}
+                                </span>
+                                <span class="post-stat">
+                                    <i class="fa fa-comment-o"></i>
+                                    ${post.comments_count || 0}
+                                </span>
+                            </div>
+                            <a href="xalass-story.html?id=${postId}" class="btn-view">
+                                Lire l'histoire
+                                <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

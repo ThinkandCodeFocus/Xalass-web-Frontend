@@ -590,13 +590,9 @@
                 
                 loader.classList.add('hidden');
                 
-                if (session) {
-                    // Rediriger vers le feed
-                    window.location.href = 'xalass-feed.html';
-                } else {
-                    // Afficher la hero section
-                    hero.style.display = 'flex';
-                }
+                // Le feed est maintenant public: les visiteurs voient les histoires populaires,
+                // puis sont renvoyes vers connexion/inscription pour interagir.
+                window.location.href = 'xalass-feed.html';
             }, 1200);
         });
     </script>

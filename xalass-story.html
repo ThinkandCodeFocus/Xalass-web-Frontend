@@ -546,7 +546,13 @@
                                     <img src="" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <div style="flex: 1;">
+                                    <div class="v2-reply-target" id="replyTargetBanner" style="display: none;">
+                                        <span id="replyTargetText">Reponse ciblee</span>
+                                        <button type="button" onclick="cancelReplyTarget()" aria-label="Annuler la reponse ciblee">Annuler</button>
+                                    </div>
                                     <textarea id="commentText" placeholder="Ajouter un commentaire..." rows="2" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 10px; resize: none;"></textarea>
+                                    <div class="v2-alert" id="commentTextAlert" style="display: none;"></div>
+                                    <div class="v2-preview" id="commentTextPreview" aria-live="polite"></div>
                                     <button type="submit" class="mtr-btn" style="margin-top: 10px; padding: 8px 20px; font-size: 13px;">
                                         <span>Commenter</span>
                                     </button>
@@ -667,12 +673,14 @@
 </div>
 
 <!-- Charger les scripts API -->
-<script src="js/config.js"></script>
-<script src="js/api.js"></script>
-<script src="js/main.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/xalass-v2.js"></script>
+    <script src="js/main.min.js"></script>
 <script>
 let currentStoryId = null;
 let currentCommentId = null;
+let currentCommentPreview = '';
 let currentPost = null;
 let currentSession = null;
 let moreCommentsExpanded = false;
@@ -890,6 +898,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const avatarUrl = getAvatarUrl(session.avatar ?? session.user_id);
     document.querySelector('#headerAvatar img').src = avatarUrl;
     document.querySelector('#myAvatar img').src = avatarUrl;
+    XalassV2.attachLivePreview(document.getElementById('commentText'), document.getElementById('commentTextPreview'), document.getElementById('commentTextAlert'));
 
     const storyContainer = document.getElementById('storyContent');
     storyContainer.addEventListener('click', async function(e) {

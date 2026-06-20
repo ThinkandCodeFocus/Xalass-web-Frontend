@@ -1549,22 +1549,231 @@
             color: #8b5cf6;
         }
 
+        /* Single page app views */
+        .app-view {
+            display: none;
+        }
+
+        .app-view.active {
+            display: block;
+            animation: fadeIn 0.18s ease;
+        }
+
+        .view-card {
+            background: rgba(22, 27, 34, 0.72);
+            border: 1px solid rgba(99, 102, 241, 0.22);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+        }
+
+        .view-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: #e6edf3;
+        }
+
+        .view-muted {
+            color: #8b949e;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .view-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .view-list-item {
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            border-radius: 12px;
+            padding: 14px;
+            background: rgba(13, 17, 23, 0.42);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 12px;
+            background: rgba(13, 17, 23, 0.62);
+            color: #e6edf3;
+            font: inherit;
+            margin-bottom: 16px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .profile-stat {
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            border-radius: 12px;
+            padding: 14px;
+            background: rgba(13, 17, 23, 0.42);
+        }
+
+        .profile-stat strong {
+            display: block;
+            font-size: 22px;
+            color: #8b5cf6;
+        }
+
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        .back-inline-btn {
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.10);
+            color: #c9d1d9;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .story-detail-content {
+            white-space: pre-wrap;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #c9d1d9;
+            margin-top: 12px;
+        }
+
+        .public-cta-card {
+            display: none;
+            background: rgba(22, 27, 34, 0.78);
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .public-cta-card.active {
+            display: block;
+        }
+
+        .public-cta-card h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #e6edf3;
+        }
+
+        .public-cta-card p {
+            color: #8b949e;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .public-cta-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .public-cta-actions a {
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .public-cta-actions a.secondary {
+            background: rgba(99, 102, 241, 0.10);
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            color: #c9d1d9;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 78px;
+            }
+
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 4px;
+                padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+                background: rgba(13, 17, 23, 0.94);
+                border-top: 1px solid rgba(99, 102, 241, 0.24);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                z-index: 1500;
+            }
+
+            .bottom-nav-link {
+                min-height: 52px;
+                border: 0;
+                border-radius: 12px;
+                background: transparent;
+                color: #8b949e;
+                font: inherit;
+                font-size: 11px;
+                font-weight: 700;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+
+            .bottom-nav-link span {
+                font-size: 18px;
+                line-height: 1;
+            }
+
+            .bottom-nav-link.active {
+                color: #fff;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.92), rgba(139, 92, 246, 0.92));
+            }
+
+            .main-container {
+                padding-bottom: 18px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-inner">
             <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
-            <a href="xalass-feed.html" class="logo">Xalass</a>
+            <a href="#feed" class="logo" data-view-link="feed">Xalass</a>
             <nav class="nav">
-                <a href="xalass-feed.html" class="nav-link active">📖 Histoires</a>
-                <a href="xalass-search.html" class="nav-link">🔍 Rechercher</a>
-                <a href="xalass-friends.html" class="nav-link">👥 Mes amis</a>
-                <a href="xalass-notifications.html" class="nav-link">🔔 Notifications</a>
-                <a href="xalass-profile.html" class="nav-link">👤 Profil</a>
+                <a href="#feed" class="nav-link active" data-view-link="feed">📖 Histoires</a>
+                <a href="#search" class="nav-link" data-view-link="search">🔍 Rechercher</a>
+                <a href="#friends" class="nav-link" data-view-link="friends">👥 Mes amis</a>
+                <a href="#notifications" class="nav-link" data-view-link="notifications">🔔 Notifications</a>
+                <a href="#profile" class="nav-link" data-view-link="profile">👤 Profil</a>
             </nav>
             <div class="user-menu">
-                <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="location.href='xalass-profile.html'">
+                <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="showView('profile')">
                 <button class="btn-logout" onclick="logout()">Déconnexion</button>
             </div>
         </div>
@@ -1573,11 +1782,11 @@
     <!-- Menu mobile -->
     <nav class="mobile-nav" id="mobile-nav">
         <div class="mobile-nav-links">
-            <a href="xalass-feed.html" class="mobile-nav-link active" onclick="closeMobileNav()">📖 Histoires</a>
-            <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">🔍 Rechercher</a>
-            <a href="xalass-friends.html" class="mobile-nav-link" onclick="closeMobileNav()">👥 Mes amis</a>
-            <a href="xalass-notifications.html" class="mobile-nav-link" onclick="closeMobileNav()">🔔 Notifications</a>
-            <a href="xalass-profile.html" class="mobile-nav-link" onclick="closeMobileNav()">👤 Profil</a>
+            <a href="#feed" class="mobile-nav-link active" data-view-link="feed" onclick="closeMobileNav()">📖 Histoires</a>
+            <a href="#search" class="mobile-nav-link" data-view-link="search" onclick="closeMobileNav()">🔍 Rechercher</a>
+            <a href="#friends" class="mobile-nav-link" data-view-link="friends" onclick="closeMobileNav()">👥 Mes amis</a>
+            <a href="#notifications" class="mobile-nav-link" data-view-link="notifications" onclick="closeMobileNav()">🔔 Notifications</a>
+            <a href="#profile" class="mobile-nav-link" data-view-link="profile" onclick="closeMobileNav()">👤 Profil</a>
         </div>
     </nav>
 
@@ -1603,13 +1812,16 @@
             <div class="sidebar-card">
                 <h3>⚡ Actions rapides</h3>
                 <div class="quick-actions">
-                    <a href="xalass-profile.html" class="quick-action-btn">
+                    <a href="#profile" class="quick-action-btn" data-view-link="profile">
                         👤 Mon profil
                     </a>
-                    <a href="xalass-notifications.html" class="quick-action-btn">
+                    <a href="#notifications" class="quick-action-btn" data-view-link="notifications">
                         🔔 Notifications
                     </a>
-                    <a href="xalass-search.html" class="quick-action-btn">
+                    <a href="xalass-admin.html" class="quick-action-btn">
+                        Moderation admin
+                    </a>
+                    <a href="#search" class="quick-action-btn" data-view-link="search">
                         🔍 Rechercher
                     </a>
                 </div>
@@ -1618,12 +1830,23 @@
 
         <!-- Colonne centrale -->
         <main class="main">
+        <section class="app-view active" id="feed-view" data-view="feed">
+        <div class="public-cta-card" id="public-cta-card">
+            <h2>Les histoires les plus populaires</h2>
+            <p>Tu peux lire les publications qui ont le plus de reactions et commentaires. Pour voir la suite, aimer, commenter ou publier, connecte-toi ou cree un compte.</p>
+            <div class="public-cta-actions">
+                <a href="xalass-login.html#register">Creer un compte</a>
+                <a href="xalass-login.html#login" class="secondary">Se connecter</a>
+            </div>
+        </div>
+
         <!-- Publish Story -->
-        <div class="publish-card">
+        <div class="publish-card" id="publish-card">
             <div class="publish-header">
                 <img src="" alt="Avatar" class="publish-avatar" id="publish-avatar">
                 <div class="publish-input-wrapper">
                     <input type="text" class="publish-title" id="story-title" placeholder="Titre de ton histoire...">
+                    <div class="v2-counter" id="story-title-counter"></div>
                 </div>
             </div>
 
@@ -1636,6 +1859,8 @@
             <!-- Text Content -->
             <div class="content-section active" id="text-section">
                 <textarea class="publish-content" id="story-content" placeholder="Raconte ton histoire ici... Qu'est-ce que tu veux partager anonymement ?"></textarea>
+                <div class="v2-alert" id="story-content-alert" style="display: none;"></div>
+                <div class="v2-preview" id="story-content-preview" aria-live="polite"></div>
             </div>
 
             <!-- Voice Content -->
@@ -1704,6 +1929,42 @@
 
         <!-- Stories Feed -->
         <div id="stories-feed"></div>
+        </section>
+
+        <section class="app-view" id="story-detail-view" data-view="story">
+            <button class="back-inline-btn" onclick="showView('feed')">Retour au fil</button>
+            <div id="story-detail-content"></div>
+        </section>
+
+        <section class="app-view" id="search-view" data-view="search">
+            <div class="view-card">
+                <h2 class="view-title">Recherche</h2>
+                <input class="search-box" id="spa-search-input" type="search" placeholder="Rechercher une histoire, une categorie ou un mot..." oninput="renderSearchView()">
+                <div class="view-list" id="spa-search-results"></div>
+            </div>
+        </section>
+
+        <section class="app-view" id="friends-view" data-view="friends">
+            <div class="view-card">
+                <h2 class="view-title">Mes amis</h2>
+                <p class="view-muted">Retrouve ici les auteurs anonymes que tu suis. La liste se met a jour avec les boutons Suivre du fil.</p>
+                <div class="view-list" id="friends-list" style="margin-top: 16px;"></div>
+            </div>
+        </section>
+
+        <section class="app-view" id="notifications-view" data-view="notifications">
+            <div class="view-card">
+                <h2 class="view-title">Notifications</h2>
+                <div class="view-list" id="notifications-list"></div>
+            </div>
+        </section>
+
+        <section class="app-view" id="profile-view" data-view="profile">
+            <div class="view-card">
+                <h2 class="view-title">Profil</h2>
+                <div id="profile-content"></div>
+            </div>
+        </section>
         </main>
 
         <!-- Sidebar droite -->
@@ -1743,6 +2004,14 @@
             </div>
         </aside>
     </div>
+
+    <nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
+        <button class="bottom-nav-link active" type="button" data-view-link="feed"><span>H</span>Fil</button>
+        <button class="bottom-nav-link" type="button" data-view-link="search"><span>R</span>Search</button>
+        <button class="bottom-nav-link" type="button" data-view-link="friends"><span>A</span>Amis</button>
+        <button class="bottom-nav-link" type="button" data-view-link="notifications"><span>N</span>Notif</button>
+        <button class="bottom-nav-link" type="button" data-view-link="profile"><span>P</span>Profil</button>
+    </nav>
 
     <!-- Logout Modal -->
     <div class="logout-modal" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" onclick="closeLogoutModal()">
@@ -1804,11 +2073,30 @@
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/voice-recorder.js"></script>
+    <script src="js/xalass-v2.js"></script>
     
     <script>
         let currentFilter = 'all';
         let session = null;
         let allPosts = [];
+
+        function isAuthenticated() {
+            return Boolean(session && session.anon_uuid);
+        }
+
+        function redirectToAuth(mode = 'login') {
+            window.location.href = `xalass-login.html#${mode}`;
+        }
+
+        function requireAuthForAction(mode = 'login') {
+            if (isAuthenticated()) return true;
+            redirectToAuth(mode);
+            return false;
+        }
+
+        function getEngagementScore(post) {
+            return getCount(post?.reactions_count, post?.reactions) + getCount(post?.comments_count, post?.comments);
+        }
 
         // === Gestion des avatars stockés ===
         const USER_AVATARS_KEY = 'xalass_user_avatars';
@@ -1916,6 +2204,197 @@
             return story.post_id ?? story.id ?? 1;
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getPostAuthorId(post) {
+            return post?.author_id || post?.author?.user_id || post?.author?.id || null;
+        }
+
+        function showView(viewName, options = {}) {
+            const view = viewName || 'feed';
+            document.querySelectorAll('.app-view').forEach(section => {
+                section.classList.toggle('active', section.dataset.view === view);
+            });
+
+            document.querySelectorAll('[data-view-link]').forEach(link => {
+                link.classList.toggle('active', link.dataset.viewLink === view);
+            });
+
+            if (!options.skipHash) {
+                const hash = view === 'feed' ? '#feed' : `#${view}`;
+                if (window.location.hash !== hash) history.replaceState(null, '', hash);
+            }
+
+            closeMobileNav();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (view === 'search') renderSearchView();
+            if (view === 'friends') renderFriendsView();
+            if (view === 'notifications') renderNotificationsView();
+            if (view === 'profile') renderProfileView();
+        }
+
+        function bindSinglePageNavigation() {
+            document.querySelectorAll('[data-view-link]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const view = this.dataset.viewLink;
+                    if (!view) return;
+                    e.preventDefault();
+                    showView(view);
+                });
+            });
+
+            window.addEventListener('hashchange', handleInitialHash);
+        }
+
+        function handleInitialHash() {
+            const raw = window.location.hash.replace('#', '');
+            if (raw.startsWith('story-')) {
+                const postId = raw.replace('story-', '');
+                showStoryDetail(postId, { skipHash: true });
+                return;
+            }
+
+            const allowed = ['feed', 'search', 'friends', 'notifications', 'profile'];
+            showView(allowed.includes(raw) ? raw : 'feed', { skipHash: true });
+        }
+
+        function showStoryDetail(postId, options = {}) {
+            if (!requireAuthForAction('login')) return;
+            const story = allPosts.find(post => String(post.post_id) === String(postId));
+            const target = document.getElementById('story-detail-content');
+            if (!target) return;
+
+            if (!story) {
+                target.innerHTML = `
+                    <div class="view-card">
+                        <h2 class="view-title">Histoire introuvable</h2>
+                        <p class="view-muted">Elle n'est pas encore chargee dans le fil.</p>
+                    </div>
+                `;
+                showView('story', options);
+                return;
+            }
+
+            const reactionsCount = getCount(story.reactions_count, story.reactions);
+            const commentsCount = getCount(story.comments_count, story.comments);
+            const categoryClass = 'badge-' + (story.category || 'autre');
+            target.innerHTML = `
+                <article class="view-card">
+                    <div class="story-header">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(resolveAvatarSeedFromStory(story)))}" alt="Avatar" class="story-avatar">
+                        <div class="story-meta">
+                            <div class="story-author">Anonyme</div>
+                            <div class="story-time">${formatTime(story.created_at)}</div>
+                        </div>
+                        <span class="story-badge ${categoryClass}">${escapeHtml(story.category || 'autre')}</span>
+                    </div>
+                    <h2 class="story-title">${escapeHtml(story.title)}</h2>
+                    <div class="story-detail-content">${escapeHtml(story.content)}</div>
+                    <div class="story-actions">
+                        <button class="action-btn ${story.user_liked ? 'liked' : ''}" onclick="toggleLike(${story.post_id}); showStoryDetail(${story.post_id}, { skipHash: true })">
+                            ${story.user_liked ? '❤️' : '🤍'} ${reactionsCount}
+                        </button>
+                        <button class="action-btn" type="button">💬 ${commentsCount}</button>
+                        <button class="action-btn" onclick="shareStory(${story.post_id}, '${escapeHtml(story.title).replace(/'/g, "\\'")}')">📤 Partager</button>
+                        <button class="action-btn" onclick="reportStory(${story.post_id})">⚠️ Signaler</button>
+                    </div>
+                </article>
+            `;
+            showView('story', options);
+            if (!options.skipHash) history.replaceState(null, '', `#story-${postId}`);
+        }
+
+        function renderSearchView() {
+            const input = document.getElementById('spa-search-input');
+            const results = document.getElementById('spa-search-results');
+            if (!results) return;
+
+            const query = (input?.value || '').trim().toLowerCase();
+            const matches = allPosts.filter(post => {
+                if (!query) return true;
+                return [
+                    post.title,
+                    post.content,
+                    post.category,
+                    post.status
+                ].some(value => String(value || '').toLowerCase().includes(query));
+            }).slice(0, 20);
+
+            results.innerHTML = matches.length ? matches.map(post => `
+                <button class="view-list-item" type="button" onclick="showStoryDetail(${post.post_id})" style="text-align:left; cursor:pointer; color:inherit;">
+                    <strong>${escapeHtml(post.title)}</strong>
+                    <p class="view-muted">${escapeHtml((post.content || '').slice(0, 150))}${(post.content || '').length > 150 ? '...' : ''}</p>
+                </button>
+            `).join('') : `<p class="view-muted">Aucun resultat pour cette recherche.</p>`;
+        }
+
+        function renderFriendsView() {
+            const list = document.getElementById('friends-list');
+            if (!list) return;
+
+            const followed = allPosts
+                .map(post => getPostAuthorId(post))
+                .filter(authorId => isAuthenticated() && authorId && api.isFollowingLocal(authorId, session));
+            const unique = [...new Set(followed.map(String))];
+
+            list.innerHTML = unique.length ? unique.map((authorId, index) => `
+                <div class="view-list-item">
+                    <strong>Auteur anonyme ${index + 1}</strong>
+                    <p class="view-muted">Tu suis cet auteur. Ses histoires restent disponibles dans le fil.</p>
+                    <button class="action-btn" type="button" onclick="filterStories('all'); showView('feed')">Voir le fil</button>
+                </div>
+            `).join('') : `<p class="view-muted">Tu ne suis encore personne. Utilise le bouton Suivre sur une histoire pour remplir cette vue.</p>`;
+        }
+
+        function renderNotificationsView() {
+            const list = document.getElementById('notifications-list');
+            if (!list) return;
+
+            const liked = allPosts.filter(post => post.user_liked).slice(0, 6);
+            const latest = allPosts.slice(0, 4);
+            const items = [
+                ...liked.map(post => ({ title: 'Histoire aimee', text: post.title, postId: post.post_id })),
+                ...latest.map(post => ({ title: 'Nouvelle histoire', text: post.title, postId: post.post_id }))
+            ];
+
+            list.innerHTML = items.length ? items.map(item => `
+                <button class="view-list-item" type="button" onclick="showStoryDetail(${item.postId})" style="text-align:left; cursor:pointer; color:inherit;">
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <p class="view-muted">${escapeHtml(item.text)}</p>
+                </button>
+            `).join('') : `<p class="view-muted">Aucune notification pour le moment.</p>`;
+        }
+
+        function renderProfileView() {
+            const target = document.getElementById('profile-content');
+            if (!target) return;
+
+            const myPosts = allPosts.filter(post => session?.user_id && String(getPostAuthorId(post)) === String(session.user_id));
+            const liked = allPosts.filter(post => post.user_liked);
+            target.innerHTML = `
+                <div class="story-header">
+                    <img src="${escapeHtml(document.getElementById('user-avatar')?.src || '')}" alt="Avatar" class="story-avatar">
+                    <div class="story-meta">
+                        <div class="story-author">${escapeHtml(session?.code_name || session?.pseudo || 'Utilisateur anonyme')}</div>
+                        <div class="story-time">Compte Xalass</div>
+                    </div>
+                </div>
+                <div class="profile-grid">
+                    <div class="profile-stat"><strong>${allPosts.length}</strong><span class="view-muted">Posts</span></div>
+                    <div class="profile-stat"><strong>${myPosts.length}</strong><span class="view-muted">Mes posts</span></div>
+                    <div class="profile-stat"><strong>${liked.length}</strong><span class="view-muted">Likes</span></div>
+                </div>
+            `;
+        }
+
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             const bg = type === 'error'
@@ -1949,10 +2428,14 @@
 
         // Check auth
         function checkAuth() {
-            session = JSON.parse(localStorage.getItem('xalass_session'));
+            try {
+                session = JSON.parse(localStorage.getItem('xalass_session'));
+            } catch (e) {
+                session = null;
+            }
             if (!session || !session.anon_uuid) {
-                window.location.href = 'xalass-login.html';
-                return false;
+                session = null;
+                return true;
             }
             if (!session.user_id && session.id) {
                 session.user_id = session.id;
@@ -1972,6 +2455,17 @@
                 }
             }
             return true;
+        }
+
+        function updatePublicModeUi() {
+            const publicCta = document.getElementById('public-cta-card');
+            const publishCard = document.getElementById('publish-card');
+            const logoutBtn = document.querySelector('.btn-logout');
+            const isPublic = !isAuthenticated();
+
+            if (publicCta) publicCta.classList.toggle('active', isPublic);
+            if (publishCard) publishCard.style.display = isPublic ? 'none' : '';
+            if (logoutBtn) logoutBtn.style.display = isPublic ? 'none' : '';
         }
 
         // Format time
@@ -2093,7 +2587,15 @@
             }
 
             // Sort by date (déjà trié par le backend, mais on peut re-trier)
-            stories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            if (isAuthenticated()) {
+                stories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            } else {
+                stories.sort((a, b) => {
+                    const scoreDiff = getEngagementScore(b) - getEngagementScore(a);
+                    if (scoreDiff !== 0) return scoreDiff;
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+            }
 
             if (stories.length === 0) {
                 feed.innerHTML = `
@@ -2103,6 +2605,10 @@
                     </div>
                 `;
                 updateStats();
+                renderSearchView();
+                renderFriendsView();
+                renderNotificationsView();
+                renderProfileView();
                 return;
             }
 
@@ -2121,10 +2627,13 @@
                 const avatarSeed = resolveAvatarSeedFromStory(story);
                 const authorId = story.author_id || story.author?.user_id || story.author?.id;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);
-                const isFollowingAuthor = !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
+                const isFollowingAuthor = isAuthenticated() && !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
                 const followBtn = (!isOwner && authorId)
                     ? `<button class="follow-btn ${isFollowingAuthor ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">${isFollowingAuthor ? 'Abonne' : 'Suivre'}</button>`
                     : '';
+                const safeTitle = escapeHtml(story.title);
+                const rawContent = story.content || '';
+                const safeContent = escapeHtml(rawContent);
                 
                 return `
                     <article class="story-card">
@@ -2139,17 +2648,17 @@
                             ${followBtn}
                         </div>
                         <h2 class="story-title">
-                            <a href="xalass-story.html?id=${story.post_id}">${story.title}</a>
+                            <a href="#story-${story.post_id}" onclick="event.preventDefault(); showStoryDetail(${story.post_id})">${safeTitle}</a>
                         </h2>
-                        <p class="story-content">${story.content.substring(0, 300)}${story.content.length > 300 ? '...' : ''}</p>
+                        <p class="story-content">${safeContent.substring(0, 300)}${rawContent.length > 300 ? '...' : ''}</p>
                         <div class="story-actions">
                             <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.post_id})">
                                 ${isLiked ? '❤️' : '🤍'} ${reactionsCount}
                             </button>
-                            <button class="action-btn" onclick="location.href='xalass-story.html?id=${story.post_id}'">
+                            <button class="action-btn" onclick="showStoryDetail(${story.post_id})">
                                 💬 ${commentsCount}
                             </button>
-                            <button class="action-btn" onclick="shareStory(${story.post_id}, '${story.title}')">
+                            <button class="action-btn" onclick="shareStory(${story.post_id}, '${safeTitle.replace(/'/g, "\\'")}')">
                                 📤 Partager
                             </button>
                             <button class="action-btn" onclick="reportStory(${story.post_id})">
@@ -2168,6 +2677,10 @@
             
             // Mettre à jour les statistiques
             updateStats();
+            renderSearchView();
+            renderFriendsView();
+            renderNotificationsView();
+            renderProfileView();
         }
 
         // Charger plus de posts
@@ -2367,6 +2880,7 @@
 
         // Publish story - Utilise l'API
         async function publishStory() {
+            if (!requireAuthForAction('register')) return;
             const title = document.getElementById('story-title').value.trim();
             const category = document.getElementById('story-category').value;
             const isFollowing = document.getElementById('story-following').checked;
@@ -2380,6 +2894,12 @@
                     showToast('Remplis le contenu de ton histoire', 'error');
                     return;
                 }
+                const contentValidation = XalassV2.validateTextContent(content, { requireText: true });
+                if (!contentValidation.ok) {
+                    showToast(contentValidation.errors[0], 'error');
+                    return;
+                }
+                content = contentValidation.sanitized;
             } else {
                 // Mode vocal
                 if (!selectedVoiceRecording) {
@@ -2392,6 +2912,11 @@
 
             if (!title) {
                 showToast('Remplis le titre de ton histoire', 'error');
+                return;
+            }
+            const titleValidation = XalassV2.validateTitle(title);
+            if (!titleValidation.ok) {
+                showToast(titleValidation.errors[0], 'error');
                 return;
             }
 
@@ -2407,6 +2932,8 @@
                 // Clear form
                 document.getElementById('story-title').value = '';
                 document.getElementById('story-content').value = '';
+                XalassV2.attachTitleCounter(document.getElementById('story-title'), document.getElementById('story-title-counter'));
+                XalassV2.attachLivePreview(document.getElementById('story-content'), document.getElementById('story-content-preview'), document.getElementById('story-content-alert'));
                 document.getElementById('story-category').value = 'autre';
                 document.getElementById('story-following').checked = false;
                 
@@ -2438,6 +2965,7 @@
 
         // Toggle like - Utilise l'API avec mise à jour optimiste
         async function toggleLike(postId) {
+            if (!requireAuthForAction('login')) return;
             // Trouver le post dans la liste
             const post = allPosts.find(p => p.post_id === postId);
             if (!post) return;
@@ -2468,7 +2996,7 @@
 
         // Share story
         function shareStory(postId, title) {
-            const url = window.location.origin + window.location.pathname.replace('xalass-feed.html', '') + 'xalass-story.html?id=' + postId;
+            const url = window.location.origin + window.location.pathname + '#story-' + postId;
             
             if (navigator.share) {
                 navigator.share({
@@ -2531,6 +3059,7 @@
         }
 
         function reportStory(postId) {
+            if (!requireAuthForAction('login')) return;
             openReportModal(postId);
         }
 
@@ -2728,17 +3257,22 @@
         // Init
         document.addEventListener('DOMContentLoaded', async function() {
             if (!checkAuth()) return;
+            bindSinglePageNavigation();
+            updatePublicModeUi();
             
             // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
-            const avatarSeed = session.avatar || session.user_id || 1;
+            const avatarSeed = session?.avatar || session?.user_id || 'visiteur';
             const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}`;
             document.getElementById('user-avatar').src = avatarUrl;
             document.getElementById('publish-avatar').src = avatarUrl;
+            XalassV2.attachTitleCounter(document.getElementById('story-title'), document.getElementById('story-title-counter'));
+            XalassV2.attachLivePreview(document.getElementById('story-content'), document.getElementById('story-content-preview'), document.getElementById('story-content-alert'));
 
             const feed = document.getElementById('stories-feed');
             feed.addEventListener('click', async function(e) {
                 const btn = e.target.closest('.follow-btn');
                 if (!btn) return;
+                if (!requireAuthForAction('login')) return;
 
                 const authorId = btn.dataset.followAuthorId;
                 if (!authorId) return;
@@ -2757,6 +3291,7 @@
                         b.classList.toggle('is-following', nowFollowing);
                         b.textContent = nowFollowing ? 'Abonne' : 'Suivre';
                     });
+                    renderFriendsView();
                     showToast(nowFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
                 } catch (err) {
                     showToast('Erreur réseau, réessayez.', 'error');
@@ -2766,9 +3301,12 @@
             });
 
             // Hydrater le cache des abonnements depuis le backend
-            await api.hydrateFollowCache(session);
+            if (isAuthenticated()) {
+                await api.hydrateFollowCache(session);
+            }
             // Charger les posts (avec cache)
             await loadPosts();
+            handleInitialHash();
             
             // Connecter SSE pour les mises à jour en temps réel
             connectSSE();

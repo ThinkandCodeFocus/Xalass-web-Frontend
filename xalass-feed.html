@@ -3308,15 +3308,7 @@
             await loadPosts();
             handleInitialHash();
             
-            // Connecter SSE pour les mises à jour en temps réel
-            connectSSE();
-            
-            // Nettoyer la connexion SSE quand on quitte la page
-            window.addEventListener('beforeunload', function() {
-                if (eventSource) {
-                    eventSource.close();
-                }
-            });
+            // SSE désactivé — endpoint /api/stream/posts non implémenté côté backend
         });
     </script>
 </body>

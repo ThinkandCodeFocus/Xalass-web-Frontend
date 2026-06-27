@@ -69,7 +69,7 @@ async function validateContent(text) {
         try {
             const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : null)
                       || (typeof window !== 'undefined' && window.API_BASE_URL ? window.API_BASE_URL : null)
-                      || 'http://127.0.0.1:8000/api';
+                      || 'https://api.xalass.com//api';
 
             const resp = await fetch(`${base}/moderation/words`);
             if (!resp.ok) return;

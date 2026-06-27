@@ -143,7 +143,7 @@ php artisan db:seed
 1. **Lancer le Backend :**
    - Double-cliquez sur `LANCER_BACKEND.bat`
    - Une fenêtre de terminal s'ouvre
-   - Vous devriez voir : `Server running on [http://127.0.0.1:8000]`
+   - Vous devriez voir : `Server running on [https://api.xalass.com/]`
    - **⚠️ Ne fermez PAS cette fenêtre**
 
 2. **Lancer le Frontend :**
@@ -167,7 +167,7 @@ php artisan serve
 
 **Résultat attendu :**
 ```
-INFO  Server running on [http://127.0.0.1:8000]
+INFO  Server running on [https://api.xalass.com/]
 ```
 
 #### Terminal 2 - Frontend
@@ -205,12 +205,12 @@ Dans un nouveau terminal :
 
 **Windows (PowerShell) :**
 ```powershell
-Invoke-WebRequest -Uri "http://127.0.0.1:8000/api/health" -Method GET
+Invoke-WebRequest -Uri "https://api.xalass.com//api/health" -Method GET
 ```
 
 **Linux/Mac :**
 ```bash
-curl http://127.0.0.1:8000/api/health
+curl https://api.xalass.com//api/health
 ```
 
 **Résultat attendu :**
@@ -281,7 +281,7 @@ Le fichier `Winku-Social-Network-Corporate-Responsive-Template/js/config.js` con
 
 ```javascript
 const API_CONFIG = {
-    BASE_URL: 'http://127.0.0.1:8000/api',
+    BASE_URL: 'https://api.xalass.com//api',
     // ...
 };
 ```
@@ -367,7 +367,7 @@ Les principales configurations sont dans `Xalass_Backend/.env` :
 
 **Erreur dans la console :** `Impossible de se connecter au serveur`
 - **Solution :** 
-  1. Vérifiez que le backend est lancé : `http://127.0.0.1:8000/api/health`
+  1. Vérifiez que le backend est lancé : `https://api.xalass.com//api/health`
   2. Vérifiez l'URL dans `js/config.js`
   3. Ouvrez la console (F12) et vérifiez les erreurs réseau
 
@@ -377,7 +377,7 @@ Les principales configurations sont dans `Xalass_Backend/.env` :
 - **Solution :** 
   1. Vérifiez que vous êtes connecté (UUID présent dans localStorage)
   2. Vérifiez la console (F12) pour les erreurs
-  3. Vérifiez que le backend répond : `http://127.0.0.1:8000/api/health`
+  3. Vérifiez que le backend répond : `https://api.xalass.com//api/health`
 
 ---
 
@@ -450,8 +450,8 @@ Une fois les serveurs lancés :
 - **Détail post :** `http://localhost:8080/xalass-story.html?id=1`
 
 **API :**
-- **Health Check :** `http://127.0.0.1:8000/api/health`
-- **API Base :** `http://127.0.0.1:8000/api`
+- **Health Check :** `https://api.xalass.com//api/health`
+- **API Base :** `https://api.xalass.com//api`
 
 ---
 

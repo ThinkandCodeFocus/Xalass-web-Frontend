@@ -2801,10 +2801,10 @@
             // Appliquer l'effet d'anonymat si demandé
             const shouldApplyEffect = document.getElementById('applyAnonymityEffect').checked;
             let finalAudioData = audioData;
-            
+
             if (shouldApplyEffect) {
-                showToast('Application de l\'effet d\'anonymat...', 'info');
-                finalAudioData = await VoiceEffects.applyAnonymityEffect(audioData);
+                showToast('Anonymisation en cours…', 'info');
+                finalAudioData = await anonymizeAudio(audioData);
             }
             
             // Créer un objet d'enregistrement

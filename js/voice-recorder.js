@@ -42,24 +42,29 @@ const VoiceRecorder = {
         }
     },
 
+    MAX_DURATION: 60,
+
     /**
      * Démarre l'enregistrement
      */
     start() {
         if (!this.mediaRecorder) return false;
-        
+
         this.audioChunks = [];
         this.recordingTime = 0;
         this.isRecording = true;
         this.mediaRecorder.start();
-        
-        // Compteur de temps
+
+        // Compteur de temps + arrêt automatique à MAX_DURATION secondes
         this.recordingInterval = setInterval(() => {
             this.recordingTime++;
-            const event = new CustomEvent('recordingTime', { 
-                detail: { duration: this.recordingTime } 
-            });
-            document.dispatchEvent(event);
+            document.dispatchEvent(new CustomEvent('recordingTime', {
+                detail: { duration: this.recordingTime }
+            }));
+            if (this.recordingTime >= this.MAX_DURATION) {
+                this.stop();
+                document.dispatchEvent(new CustomEvent('recordingMaxDuration'));
+            }
         }, 1000);
         
         // Visualisation
@@ -186,65 +191,79 @@ const VoiceEffects = {
     },
 
     /**
-     * Traite le buffer audio avec effets
+     * Génère un nombre aléatoire dans [min, max]
      */
-    processAudioBuffer(audioBuffer, audioContext) {
-        const offlineContext = new OfflineAudioContext(
-            audioBuffer.numberOfChannels,
-            audioBuffer.length,
-            audioBuffer.sampleRate
-        );
-        
-        const source = offlineContext.createBufferSource();
-        source.buffer = audioBuffer;
-        
-        // 1. Pitch Shifter (augmente la fréquence)
-        const pitchShifter = this.createPitchShifter(offlineContext, 1.3);
-        
-        // 2. Distortion (ajoute du bruit)
-        const distortion = offlineContext.createWaveShaper();
-        distortion.curve = this.makeDistortionCurve(100);
-        
-        // 3. EQ (renforce les hautes fréquences)
-        const highShelf = offlineContext.createBiquadFilter();
-        highShelf.type = 'highShelf';
-        highShelf.frequency.value = 3000;
-        highShelf.gain.value = 10;
-        
-        const lowShelf = offlineContext.createBiquadFilter();
-        lowShelf.type = 'lowShelf';
-        lowShelf.frequency.value = 200;
-        lowShelf.gain.value = -8;
-        
-        // 4. Compresseur
-        const compressor = offlineContext.createDynamicsCompressor();
-        compressor.threshold.value = -30;
-        compressor.knee.value = 40;
-        compressor.ratio.value = 12;
-        compressor.attack.value = 0.003;
-        compressor.release.value = 0.25;
-        
-        // Chaîne de filtres
-        source.connect(pitchShifter);
-        pitchShifter.connect(distortion);
-        distortion.connect(lowShelf);
-        lowShelf.connect(highShelf);
-        highShelf.connect(compressor);
-        compressor.connect(offlineContext.destination);
-        
-        source.start();
-        
-        return offlineContext.startRendering().then((renderedBuffer) => {
-            return renderedBuffer;
-        });
+    _rand(min, max) {
+        return min + Math.random() * (max - min);
     },
 
     /**
-     * Crée un pitch shifter (modifie la hauteur)
+     * Traite le buffer audio avec paramètres aléatoires pour l'anonymisation
      */
-    createPitchShifter(context, ratio) {
-        const processor = context.createGain();
-        return processor;
+    processAudioBuffer(audioBuffer, audioContext) {
+        // Paramètres aléatoires — différents à chaque enregistrement
+        const pitchRate    = this._rand(0.85, 1.45);   // grave (0.85) → aigu (1.45)
+        const distAmount   = this._rand(60, 220);
+        const highGain     = this._rand(6, 18);
+        const lowGain      = this._rand(-14, -4);
+        const highFreq     = this._rand(2500, 5000);
+        const lowFreq      = this._rand(120, 300);
+        const compRatio    = this._rand(8, 16);
+        const compThresh   = this._rand(-40, -20);
+
+        // Durée modifiée par playbackRate (approximation de pitch shift)
+        const outLength = Math.ceil(audioBuffer.length / pitchRate);
+
+        const offlineContext = new OfflineAudioContext(
+            audioBuffer.numberOfChannels,
+            outLength,
+            audioBuffer.sampleRate
+        );
+
+        const source = offlineContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = pitchRate;  // pitch shift via rate
+
+        // Distortion
+        const distortion = offlineContext.createWaveShaper();
+        distortion.curve = this.makeDistortionCurve(distAmount);
+        distortion.oversample = '4x';
+
+        // Formant simulation via bandpass + notch
+        const bandpass = offlineContext.createBiquadFilter();
+        bandpass.type = 'bandpass';
+        bandpass.frequency.value = this._rand(800, 2200);
+        bandpass.Q.value = this._rand(0.3, 1.2);
+
+        // EQ
+        const highShelf = offlineContext.createBiquadFilter();
+        highShelf.type = 'highShelf';
+        highShelf.frequency.value = highFreq;
+        highShelf.gain.value = highGain;
+
+        const lowShelf = offlineContext.createBiquadFilter();
+        lowShelf.type = 'lowShelf';
+        lowShelf.frequency.value = lowFreq;
+        lowShelf.gain.value = lowGain;
+
+        // Compresseur
+        const compressor = offlineContext.createDynamicsCompressor();
+        compressor.threshold.value = compThresh;
+        compressor.knee.value = 40;
+        compressor.ratio.value = compRatio;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.25;
+
+        source.connect(distortion);
+        distortion.connect(bandpass);
+        bandpass.connect(lowShelf);
+        lowShelf.connect(highShelf);
+        highShelf.connect(compressor);
+        compressor.connect(offlineContext.destination);
+
+        source.start();
+
+        return offlineContext.startRendering().then((renderedBuffer) => renderedBuffer);
     },
 
     /**
@@ -372,3 +391,35 @@ const VoicePlayer = {
         }
     }
 };
+
+/**
+ * Anonymise un audio base64 :
+ * 1. Essaie d'abord le backend /api/voice/anonymize (traitement FFmpeg côté serveur)
+ * 2. Si indisponible ou erreur, repli sur VoiceEffects côté client
+ */
+async function anonymizeAudio(base64Audio) {
+    try {
+        // Détecter l'URL de base de l'API (config.js définit API_BASE_URL ou window.API_BASE_URL)
+        const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : null)
+                  || (typeof window !== 'undefined' && window.API_BASE_URL ? window.API_BASE_URL : null)
+                  || 'http://127.0.0.1:8000/api';
+
+        const resp = await fetch(`${base}/voice/anonymize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio_data: base64Audio }),
+        });
+
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.success && data.audio_data) {
+                return data.audio_data;
+            }
+        }
+    } catch (_) {
+        // Réseau indisponible ou backend non démarré — repli silencieux
+    }
+
+    // Fallback client-side
+    return VoiceEffects.applyAnonymityEffect(base64Audio);
+}

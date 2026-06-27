@@ -308,9 +308,10 @@ class XalassAPI {
         });
     }
 
-    async createComment(postId, content, parentId = null) {
+    async createComment(postId, content, parentId = null, audioData = null) {
         const body = { post_id: postId, content };
         if (parentId) body.parent_id = parentId;
+        if (audioData) body.audio_data = audioData;
         const response = await this.request('/create/comment', {
             method: 'POST',
             body: JSON.stringify(body)

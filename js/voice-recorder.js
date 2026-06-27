@@ -163,31 +163,35 @@ const VoiceEffects = {
      * Applique l'effet d'anonymat à un audio Base64
      */
     async applyAnonymityEffect(base64Audio) {
-        return new Promise((resolve) => {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const binary = atob(base64Audio.split(',')[1]);
-            const len = binary.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
+        try {
+            // Extraire les bytes depuis data URL ou base64 brut
+            const parts = base64Audio.split(',');
+            const b64 = parts.length > 1 ? parts[1] : parts[0];
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
                 bytes[i] = binary.charCodeAt(i);
             }
-            
-            audioContext.decodeAudioData(bytes.buffer, (audioBuffer) => {
-                const effectBuffer = this.processAudioBuffer(audioBuffer, audioContext);
-                const wavData = this.audioBufferToWav(effectBuffer);
-                const blob = new Blob([wavData], { type: 'audio/wav' });
-                
+
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(bytes.buffer.slice(0));
+            audioContext.close();
+
+            // processAudioBuffer retourne une Promise — on l'attend
+            const processedBuffer = await this.processAudioBuffer(audioBuffer);
+
+            const wavData = this.audioBufferToWav(processedBuffer);
+            const blob = new Blob([wavData], { type: 'audio/wav' });
+
+            return await new Promise((resolve) => {
                 const reader = new FileReader();
-                reader.onloadend = () => {
-                    resolve(reader.result);
-                };
+                reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(blob);
-            }, (error) => {
-                console.error('Erreur décodage audio:', error);
-                resolve(base64Audio); // Retour à original en cas d'erreur
-                audioContext.close();
             });
-        });
+        } catch (error) {
+            console.error('Erreur effet audio:', error);
+            return base64Audio;
+        }
     },
 
     /**
@@ -200,7 +204,7 @@ const VoiceEffects = {
     /**
      * Traite le buffer audio avec paramètres aléatoires pour l'anonymisation
      */
-    processAudioBuffer(audioBuffer, audioContext) {
+    processAudioBuffer(audioBuffer) {
         // Paramètres aléatoires — différents à chaque enregistrement
         const pitchRate    = this._rand(0.85, 1.45);   // grave (0.85) → aigu (1.45)
         const distAmount   = this._rand(60, 220);
@@ -237,12 +241,12 @@ const VoiceEffects = {
 
         // EQ
         const highShelf = offlineContext.createBiquadFilter();
-        highShelf.type = 'highShelf';
+        highShelf.type = 'highshelf';
         highShelf.frequency.value = highFreq;
         highShelf.gain.value = highGain;
 
         const lowShelf = offlineContext.createBiquadFilter();
-        lowShelf.type = 'lowShelf';
+        lowShelf.type = 'lowshelf';
         lowShelf.frequency.value = lowFreq;
         lowShelf.gain.value = lowGain;
 

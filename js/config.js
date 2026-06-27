@@ -1,6 +1,6 @@
 // Configuration de l'API Backend (local en developpement par defaut)
 const API_CONFIG = (() => {
-    const DEFAULT_BASE_URL = 'https://api.xalass.com/api';
+    const DEFAULT_BASE_URL = 'https://babacar.alwaysdata.net/api';
     const STORAGE_KEY = 'xalass_api_base_url';
     const QUERY_KEY = 'api_base_url';
 

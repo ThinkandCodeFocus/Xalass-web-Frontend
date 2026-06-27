@@ -22,7 +22,10 @@ const VoiceRecorder = {
             this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.analyser = this.audioContext.createAnalyser();
-            this.mediaRecorder = new MediaRecorder(this.stream);
+            // Choisir le format supporté par le navigateur (mp4 sur iOS, webm sur Android/Chrome)
+            const preferred = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+            const mimeType = preferred.find(t => MediaRecorder.isTypeSupported(t)) || '';
+            this.mediaRecorder = new MediaRecorder(this.stream, mimeType ? { mimeType } : {});
             
             this.mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -94,7 +97,9 @@ const VoiceRecorder = {
      * Callback quand l'enregistrement est terminé
      */
     onRecordingStop() {
-        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+        // Utiliser le vrai type MIME de ce que MediaRecorder a enregistré
+        const mimeType = (this.mediaRecorder && this.mediaRecorder.mimeType) || 'audio/webm';
+        const audioBlob = new Blob(this.audioChunks, { type: mimeType });
         this.blobToBase64(audioBlob, (base64Audio) => {
             const event = new CustomEvent('recordingComplete', { 
                 detail: { 
@@ -336,7 +341,7 @@ const VoiceEffects = {
      */
     interleave(audioBuffer) {
         const numberOfChannels = audioBuffer.numberOfChannels;
-        const length = audioBuffer.length * numberOfChannels * 2;
+        const length = audioBuffer.length * numberOfChannels;
         const data = new Float32Array(length);
         const channels = [];
         
@@ -403,9 +408,8 @@ const VoicePlayer = {
  */
 async function anonymizeAudio(base64Audio) {
     try {
-        // Détecter l'URL de base de l'API (config.js définit API_BASE_URL ou window.API_BASE_URL)
-        const base = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : null)
-                  || (typeof window !== 'undefined' && window.API_BASE_URL ? window.API_BASE_URL : null)
+        const base = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL ? API_CONFIG.BASE_URL : null)
+                  || (typeof window !== 'undefined' && window.XALASS_API_BASE_URL ? window.XALASS_API_BASE_URL : null)
                   || 'https://api.xalass.com/api';
 
         const resp = await fetch(`${base}/voice/anonymize`, {

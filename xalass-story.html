@@ -546,13 +546,57 @@
                                     <img src="" style="width: 100%; height: 100%; object-fit: cover;">
                                 </div>
                                 <div style="flex: 1;">
-                                    <div class="v2-reply-target" id="replyTargetBanner" style="display: none;">
-                                        <span id="replyTargetText">Reponse ciblee</span>
-                                        <button type="button" onclick="cancelReplyTarget()" aria-label="Annuler la reponse ciblee">Annuler</button>
+                                    <div id="replyTargetBanner" style="display:none; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; padding:9px 14px; border-radius:8px; background:rgba(99,102,241,0.10); border-left:3px solid #6366f1; color:#c7d2fe; font-size:13px; animation:none;">
+                                        <span id="replyTargetText" style="flex:1;"></span>
+                                        <button type="button" onclick="cancelReplyTarget()" aria-label="Annuler la réponse ciblée" style="border:0;background:transparent;color:#8b949e;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:4px;">✕</button>
                                     </div>
-                                    <textarea id="commentText" placeholder="Ajouter un commentaire..." rows="2" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 10px; resize: none;"></textarea>
-                                    <div class="v2-alert" id="commentTextAlert" style="display: none;"></div>
-                                    <div class="v2-preview" id="commentTextPreview" aria-live="polite"></div>
+
+                                    <!-- Onglets texte / vocal -->
+                                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                                        <button type="button" id="cmtTabText" onclick="switchCommentMode('text')"
+                                            style="padding:5px 14px;border-radius:20px;border:1px solid #6366f1;background:#6366f1;color:#fff;font-size:12px;cursor:pointer;">
+                                            ✏️ Texte
+                                        </button>
+                                        <button type="button" id="cmtTabVoice" onclick="switchCommentMode('voice')"
+                                            style="padding:5px 14px;border-radius:20px;border:1px solid #eee;background:transparent;color:#999;font-size:12px;cursor:pointer;">
+                                            🎤 Vocal
+                                        </button>
+                                    </div>
+
+                                    <!-- Mode texte -->
+                                    <div id="cmtTextMode">
+                                        <textarea id="commentText" placeholder="Ajouter un commentaire..." rows="2" style="width: 100%; border: 1px solid #eee; border-radius: 8px; padding: 10px; resize: none;"></textarea>
+                                        <div class="v2-alert" id="commentTextAlert" style="display: none;"></div>
+                                        <div class="v2-preview" id="commentTextPreview" aria-live="polite"></div>
+                                    </div>
+
+                                    <!-- Mode vocal -->
+                                    <div id="cmtVoiceMode" style="display:none;">
+                                        <div style="border:1px solid #eee; border-radius:8px; padding:14px; background:#fafafa; text-align:center;">
+                                            <div id="cmtRecordStatus" style="color:#666; font-size:13px; margin-bottom:10px;">
+                                                Appuie sur le micro pour enregistrer ton commentaire vocal
+                                            </div>
+                                            <div style="display:flex; align-items:center; justify-content:center; gap:14px;">
+                                                <button type="button" id="cmtMicBtn" onclick="toggleCommentRecording()"
+                                                    style="width:52px;height:52px;border-radius:50%;border:none;background:#6366f1;color:#fff;font-size:22px;cursor:pointer;transition:all 0.2s;">
+                                                    🎤
+                                                </button>
+                                                <span id="cmtRecordTimer" style="font-size:18px;font-weight:600;color:#6366f1;display:none;">0:00</span>
+                                            </div>
+                                            <canvas id="cmtWaveform" width="260" height="40" style="display:none; margin-top:10px; border-radius:6px; background:#eef;"></canvas>
+                                            <div id="cmtAudioPreview" style="display:none; margin-top:12px;">
+                                                <audio id="cmtAudioPlayer" controls style="width:100%; border-radius:8px;"></audio>
+                                                <button type="button" onclick="discardCommentAudio()"
+                                                    style="margin-top:6px;border:none;background:transparent;color:#f85149;font-size:12px;cursor:pointer;">
+                                                    🗑 Supprimer l'enregistrement
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p style="color:#999;font-size:11px;margin-top:6px;text-align:center;">
+                                            🔒 Ta voix sera automatiquement anonymisée avant envoi
+                                        </p>
+                                    </div>
+
                                     <button type="submit" class="mtr-btn" style="margin-top: 10px; padding: 8px 20px; font-size: 13px;">
                                         <span>Commenter</span>
                                     </button>
@@ -676,6 +720,7 @@
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/xalass-v2.js"></script>
+    <script src="js/voice-recorder.js"></script>
     <script src="js/main.min.js"></script>
 <script>
 let currentStoryId = null;
@@ -684,6 +729,129 @@ let currentCommentPreview = '';
 let currentPost = null;
 let currentSession = null;
 let moreCommentsExpanded = false;
+
+// Map comment_id → comment object (top-level + replies) for 2-level nesting check
+let commentsMap = {};
+
+// Voice recording state for comments
+let commentAudioData = null;
+let commentVoiceRecorder = null;
+let commentRecordingMode = 'text';
+
+function switchCommentMode(mode) {
+    commentRecordingMode = mode;
+    document.getElementById('cmtTextMode').style.display  = mode === 'text'  ? 'block' : 'none';
+    document.getElementById('cmtVoiceMode').style.display = mode === 'voice' ? 'block' : 'none';
+    const btnText  = document.getElementById('cmtTabText');
+    const btnVoice = document.getElementById('cmtTabVoice');
+    if (btnText && btnVoice) {
+        btnText.style.background  = mode === 'text'  ? '#6366f1' : 'transparent';
+        btnText.style.color       = mode === 'text'  ? '#fff'    : '#999';
+        btnText.style.borderColor = mode === 'text'  ? '#6366f1' : '#eee';
+        btnVoice.style.background = mode === 'voice' ? '#6366f1' : 'transparent';
+        btnVoice.style.color      = mode === 'voice' ? '#fff'    : '#999';
+        btnVoice.style.borderColor= mode === 'voice' ? '#6366f1' : '#eee';
+    }
+    if (mode === 'text') discardCommentAudio();
+}
+
+async function toggleCommentRecording() {
+    const btn    = document.getElementById('cmtMicBtn');
+    const status = document.getElementById('cmtRecordStatus');
+    const timer  = document.getElementById('cmtRecordTimer');
+    const canvas = document.getElementById('cmtWaveform');
+
+    if (!commentVoiceRecorder || !commentVoiceRecorder.isRecording) {
+        // Start
+        discardCommentAudio();
+        if (!commentVoiceRecorder) {
+            commentVoiceRecorder = Object.assign({}, VoiceRecorder);
+        }
+        const ok = await commentVoiceRecorder.init();
+        if (!ok) return;
+
+        commentVoiceRecorder.start();
+
+        btn.textContent = '⏹';
+        btn.style.background = '#f85149';
+        status.textContent = 'Enregistrement en cours…';
+        timer.style.display = 'inline';
+        canvas.style.display = 'block';
+
+        document.addEventListener('recordingTime', _onCmtRecordingTime);
+        document.addEventListener('recordingComplete', _onCmtRecordingComplete);
+        document.addEventListener('audioVisualize', _onCmtVisualize);
+    } else {
+        commentVoiceRecorder.stop();
+        btn.textContent = '🎤';
+        btn.style.background = '#6366f1';
+        status.textContent = 'Traitement en cours…';
+        timer.style.display = 'none';
+        canvas.style.display = 'none';
+        document.removeEventListener('recordingTime', _onCmtRecordingTime);
+        document.removeEventListener('audioVisualize', _onCmtVisualize);
+    }
+}
+
+function _onCmtRecordingTime(e) {
+    const s = e.detail.duration;
+    const timer = document.getElementById('cmtRecordTimer');
+    if (timer) timer.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function _onCmtVisualize(e) {
+    const canvas = document.getElementById('cmtWaveform');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const data = e.detail.data;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#c7d2fe';
+    const barWidth = canvas.width / data.length;
+    data.forEach((v, i) => {
+        const h = (v / 255) * canvas.height;
+        ctx.fillRect(i * barWidth, canvas.height - h, barWidth - 1, h);
+    });
+}
+
+async function _onCmtRecordingComplete(e) {
+    document.removeEventListener('recordingComplete', _onCmtRecordingComplete);
+    const status  = document.getElementById('cmtRecordStatus');
+    const preview = document.getElementById('cmtAudioPreview');
+    const player  = document.getElementById('cmtAudioPlayer');
+
+    if (status) status.textContent = '⏳ Anonymisation en cours…';
+
+    try {
+        // Tente le backend d'abord, repli client-side si indisponible
+        const anonymized = await anonymizeAudio(e.detail.audioData);
+        commentAudioData = anonymized;
+
+        if (player) player.src = anonymized;
+        if (preview) preview.style.display = 'block';
+        if (status)  status.textContent    = '✅ Enregistrement prêt — écoute avant d\'envoyer';
+    } catch (err) {
+        commentAudioData = e.detail.audioData;
+        if (player) player.src = commentAudioData;
+        if (preview) preview.style.display = 'block';
+        if (status)  status.textContent    = '⚠️ Anonymisation partielle';
+    }
+}
+
+function discardCommentAudio() {
+    commentAudioData = null;
+    const preview = document.getElementById('cmtAudioPreview');
+    const player  = document.getElementById('cmtAudioPlayer');
+    const status  = document.getElementById('cmtRecordStatus');
+    const timer   = document.getElementById('cmtRecordTimer');
+    if (preview) preview.style.display = 'none';
+    if (player)  player.src = '';
+    if (timer)   timer.style.display = 'none';
+    if (status)  status.textContent = 'Appuie sur le micro pour enregistrer ton commentaire vocal';
+    if (commentVoiceRecorder) {
+        try { commentVoiceRecorder.destroy(); } catch(_) {}
+        commentVoiceRecorder = null;
+    }
+}
 
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -1101,6 +1269,13 @@ async function loadComments() {
             return;
         }
 
+        // Populate commentsMap for 2-level nesting check
+        commentsMap = {};
+        list.forEach(c => {
+            commentsMap[c.comment_id] = c;
+            (c.replies || []).forEach(r => { commentsMap[r.comment_id] = r; });
+        });
+
         const sorted = list.slice().sort((a, b) => {
             const diff = getReactionCount(b) - getReactionCount(a);
             if (diff !== 0) return diff;
@@ -1111,6 +1286,7 @@ async function loadComments() {
 
         container.innerHTML = sorted.map(comment => {
             const isCommentLiked = comment.user_liked || false;
+            const isVoiceComment = comment.audio_data && comment.content === '[Message vocal]';
 
             return `
                 <div class="comment-item" style="padding: 15px 0; border-bottom: 1px solid #eee;">
@@ -1122,7 +1298,13 @@ async function loadComments() {
                             <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
                                 <strong style="color: #667eea;">Anonyme</strong>
                                 <span style="color: #999; font-size: 11px; margin-left: 10px;">${formatTime(comment.created_at)}</span>
-                                <p style="margin: 8px 0 0; color: #333;">${comment.content}</p>
+                                ${isVoiceComment
+                                    ? `<div style="margin-top:8px;">
+                                           <span style="font-size:11px;color:#8b949e;display:block;margin-bottom:4px;">🎤 Message vocal anonymisé</span>
+                                           <audio controls src="${comment.audio_data}" style="width:100%;border-radius:8px;height:36px;"></audio>
+                                       </div>`
+                                    : `<p style="margin: 8px 0 0; color: #333;">${comment.content}</p>`
+                                }
                             </div>
 
                             <div class="comment-actions">
@@ -1130,7 +1312,7 @@ async function loadComments() {
                                     <i class="fa ${isCommentLiked ? 'fa-heart' : 'fa-heart-o'}"></i>
                                     <span class="comment-like-count">${getReactionCount(comment)}</span>
                                 </a>
-                                <a href="#" onclick="openReplyModal('${comment.comment_id}'); return false;">
+                                <a href="#" onclick="openReplyModal('${comment.comment_id}', ${JSON.stringify(String(comment.content || '').slice(0,120))}); return false;">
                                     <i class="fa fa-reply"></i> Répondre
                                 </a>
                             </div>
@@ -1139,6 +1321,7 @@ async function loadComments() {
                                 <ul class="replies-list">
                                     ${comment.replies.map(reply => {
                                         const isReplyLiked = reply.user_liked || false;
+                                        const isVoiceReply = reply.audio_data && reply.content === '[Message vocal]';
                                         return `
                                             <li style="padding: 10px 0;">
                                                 <div style="display: flex; gap: 10px;">
@@ -1149,7 +1332,13 @@ async function loadComments() {
                                                         <div style="background: #f0f0f0; border-radius: 10px; padding: 10px;">
                                                             <strong style="color: #667eea; font-size: 13px;">Anonyme</strong>
                                                             <span style="color: #999; font-size: 10px; margin-left: 8px;">${formatTime(reply.created_at)}</span>
-                                                            <p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>
+                                                            ${isVoiceReply
+                                                                ? `<div style="margin-top:5px;">
+                                                                       <span style="font-size:11px;color:#8b949e;display:block;margin-bottom:3px;">🎤 Message vocal anonymisé</span>
+                                                                       <audio controls src="${reply.audio_data}" style="width:100%;border-radius:8px;height:32px;"></audio>
+                                                                   </div>`
+                                                                : `<p style="margin: 5px 0 0; color: #333; font-size: 13px;">${reply.content}</p>`
+                                                            }
                                                         </div>
                                                         <div class="comment-actions" style="font-size: 12px;">
                                                             <a href="#" onclick="handleReplyLike('${reply.comment_id}'); return false;" class="${isReplyLiked ? 'liked' : ''}" data-reply="${reply.comment_id}">
@@ -1214,11 +1403,39 @@ async function handleReplyLike(replyId) {
 document.getElementById('commentForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const content = document.getElementById('commentText').value.trim();
+    const isVoice = commentRecordingMode === 'voice';
 
-    if (!content) {
-        showToast('Veuillez écrire un commentaire', 'error');
-        return;
+    // Voice mode: need an audio recording
+    if (isVoice) {
+        if (!commentAudioData) {
+            showToast('Enregistre un message vocal avant d\'envoyer', 'error');
+            return;
+        }
+    } else {
+        // Text mode: validate content with XalassV2
+        const content = document.getElementById('commentText').value.trim();
+
+        if (!content) {
+            showToast('Veuillez écrire un commentaire', 'error');
+            return;
+        }
+
+        if (typeof XalassV2 !== 'undefined') {
+            const validation = XalassV2.validateTextContent(content, { requireText: true });
+            if (!validation.ok) {
+                const alertBox = document.getElementById('commentTextAlert');
+                if (alertBox) {
+                    alertBox.textContent = validation.errors.join(' ');
+                    alertBox.style.display = 'block';
+                }
+                showToast(validation.errors[0], 'error');
+                return;
+            }
+            // Send censored text
+            var finalContent = validation.sanitized || content;
+        } else {
+            var finalContent = content;
+        }
     }
 
     const btn = e.target.querySelector('button[type="submit"]');
@@ -1227,9 +1444,23 @@ document.getElementById('commentForm').addEventListener('submit', async function
     btn.textContent = 'Publication...';
 
     try {
-        await api.createComment(currentStoryId, content);
+        const parentId = currentCommentId || null;
+        // Voice comment uses a placeholder text content so the backend validation passes
+        const textContent = isVoice ? '[Message vocal]' : finalContent;
+        const audioPayload = isVoice ? commentAudioData : null;
+
+        await api.createComment(currentStoryId, textContent, parentId, audioPayload);
+
         document.getElementById('commentText').value = '';
-        showToast('Commentaire ajouté', 'success');
+        const alertBox = document.getElementById('commentTextAlert');
+        if (alertBox) alertBox.style.display = 'none';
+
+        cancelReplyTarget();
+        if (isVoice) {
+            discardCommentAudio();
+            switchCommentMode('text');
+        }
+        showToast(parentId ? 'Réponse ajoutée' : 'Commentaire ajouté', 'success');
         await loadComments();
     } catch (error) {
         showToast('Erreur: ' + error.message, 'error');
@@ -1239,36 +1470,50 @@ document.getElementById('commentForm').addEventListener('submit', async function
     }
 });
 
-// Modal de réponse
-function openReplyModal(commentId) {
+// Réponse ciblée — inline (V2)
+function openReplyModal(commentId, commentPreview) {
+    // 2-level max: if the targeted comment is itself a reply, attach to its parent instead
+    const targetComment = commentsMap[commentId];
+    if (targetComment && targetComment.parent_id) {
+        // Already a level-2 reply — redirect to its root comment
+        const rootId = targetComment.parent_id;
+        const rootComment = commentsMap[rootId];
+        commentId = rootId;
+        commentPreview = rootComment ? String(rootComment.content || '').slice(0, 120) : commentPreview;
+    }
+
     currentCommentId = commentId;
-    document.getElementById('replyModal').style.display = 'flex';
-    document.getElementById('replyText').focus();
+
+    const banner   = document.getElementById('replyTargetBanner');
+    const textSpan = document.getElementById('replyTargetText');
+
+    if (banner && textSpan) {
+        const preview = String(commentPreview || '').trim().slice(0, 80);
+        textSpan.textContent = preview
+            ? `💬 En réponse à : "${preview}${(commentPreview || '').length > 80 ? '…' : ''}"`
+            : '💬 En réponse à un commentaire';
+        banner.style.display = 'flex';
+    }
+
+    // Switch to text mode and focus textarea
+    switchCommentMode('text');
+    const textarea = document.getElementById('commentText');
+    if (textarea) {
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
-function closeReplyModal() {
-    document.getElementById('replyModal').style.display = 'none';
-    document.getElementById('replyText').value = '';
+function cancelReplyTarget() {
     currentCommentId = null;
+    const banner = document.getElementById('replyTargetBanner');
+    if (banner) banner.style.display = 'none';
+    const textSpan = document.getElementById('replyTargetText');
+    if (textSpan) textSpan.textContent = '';
 }
 
-async function submitReply() {
-    const content = document.getElementById('replyText').value.trim();
-
-    if (!content) {
-        showToast('Veuillez écrire une réponse', 'error');
-        return;
-    }
-
-    try {
-        await api.createComment(currentStoryId, content, currentCommentId);
-        closeReplyModal();
-        showToast('Réponse ajoutée', 'success');
-        await loadComments();
-    } catch (error) {
-        showToast('Erreur: ' + error.message, 'error');
-    }
-}
+// Alias conservé pour compatibilité
+function closeReplyModal() { cancelReplyTarget(); }
 
 // Modal de signalement
 function openReportModal() {

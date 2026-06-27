@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xalass Admin — Dashboard Modération</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0d1117;
+            --bg-card: rgba(22, 27, 34, 0.7);
+            --border: rgba(99, 102, 241, 0.2);
+            --border-hover: rgba(99, 102, 241, 0.45);
+            --indigo: #6366f1;
+            --purple: #8b5cf6;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --danger: #f85149;
+            --danger-bg: rgba(248, 81, 73, 0.1);
+            --danger-border: rgba(248, 81, 73, 0.3);
+            --success: #3fb950;
+            --success-bg: rgba(63, 185, 80, 0.1);
+            --success-border: rgba(63, 185, 80, 0.3);
+            --warning: #d29922;
+            --warning-bg: rgba(210, 153, 34, 0.1);
+            --warning-border: rgba(210, 153, 34, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139,92,246,0.08) 0%, transparent 50%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        #login-screen {
+            position: fixed; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999;
+            background: var(--bg);
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .login-badge {
+            display: inline-block;
+            padding: 3px 12px; border-radius: 20px;
+            background: var(--danger-bg); border: 1px solid var(--danger-border);
+            color: var(--danger); font-size: 12px; font-weight: 600;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+
+        .login-label {
+            display: block; text-align: left;
+            font-size: 13px; font-weight: 600;
+            color: var(--muted); margin-bottom: 8px;
+        }
+
+        .login-input {
+            width: 100%; padding: 12px 16px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text); font-size: 15px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .login-input:focus { border-color: var(--indigo); }
+
+        .login-btn {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none; border-radius: 10px;
+            color: #fff; font-size: 15px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .login-btn:hover { opacity: 0.9; }
+        .login-btn:active { transform: scale(0.98); }
+
+        .login-error {
+            display: none; margin-top: 12px;
+            color: var(--danger); font-size: 13px;
+        }
+
+        .login-setup-notice {
+            margin-top: 14px; font-size: 12px; color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ===== HEADER ===== */
+        #admin-dashboard { position: relative; z-index: 1; }
+
+        .header {
+            background: rgba(13,17,23,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .header-inner {
+            max-width: 1300px; margin: 0 auto;
+            padding: 0 20px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
+        .logo {
+            font-size: 26px; font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -1px;
+        }
+
+        .admin-badge {
+            padding: 3px 10px; border-radius: 6px;
+            background: var(--danger-bg); border: 1px solid var(--danger-border);
+            color: var(--danger); font-size: 11px; font-weight: 700;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .header-time {
+            font-size: 13px; color: var(--muted);
+        }
+
+        .btn-logout-admin {
+            padding: 8px 16px;
+            border: 1px solid var(--danger-border);
+            border-radius: 8px;
+            background: var(--danger-bg);
+            color: var(--danger); font-weight: 500; font-size: 13px;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-logout-admin:hover { background: rgba(248,81,73,0.2); }
+
+        .btn-change-pwd {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted); font-weight: 500; font-size: 13px;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-change-pwd:hover { border-color: var(--indigo); color: var(--text); }
+
+        /* ===== TAB NAV ===== */
+        .tab-nav {
+            background: rgba(13,17,23,0.5);
+            border-bottom: 1px solid var(--border);
+            display: flex; gap: 0;
+            max-width: 1300px; margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .tab-btn {
+            padding: 14px 20px;
+            background: none; border: none;
+            color: var(--muted); font-size: 14px; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s; display: flex; align-items: center; gap: 7px;
+        }
+
+        .tab-btn:hover { color: var(--text); }
+
+        .tab-btn.active {
+            color: var(--indigo);
+            border-bottom-color: var(--indigo);
+        }
+
+        .tab-badge {
+            background: var(--danger-bg); border: 1px solid var(--danger-border);
+            color: var(--danger); font-size: 11px; font-weight: 700;
+            padding: 1px 7px; border-radius: 20px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            max-width: 1300px; margin: 0 auto;
+            padding: 28px 20px;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--border-hover); }
+
+        .card-title {
+            font-size: 15px; font-weight: 700;
+            color: var(--text); margin-bottom: 18px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .card-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+
+        /* ===== OVERVIEW STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+        .stat-value {
+            font-size: 32px; font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-value.danger { background: none; -webkit-text-fill-color: var(--danger); color: var(--danger); }
+        .stat-value.success { background: none; -webkit-text-fill-color: var(--success); color: var(--success); }
+        .stat-sub { font-size: 12px; color: var(--muted); }
+
+        /* ===== WORD MANAGEMENT ===== */
+        .lang-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+
+        .lang-tab {
+            padding: 7px 16px; border-radius: 8px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted); font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .lang-tab.active {
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+            border-color: var(--indigo); color: var(--text);
+        }
+        .lang-tab:hover:not(.active) { border-color: var(--border-hover); color: var(--text); }
+
+        .word-grid { margin-bottom: 20px; }
+
+        .lang-panel { display: none; }
+        .lang-panel.active { display: block; }
+
+        .words-list {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            min-height: 52px; padding: 12px;
+            background: rgba(99,102,241,0.03);
+            border: 1px dashed rgba(99,102,241,0.2);
+            border-radius: 10px; margin-bottom: 16px;
+        }
+
+        .word-tag {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 12px; border-radius: 20px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.3);
+            font-size: 13px; font-weight: 500; color: var(--text);
+        }
+
+        .word-tag.grave {
+            background: var(--danger-bg);
+            border-color: var(--danger-border);
+            color: var(--danger);
+        }
+
+        .word-tag-remove {
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 16px; line-height: 1;
+            padding: 0 2px;
+            transition: color 0.15s;
+        }
+        .word-tag-remove:hover { color: var(--danger); }
+
+        .add-word-row {
+            display: flex; gap: 10px;
+        }
+
+        .add-word-input {
+            flex: 1; padding: 10px 14px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-size: 14px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+        }
+        .add-word-input:focus { border-color: var(--indigo); }
+        .add-word-input::placeholder { color: var(--muted); }
+
+        .btn-add {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none; border-radius: 8px;
+            color: #fff; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { opacity: 0.85; }
+
+        .word-count-info {
+            font-size: 12px; color: var(--muted);
+            display: flex; justify-content: space-between;
+        }
+
+        /* ===== REPORTED POSTS ===== */
+        .reports-toolbar {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 20px; flex-wrap: wrap;
+        }
+
+        .reports-filter {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--muted);
+        }
+
+        .filter-select {
+            padding: 7px 12px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-size: 13px; font-family: inherit;
+            outline: none; cursor: pointer;
+        }
+        .filter-select:focus { border-color: var(--indigo); }
+
+        .btn-refresh {
+            padding: 7px 16px;
+            border: 1px solid var(--border); border-radius: 8px;
+            background: transparent; color: var(--muted);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-refresh:hover { border-color: var(--indigo); color: var(--text); }
+
+        .reports-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .report-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px;
+            transition: border-color 0.2s;
+        }
+        .report-card:hover { border-color: var(--border-hover); }
+
+        .report-card.critical { border-color: var(--danger-border); }
+
+        .report-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px; gap: 12px;
+        }
+
+        .report-meta { flex: 1; }
+
+        .report-title {
+            font-size: 15px; font-weight: 700; color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .report-info {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            font-size: 12px; color: var(--muted);
+        }
+
+        .report-badge {
+            padding: 2px 9px; border-radius: 20px;
+            font-size: 11px; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .report-badge.danger {
+            background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger);
+        }
+        .report-badge.warning {
+            background: var(--warning-bg); border: 1px solid var(--warning-border); color: var(--warning);
+        }
+        .report-badge.info {
+            background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); color: var(--indigo);
+        }
+
+        .report-content {
+            font-size: 14px; color: var(--muted); line-height: 1.6;
+            padding: 12px; border-radius: 8px;
+            background: rgba(99,102,241,0.03);
+            border-left: 3px solid rgba(99,102,241,0.3);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .report-actions {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+
+        .btn-delete-post {
+            padding: 8px 16px;
+            background: var(--danger-bg); border: 1px solid var(--danger-border);
+            border-radius: 8px; color: var(--danger);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .btn-delete-post:hover { background: rgba(248,81,73,0.2); }
+
+        .btn-keep-post {
+            padding: 8px 16px;
+            background: var(--success-bg); border: 1px solid var(--success-border);
+            border-radius: 8px; color: var(--success);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .btn-keep-post:hover { background: rgba(63,185,80,0.2); }
+
+        .btn-view-post {
+            padding: 8px 16px;
+            background: transparent; border: 1px solid var(--border);
+            border-radius: 8px; color: var(--muted);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-view-post:hover { border-color: var(--indigo); color: var(--text); }
+
+        /* ===== EMPTY / LOADING ===== */
+        .empty-state {
+            text-align: center; padding: 48px 20px;
+            color: var(--muted);
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .empty-desc { font-size: 14px; }
+
+        .loading-state {
+            text-align: center; padding: 48px;
+            color: var(--muted); font-size: 14px;
+        }
+
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid rgba(99,102,241,0.2);
+            border-top-color: var(--indigo);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed; bottom: 24px; right: 24px;
+            z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 18px; border-radius: 10px;
+            font-size: 14px; font-weight: 500;
+            animation: slideInRight 0.3s ease;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: rgba(13,17,23,0.95); border: 1px solid var(--success-border);
+            color: var(--success);
+        }
+        .toast.error {
+            background: rgba(13,17,23,0.95); border: 1px solid var(--danger-border);
+            color: var(--danger);
+        }
+        .toast.info {
+            background: rgba(13,17,23,0.95); border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 998;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: #161b22; border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 16px; font-weight: 700; color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .modal-label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--muted); margin-bottom: 6px;
+        }
+
+        .modal-input {
+            width: 100%; padding: 11px 14px;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-size: 14px; font-family: inherit;
+            outline: none; margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .modal-input:focus { border-color: var(--indigo); }
+
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+        .btn-modal-cancel {
+            padding: 9px 18px; border: 1px solid var(--border);
+            border-radius: 8px; background: transparent;
+            color: var(--muted); font-size: 14px; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .btn-modal-cancel:hover { border-color: var(--indigo); color: var(--text); }
+
+        .btn-modal-confirm {
+            padding: 9px 18px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none; border-radius: 8px;
+            color: #fff; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: opacity 0.2s;
+        }
+        .btn-modal-confirm:hover { opacity: 0.85; }
+
+        /* ===== SECTION GRID ===== */
+        .section-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 20px; margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .section-grid { grid-template-columns: 1fr; }
+        }
+
+        .section-title {
+            font-size: 20px; font-weight: 700; color: var(--text);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+
+        .section-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header-inner { padding: 0 12px; }
+            .main { padding: 16px 12px; }
+            .tab-btn { padding: 12px 12px; font-size: 13px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-logo">Xalass</div>
+        <div class="login-badge">Admin Panel</div>
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <label class="login-label">Mot de passe administrateur</label>
+            <input
+                type="password"
+                id="login-password"
+                class="login-input"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                autofocus
+            />
+            <button type="submit" class="login-btn">Accéder au tableau de bord</button>
+            <p class="login-error" id="login-error">Mot de passe incorrect.</p>
+        </form>
+        <p class="login-setup-notice" id="login-notice"></p>
+    </div>
+</div>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div id="admin-dashboard" style="display:none">
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo">Xalass</div>
+                <div class="admin-badge">Admin</div>
+            </div>
+            <div class="header-right">
+                <span class="header-time" id="header-time"></span>
+                <button class="btn-change-pwd" onclick="openChangePwd()">🔑 Mot de passe</button>
+                <button class="btn-logout-admin" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div style="background:rgba(13,17,23,0.5); border-bottom:1px solid var(--border);">
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview', this)">
+                📊 Vue d'ensemble
+            </button>
+            <button class="tab-btn" data-tab="vulgar" onclick="switchTab('vulgar', this)">
+                🚫 Mots vulgaires
+            </button>
+            <button class="tab-btn" data-tab="grave" onclick="switchTab('grave', this)">
+                ⚠️ Mots graves
+            </button>
+            <button class="tab-btn" data-tab="reports" onclick="switchTab('reports', this)">
+                🚨 Signalements
+                <span class="tab-badge" id="reports-count-badge" style="display:none">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- ===== TAB: OVERVIEW ===== -->
+        <div class="tab-panel active" id="tab-overview">
+            <div class="section-title">📊 Vue d'ensemble</div>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Publications signalées</div>
+                    <div class="stat-value danger" id="stat-reports">—</div>
+                    <div class="stat-sub">En attente de modération</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Mots vulgaires gérés</div>
+                    <div class="stat-value" id="stat-vulgar">—</div>
+                    <div class="stat-sub">Toutes langues confondues</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Mots graves gérés</div>
+                    <div class="stat-value" id="stat-grave">—</div>
+                    <div class="stat-sub">Toutes langues confondues</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total publications</div>
+                    <div class="stat-value" id="stat-posts">—</div>
+                    <div class="stat-sub">Sur la plateforme</div>
+                </div>
+            </div>
+
+            <div class="section-grid">
+                <div class="card">
+                    <div class="card-title">⚡ Actions rapides</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button onclick="switchTab('reports', document.querySelector('[data-tab=reports]'))" style="padding:12px 16px; background:var(--danger-bg); border:1px solid var(--danger-border); border-radius:10px; color:var(--danger); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; text-align:left; transition:all 0.2s;" onmouseover="this.style.background='rgba(248,81,73,0.2)'" onmouseout="this.style.background='var(--danger-bg)'">
+                            🚨 Voir les publications signalées
+                        </button>
+                        <button onclick="switchTab('vulgar', document.querySelector('[data-tab=vulgar]'))" style="padding:12px 16px; background:rgba(99,102,241,0.05); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; text-align:left; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--indigo)'" onmouseout="this.style.borderColor='var(--border)'">
+                            🚫 Gérer les mots vulgaires
+                        </button>
+                        <button onclick="switchTab('grave', document.querySelector('[data-tab=grave]'))" style="padding:12px 16px; background:rgba(99,102,241,0.05); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; text-align:left; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--indigo)'" onmouseout="this.style.borderColor='var(--border)'">
+                            ⚠️ Gérer les mots graves
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">ℹ️ Règles de modération actives</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(99,102,241,0.1); font-size:14px;">
+                            <span style="color:var(--muted);">Suppression automatique</span>
+                            <span style="color:var(--danger); font-weight:600;">≥ 5 signalements</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(99,102,241,0.1); font-size:14px;">
+                            <span style="color:var(--muted);">Filtre mots vulgaires</span>
+                            <span style="color:var(--success); font-weight:600;">Actif</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(99,102,241,0.1); font-size:14px;">
+                            <span style="color:var(--muted);">Blocage liens/téléphones</span>
+                            <span style="color:var(--success); font-weight:600;">Actif</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; font-size:14px;">
+                            <span style="color:var(--muted);">Modération IA (OpenAI)</span>
+                            <span id="ai-status" style="color:var(--warning); font-weight:600;">En attente…</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: MOTS VULGAIRES ===== -->
+        <div class="tab-panel" id="tab-vulgar">
+            <div class="section-title">🚫 Mots vulgaires</div>
+            <p class="section-desc">
+                Ces mots sont automatiquement remplacés par *** dans les publications et commentaires.
+                La détection est insensible à la casse et prend en compte les substitutions de caractères.
+            </p>
+            <div class="card">
+                <div class="lang-tabs" id="vulgar-lang-tabs">
+                    <button class="lang-tab active" data-lang="wolof" onclick="switchLang('vulgar', 'wolof', this)">🇸🇳 Wolof</button>
+                    <button class="lang-tab" data-lang="francais" onclick="switchLang('vulgar', 'francais', this)">🇫🇷 Français</button>
+                    <button class="lang-tab" data-lang="anglais" onclick="switchLang('vulgar', 'anglais', this)">🇬🇧 Anglais</button>
+                </div>
+
+                <div id="vulgar-wolof" class="lang-panel active">
+                    <div class="words-list" id="words-vulgar-wolof"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-vulgar-wolof" placeholder="Ajouter un mot en wolof…" onkeydown="handleWordKey(event, 'vulgar', 'wolof')">
+                        <button class="btn-add" onclick="addWord('vulgar', 'wolof')">+ Ajouter</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-vulgar-wolof" style="color:var(--muted)">0 mot(s)</span>
+                        <span>Entrée ou clic pour ajouter</span>
+                    </div>
+                </div>
+
+                <div id="vulgar-francais" class="lang-panel">
+                    <div class="words-list" id="words-vulgar-francais"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-vulgar-francais" placeholder="Ajouter un mot en français…" onkeydown="handleWordKey(event, 'vulgar', 'francais')">
+                        <button class="btn-add" onclick="addWord('vulgar', 'francais')">+ Ajouter</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-vulgar-francais" style="color:var(--muted)">0 mot(s)</span>
+                        <span>Entrée ou clic pour ajouter</span>
+                    </div>
+                </div>
+
+                <div id="vulgar-anglais" class="lang-panel">
+                    <div class="words-list" id="words-vulgar-anglais"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-vulgar-anglais" placeholder="Add a word in English…" onkeydown="handleWordKey(event, 'vulgar', 'anglais')">
+                        <button class="btn-add" onclick="addWord('vulgar', 'anglais')">+ Add</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-vulgar-anglais" style="color:var(--muted)">0 word(s)</span>
+                        <span>Enter or click to add</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: MOTS GRAVES ===== -->
+        <div class="tab-panel" id="tab-grave">
+            <div class="section-title">⚠️ Mots graves</div>
+            <p class="section-desc">
+                Ces mots déclenchent une alerte de modération renforcée. Le contenu contenant ces termes
+                est mis en file de revue prioritaire en plus d'être censuré visuellement.
+            </p>
+            <div class="card">
+                <div class="lang-tabs" id="grave-lang-tabs">
+                    <button class="lang-tab active" data-lang="wolof" onclick="switchLang('grave', 'wolof', this)">🇸🇳 Wolof</button>
+                    <button class="lang-tab" data-lang="francais" onclick="switchLang('grave', 'francais', this)">🇫🇷 Français</button>
+                    <button class="lang-tab" data-lang="anglais" onclick="switchLang('grave', 'anglais', this)">🇬🇧 Anglais</button>
+                </div>
+
+                <div id="grave-wolof" class="lang-panel active">
+                    <div class="words-list" id="words-grave-wolof"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-grave-wolof" placeholder="Ajouter un terme grave en wolof…" onkeydown="handleWordKey(event, 'grave', 'wolof')">
+                        <button class="btn-add" onclick="addWord('grave', 'wolof')">+ Ajouter</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-grave-wolof" style="color:var(--muted)">0 mot(s)</span>
+                        <span>Entrée ou clic pour ajouter</span>
+                    </div>
+                </div>
+
+                <div id="grave-francais" class="lang-panel">
+                    <div class="words-list" id="words-grave-francais"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-grave-francais" placeholder="Ajouter un terme grave en français…" onkeydown="handleWordKey(event, 'grave', 'francais')">
+                        <button class="btn-add" onclick="addWord('grave', 'francais')">+ Ajouter</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-grave-francais" style="color:var(--muted)">0 mot(s)</span>
+                        <span>Entrée ou clic pour ajouter</span>
+                    </div>
+                </div>
+
+                <div id="grave-anglais" class="lang-panel">
+                    <div class="words-list" id="words-grave-anglais"></div>
+                    <div class="add-word-row">
+                        <input type="text" class="add-word-input" id="input-grave-anglais" placeholder="Add a serious term in English…" onkeydown="handleWordKey(event, 'grave', 'anglais')">
+                        <button class="btn-add" onclick="addWord('grave', 'anglais')">+ Add</button>
+                    </div>
+                    <div class="word-count-info">
+                        <span id="count-grave-anglais" style="color:var(--muted)">0 word(s)</span>
+                        <span>Enter or click to add</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: SIGNALEMENTS ===== -->
+        <div class="tab-panel" id="tab-reports">
+            <div class="section-title">🚨 Publications signalées</div>
+            <div class="reports-toolbar">
+                <div class="reports-filter">
+                    Afficher :
+                    <select class="filter-select" id="filter-reports" onchange="renderReports()">
+                        <option value="1">≥ 1 signalement</option>
+                        <option value="2">≥ 2 signalements</option>
+                        <option value="3" selected>≥ 3 signalements</option>
+                        <option value="4">≥ 4 signalements</option>
+                    </select>
+                </div>
+                <div class="reports-filter">
+                    Trier par :
+                    <select class="filter-select" id="sort-reports" onchange="renderReports()">
+                        <option value="count">Signalements (↓)</option>
+                        <option value="recent">Plus récent</option>
+                    </select>
+                </div>
+                <button class="btn-refresh" onclick="loadReportedPosts()">
+                    🔄 Actualiser
+                </button>
+                <span style="font-size:13px; color:var(--muted);" id="reports-last-refresh"></span>
+            </div>
+            <div id="reports-list-container">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    Chargement des publications…
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ===== CHANGE PASSWORD MODAL ===== -->
+<div class="modal-overlay" id="change-pwd-modal">
+    <div class="modal">
+        <div class="modal-title">🔑 Changer le mot de passe admin</div>
+        <label class="modal-label">Nouveau mot de passe</label>
+        <input type="password" class="modal-input" id="new-pwd" placeholder="Nouveau mot de passe…">
+        <label class="modal-label">Confirmer</label>
+        <input type="password" class="modal-input" id="confirm-pwd" placeholder="Confirmer le mot de passe…">
+        <div id="pwd-error" style="color:var(--danger); font-size:13px; margin-bottom:12px; display:none;"></div>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeChangePwd()">Annuler</button>
+            <button class="btn-modal-confirm" onclick="saveNewPassword()">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+// ====================================================
+// CONSTANTS & STORAGE KEYS
+// ====================================================
+const ADMIN_AUTH_KEY   = 'xalass_admin_hash';
+const WORDS_KEY        = 'xalass_v2_moderation_settings';
+const SESSION_TTL_MS   = 4 * 60 * 60 * 1000; // 4 heures
+const ADMIN_SESSION_KEY = 'xalass_admin_session_until';
+
+const DEFAULT_WORDS = {
+    vulgar: {
+        wolof:   ['saga', 'kat', 'ndey', 'bay', 'thiapathiapa', 'saayi', 'khadj'],
+        francais: ['merde', 'putain', 'connard', 'salope', 'con', 'conne', 'couille'],
+        anglais:  ['fuck', 'shit', 'bitch', 'asshole', 'bastard', 'damn']
+    },
+    grave: {
+        wolof:   [],
+        francais: ['suicide', 'terrorisme', 'viol', 'meurtre', 'pedophilie', 'jihad'],
+        anglais:  ['suicide', 'terrorism', 'rape', 'murder', 'pedophilia', 'jihad']
+    }
+};
+
+// ====================================================
+// AUTHENTICATION
+// ====================================================
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
+
+function isLoggedIn() {
+    const until = parseInt(localStorage.getItem(ADMIN_SESSION_KEY) || '0', 10);
+    return Date.now() < until;
+}
+
+function setSession() {
+    localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + SESSION_TTL_MS));
+}
+
+function clearSession() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const pwd = document.getElementById('login-password').value.trim();
+    if (!pwd) return;
+
+    const hash = await sha256(pwd);
+    const storedHash = localStorage.getItem(ADMIN_AUTH_KEY);
+
+    if (!storedHash) {
+        // Premier lancement : définit le mot de passe
+        localStorage.setItem(ADMIN_AUTH_KEY, hash);
+        setSession();
+        showDashboard();
+        toast('Mot de passe administrateur défini avec succès.', 'success');
+        return;
+    }
+
+    if (hash === storedHash) {
+        setSession();
+        showDashboard();
+    } else {
+        const errEl = document.getElementById('login-error');
+        errEl.style.display = 'block';
+        setTimeout(() => { errEl.style.display = 'none'; }, 3000);
+        document.getElementById('login-password').value = '';
+    }
+}
+
+function logout() {
+    clearSession();
+    location.reload();
+}
+
+function showDashboard() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+    initDashboard();
+}
+
+function openChangePwd() {
+    document.getElementById('new-pwd').value = '';
+    document.getElementById('confirm-pwd').value = '';
+    document.getElementById('pwd-error').style.display = 'none';
+    document.getElementById('change-pwd-modal').classList.add('open');
+}
+function closeChangePwd() {
+    document.getElementById('change-pwd-modal').classList.remove('open');
+}
+
+async function saveNewPassword() {
+    const p1 = document.getElementById('new-pwd').value;
+    const p2 = document.getElementById('confirm-pwd').value;
+    const errEl = document.getElementById('pwd-error');
+
+    if (!p1 || p1.length < 6) {
+        errEl.textContent = 'Le mot de passe doit faire au moins 6 caractères.';
+        errEl.style.display = 'block'; return;
+    }
+    if (p1 !== p2) {
+        errEl.textContent = 'Les mots de passe ne correspondent pas.';
+        errEl.style.display = 'block'; return;
+    }
+
+    const hash = await sha256(p1);
+    localStorage.setItem(ADMIN_AUTH_KEY, hash);
+    closeChangePwd();
+    toast('Mot de passe mis à jour.', 'success');
+}
+
+// ====================================================
+// WORD MANAGEMENT
+// ====================================================
+
+function readWords() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(WORDS_KEY) || 'null');
+        if (!raw || typeof raw !== 'object') return structuredClone(DEFAULT_WORDS);
+        return {
+            vulgar: {
+                wolof:   Array.isArray(raw.vulgar?.wolof)   ? raw.vulgar.wolof   : [...DEFAULT_WORDS.vulgar.wolof],
+                francais: Array.isArray(raw.vulgar?.francais) ? raw.vulgar.francais : [...DEFAULT_WORDS.vulgar.francais],
+                anglais: Array.isArray(raw.vulgar?.anglais)  ? raw.vulgar.anglais  : [...DEFAULT_WORDS.vulgar.anglais],
+            },
+            grave: {
+                wolof:   Array.isArray(raw.grave?.wolof)   ? raw.grave.wolof   : [...DEFAULT_WORDS.grave.wolof],
+                francais: Array.isArray(raw.grave?.francais) ? raw.grave.francais : [...DEFAULT_WORDS.grave.francais],
+                anglais: Array.isArray(raw.grave?.anglais)  ? raw.grave.anglais  : [...DEFAULT_WORDS.grave.anglais],
+            }
+        };
+    } catch (e) {
+        return structuredClone(DEFAULT_WORDS);
+    }
+}
+
+function saveWords(words) {
+    localStorage.setItem(WORDS_KEY, JSON.stringify({ ...words, updatedAt: new Date().toISOString() }));
+}
+
+// Charge les listes depuis l'API et met à jour localStorage + affichage
+async function loadWordsFromApi() {
+    try {
+        const resp = await api.request('/moderation/words', { method: 'GET' });
+        if (resp && resp.words) {
+            const w = resp.words;
+            const structured = {
+                vulgar: {
+                    wolof:    w.vulgar?.wolof    || [],
+                    francais: w.vulgar?.francais || [],
+                    anglais:  w.vulgar?.anglais  || [],
+                },
+                grave: {
+                    wolof:    w.grave?.wolof    || [],
+                    francais: w.grave?.francais || [],
+                    anglais:  w.grave?.anglais  || [],
+                }
+            };
+            saveWords(structured);
+            renderAllWords();
+            updateStats();
+        }
+    } catch (_) {
+        // API inaccessible — garder les listes locales
+    }
+}
+
+// Synchronise une liste avec le backend après chaque modification
+function syncListToApi(category, lang) {
+    try {
+        const words = readWords();
+        const list  = words[category][lang];
+        api.request('/moderation/words/sync', {
+            method: 'POST',
+            body: JSON.stringify({ category, language: lang, words: list }),
+        }).catch(() => {});  // fire-and-forget
+    } catch (_) {}
+}
+
+function addWord(category, lang) {
+    const input = document.getElementById(`input-${category}-${lang}`);
+    const word = (input.value || '').trim().toLowerCase();
+    if (!word) return;
+
+    const words = readWords();
+    const list = words[category][lang];
+
+    if (list.includes(word)) {
+        toast(`"${word}" est déjà dans la liste.`, 'info'); input.value = ''; return;
+    }
+
+    list.push(word);
+    saveWords(words);
+    renderWordList(category, lang);
+    updateStats();
+    input.value = '';
+    syncListToApi(category, lang);
+    toast(`"${word}" ajouté.`, 'success');
+}
+
+function removeWord(category, lang, word) {
+    const words = readWords();
+    words[category][lang] = words[category][lang].filter(w => w !== word);
+    saveWords(words);
+    renderWordList(category, lang);
+    updateStats();
+    syncListToApi(category, lang);
+    toast(`"${word}" retiré.`, 'info');
+}
+
+function handleWordKey(e, category, lang) {
+    if (e.key === 'Enter') { e.preventDefault(); addWord(category, lang); }
+}
+
+function renderWordList(category, lang) {
+    const words = readWords();
+    const list = words[category][lang];
+    const container = document.getElementById(`words-${category}-${lang}`);
+    const countEl = document.getElementById(`count-${category}-${lang}`);
+
+    if (!list.length) {
+        container.innerHTML = `<span style="color:var(--muted); font-size:13px; padding:4px 8px;">Aucun mot pour cette langue.</span>`;
+    } else {
+        container.innerHTML = list.map(w => `
+            <span class="word-tag ${category === 'grave' ? 'grave' : ''}">
+                ${escapeHtml(w)}
+                <button class="word-tag-remove" onclick="removeWord('${category}','${lang}','${escapeAttr(w)}')" title="Retirer">×</button>
+            </span>
+        `).join('');
+    }
+
+    const label = lang === 'anglais' ? 'word(s)' : 'mot(s)';
+    countEl.textContent = `${list.length} ${label}`;
+}
+
+function renderAllWords() {
+    ['vulgar', 'grave'].forEach(cat => {
+        ['wolof', 'francais', 'anglais'].forEach(lang => {
+            renderWordList(cat, lang);
+        });
+    });
+}
+
+// ====================================================
+// TAB & LANGUAGE SWITCHING
+// ====================================================
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    btn.classList.add('active');
+
+    if (name === 'reports') loadReportedPosts();
+}
+
+function switchLang(category, lang, btn) {
+    document.querySelectorAll(`#tab-${category} .lang-tab`).forEach(b => b.classList.remove('active'));
+    document.querySelectorAll(`#tab-${category} .lang-panel`).forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`${category}-${lang}`).classList.add('active');
+}
+
+// ====================================================
+// REPORTED POSTS
+// ====================================================
+
+let cachedPosts = [];
+let lastRefresh = null;
+
+async function loadReportedPosts() {
+    const container = document.getElementById('reports-list-container');
+    container.innerHTML = `
+        <div class="loading-state">
+            <div class="spinner"></div>
+            Chargement des publications…
+        </div>`;
+
+    try {
+        const posts = await api.getAllPosts();
+        cachedPosts = Array.isArray(posts) ? posts : [];
+        lastRefresh = new Date();
+        document.getElementById('reports-last-refresh').textContent =
+            `Dernière actualisation : ${lastRefresh.toLocaleTimeString('fr-FR')}`;
+        renderReports();
+        updateStats();
+    } catch (err) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <div class="empty-title">Impossible de charger les publications</div>
+                <div class="empty-desc">${escapeHtml(err.message || 'Erreur réseau')}</div>
+            </div>`;
+    }
+}
+
+function renderReports() {
+    const container = document.getElementById('reports-list-container');
+    const minReports = parseInt(document.getElementById('filter-reports')?.value || '1', 10);
+    const sortBy = document.getElementById('sort-reports')?.value || 'count';
+
+    let reported = cachedPosts.filter(p => (p.report_count || 0) >= minReports);
+
+    if (sortBy === 'count') {
+        reported.sort((a, b) => (b.report_count || 0) - (a.report_count || 0));
+    } else {
+        reported.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+
+    const badge = document.getElementById('reports-count-badge');
+    const totalReported = cachedPosts.filter(p => (p.report_count || 0) >= 1).length;
+    if (totalReported > 0) {
+        badge.textContent = totalReported;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if (!reported.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <div class="empty-title">Aucune publication signalée</div>
+                <div class="empty-desc">Aucun contenu avec ${minReports}+ signalement(s) trouvé.</div>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = `<div class="reports-list">${reported.map(post => buildReportCard(post)).join('')}</div>`;
+}
+
+function buildReportCard(post) {
+    const count = post.report_count || 0;
+    const badgeClass = count >= 4 ? 'danger' : count >= 2 ? 'warning' : 'info';
+    const isCritical = count >= 4;
+    const title = escapeHtml(post.title || 'Sans titre');
+    const content = escapeHtml((post.content || '').slice(0, 300));
+    const postId = post.post_id || post.id || '';
+    const cat = escapeHtml(post.category || '');
+    const date = post.created_at ? new Date(post.created_at).toLocaleDateString('fr-FR', {
+        day: '2-digit', month: 'short', year: 'numeric'
+    }) : '';
+
+    return `
+        <div class="report-card ${isCritical ? 'critical' : ''}" id="report-card-${postId}">
+            <div class="report-header">
+                <div class="report-meta">
+                    <div class="report-title">${title}</div>
+                    <div class="report-info">
+                        ${cat ? `<span>📂 ${cat}</span>` : ''}
+                        ${date ? `<span>📅 ${date}</span>` : ''}
+                        ${post.views_count ? `<span>👁 ${post.views_count} vues</span>` : ''}
+                    </div>
+                </div>
+                <div>
+                    <span class="report-badge ${badgeClass}">
+                        🚩 ${count} signalement${count > 1 ? 's' : ''}
+                    </span>
+                </div>
+            </div>
+            ${content ? `<div class="report-content">${content}${post.content?.length > 300 ? '…' : ''}</div>` : ''}
+            <div class="report-actions">
+                <button class="btn-delete-post" onclick="handleDeletePost('${postId}', '${escapeAttr(post.title || '')}')">
+                    🗑 Supprimer
+                </button>
+                <button class="btn-keep-post" onclick="handleKeepPost('${postId}')">
+                    ✅ Valider (conserver)
+                </button>
+                <a href="xalass-story.html?id=${postId}" target="_blank" class="btn-view-post">
+                    👁 Voir la publication
+                </a>
+            </div>
+        </div>
+    `;
+}
+
+async function handleDeletePost(postId, title) {
+    if (!confirm(`Supprimer définitivement la publication "${title}" ?`)) return;
+    try {
+        await api.deletePost(postId);
+        cachedPosts = cachedPosts.filter(p => String(p.post_id || p.id) !== String(postId));
+        renderReports();
+        updateStats();
+        toast('Publication supprimée.', 'success');
+    } catch (err) {
+        toast('Erreur lors de la suppression : ' + (err.message || ''), 'error');
+    }
+}
+
+function handleKeepPost(postId) {
+    // Remove from local cache display without actually deleting (admin validated it)
+    cachedPosts = cachedPosts.map(p => {
+        if (String(p.post_id || p.id) === String(postId)) {
+            return { ...p, report_count: 0 };
+        }
+        return p;
+    });
+    renderReports();
+    updateStats();
+    toast('Publication validée — retirée de la file de modération.', 'success');
+}
+
+// ====================================================
+// STATS
+// ====================================================
+
+function updateStats() {
+    const words = readWords();
+    const vulgarTotal = words.vulgar.wolof.length + words.vulgar.francais.length + words.vulgar.anglais.length;
+    const graveTotal = words.grave.wolof.length + words.grave.francais.length + words.grave.anglais.length;
+    const reportedCount = cachedPosts.filter(p => (p.report_count || 0) >= 1).length;
+    const totalPosts = cachedPosts.length;
+
+    const el = id => document.getElementById(id);
+    if (el('stat-reports'))  el('stat-reports').textContent  = reportedCount || '0';
+    if (el('stat-vulgar'))   el('stat-vulgar').textContent   = vulgarTotal;
+    if (el('stat-grave'))    el('stat-grave').textContent    = graveTotal;
+    if (el('stat-posts'))    el('stat-posts').textContent    = totalPosts || '—';
+}
+
+// ====================================================
+// CLOCK
+// ====================================================
+
+function updateClock() {
+    const el = document.getElementById('header-time');
+    if (el) el.textContent = new Date().toLocaleString('fr-FR', {
+        weekday: 'short', day: '2-digit', month: 'short',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+// ====================================================
+// TOAST
+// ====================================================
+
+function toast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.style.transition = 'opacity 0.3s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+    }, 3000);
+}
+
+// ====================================================
+// HELPERS
+// ====================================================
+
+function escapeHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function escapeAttr(str) {
+    return String(str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ====================================================
+// INIT
+// ====================================================
+
+function initDashboard() {
+    renderAllWords();
+    updateStats();
+    updateClock();
+    setInterval(updateClock, 60000);
+    // Synchroniser les listes de mots depuis la DB backend
+    loadWordsFromApi();
+
+    // Check if moderation URL / AI is configured
+    const aiStatus = document.getElementById('ai-status');
+    if (aiStatus) {
+        if (typeof window !== 'undefined' && window.MODERATION_URL) {
+            aiStatus.textContent = 'Actif (proxy backend)';
+            aiStatus.style.color = 'var(--success)';
+        } else {
+            aiStatus.textContent = 'Non configuré';
+            aiStatus.style.color = 'var(--warning)';
+        }
+    }
+
+    // Pre-load reported posts in background
+    loadReportedPosts().catch(() => {});
+}
+
+// ====================================================
+// BOOTSTRAP
+// ====================================================
+
+(function boot() {
+    const hasPassword = !!localStorage.getItem(ADMIN_AUTH_KEY);
+    const notice = document.getElementById('login-notice');
+    if (!hasPassword) {
+        notice.textContent = 'Première connexion : choisissez un mot de passe administrateur. Il sera enregistré de façon sécurisée sur cet appareil.';
+    }
+
+    if (isLoggedIn()) {
+        showDashboard();
+    }
+})();
+</script>
+
+</body>
+</html>

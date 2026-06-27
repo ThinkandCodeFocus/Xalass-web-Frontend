@@ -444,6 +444,10 @@
                     <span id="unreadBadge" style="display: none; font-size: 14px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 4px 12px; border-radius: 12px; margin-left: 8px;"></span>
                 </h2>
                 <div class="actions">
+                    <button onclick="togglePrefsPanel()" class="btn btn-secondary" title="Préférences">
+                        <i class="fa fa-sliders"></i>
+                        Préférences
+                    </button>
                     <button onclick="markAllRead()" class="btn btn-secondary">
                         <i class="fa fa-check-double"></i>
                         Tout lire
@@ -453,6 +457,13 @@
                         Tout supprimer
                     </button>
                 </div>
+            </div>
+
+            <!-- #15 Panneau préférences notifications -->
+            <div id="prefsPanel" style="display:none; border-bottom:1px solid rgba(99,102,241,0.15); padding:18px 24px; background:rgba(99,102,241,0.05);">
+                <p style="font-size:13px; color:#8b949e; margin-bottom:12px;">Choisir les types de notifications à afficher :</p>
+                <div style="display:flex; flex-wrap:wrap; gap:10px;" id="prefToggles"></div>
+                <p style="font-size:11px; color:#6e7681; margin-top:12px;">Les types désactivés restent enregistrés mais ne s'affichent pas.</p>
             </div>
 
             <div id="notificationsList">
@@ -465,6 +476,7 @@
     <script src="js/xalass.js"></script>
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/push-notifications.js"></script>
     <script>
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
@@ -530,83 +542,197 @@
             loadNotifications();
         });
 
+        // ---- #13: Tous les types de notifications ----
+        const NOTIF_TYPES = {
+            post_comment:     { icon: 'fa-comment',          cls: 'notif-icon-comment',   label: 'Commentaires',       emoji: '💬' },
+            comment_reply:    { icon: 'fa-reply',            cls: 'notif-icon-reply',     label: 'Réponses',           emoji: '↩️' },
+            post_like:        { icon: 'fa-heart',            cls: 'notif-icon-like',      label: 'Likes post',         emoji: '❤️' },
+            comment_like:     { icon: 'fa-heart-o',          cls: 'notif-icon-like',      label: 'Likes commentaire',  emoji: '🩷' },
+            story_completed:  { icon: 'fa-star',             cls: 'notif-icon-completed', label: 'Histoires terminées',emoji: '⭐' },
+            post_deleted:     { icon: 'fa-trash',            cls: 'notif-icon-deleted',   label: 'Publications supprimées', emoji: '🗑️' },
+            moderation_action:{ icon: 'fa-shield',           cls: 'notif-icon-moderation',label: 'Modération',         emoji: '🛡️' },
+            new_follower:     { icon: 'fa-user-plus',        cls: 'notif-icon-follow',    label: 'Nouveaux abonnés',   emoji: '👤' },
+            default:          { icon: 'fa-bell',             cls: 'notif-icon-comment',   label: 'Autres',             emoji: '🔔' },
+        };
+
+        // ---- #15: Préférences persistées en localStorage ----
+        const PREFS_KEY = 'xalass_notif_preferences';
+
+        function getPrefs() {
+            try {
+                return JSON.parse(localStorage.getItem(PREFS_KEY) || 'null') || {};
+            } catch (_) { return {}; }
+        }
+
+        function savePrefs(prefs) {
+            localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+        }
+
+        function isTypeEnabled(type) {
+            const prefs = getPrefs();
+            // Par défaut tout activé; seuls les types explicitement mis à false sont masqués
+            const key = type in NOTIF_TYPES ? type : 'default';
+            return prefs[key] !== false;
+        }
+
+        function renderPrefsPanel() {
+            const container = document.getElementById('prefToggles');
+            if (!container) return;
+            const prefs = getPrefs();
+            const types = Object.entries(NOTIF_TYPES).filter(([k]) => k !== 'default');
+            container.innerHTML = types.map(([key, meta]) => {
+                const enabled = prefs[key] !== false;
+                return `
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border-radius:20px;background:rgba(99,102,241,${enabled ? '0.15' : '0.05'});border:1px solid rgba(99,102,241,${enabled ? '0.4' : '0.15'});font-size:12px;color:${enabled ? '#c7d2fe' : '#6e7681'};user-select:none;" onclick="togglePref('${key}', this)">
+                        <span>${meta.emoji}</span>
+                        <span>${meta.label}</span>
+                        <input type="checkbox" ${enabled ? 'checked' : ''} style="display:none;" data-type="${key}">
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function togglePref(type, labelEl) {
+            const prefs = getPrefs();
+            prefs[type] = prefs[type] === false ? true : false;
+            savePrefs(prefs);
+            renderPrefsPanel();
+            loadNotifications();
+        }
+
+        function togglePrefsPanel() {
+            const panel = document.getElementById('prefsPanel');
+            if (!panel) return;
+            const shown = panel.style.display !== 'none';
+            panel.style.display = shown ? 'none' : 'block';
+            if (!shown) renderPrefsPanel();
+        }
+
+        // ---- #17: Grouper les notifications par date ----
+        function dateLabel(dateStr) {
+            const now   = new Date();
+            const d     = new Date(dateStr);
+            const diffMs = now - d;
+            const diffDays = Math.floor(diffMs / 86400000);
+            if (diffDays === 0) return 'Aujourd\'hui';
+            if (diffDays === 1) return 'Hier';
+            if (diffDays < 7)  return 'Cette semaine';
+            if (diffDays < 30) return 'Ce mois-ci';
+            return 'Plus ancien';
+        }
+
+        function groupByDate(notifications) {
+            const order = ['Aujourd\'hui', 'Hier', 'Cette semaine', 'Ce mois-ci', 'Plus ancien'];
+            const groups = {};
+            notifications.forEach(n => {
+                const label = dateLabel(n.created_at || n.createdAt);
+                if (!groups[label]) groups[label] = [];
+                groups[label].push(n);
+            });
+            return order.filter(k => groups[k]).map(k => ({ label: k, items: groups[k] }));
+        }
+
+        // ---- #14: Groupement intelligent type|post|heure ----
+        function groupSmart(notifications) {
+            const map = new Map();
+            notifications.forEach(n => {
+                const data   = n.data || {};
+                const postId = data.post_id || '';
+                const hour   = (n.created_at || '').slice(0, 13);
+                const key    = `${n.type}|${postId}|${hour}`;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(n);
+            });
+            return Array.from(map.values());
+        }
+
+        function renderNotifCard(notif, extras = []) {
+            const notifId = notif.notification_id || notif.id;
+            const isRead  = notif.is_read || notif.read_at;
+            const type    = notif.type || 'default';
+            const data    = notif.data || {};
+            const postId  = data.post_id;
+            const meta    = NOTIF_TYPES[type] || NOTIF_TYPES.default;
+            const count   = extras.length;
+
+            return `
+                <div class="notification-item ${!isRead ? 'unread' : ''}" onclick="handleNotificationClick('${notifId}', '${postId || ''}')">
+                    <div class="notif-icon ${meta.cls}">
+                        <i class="fa ${meta.icon}"></i>
+                    </div>
+                    <div class="notif-content">
+                        ${notif.title ? `<div class="notif-author">${notif.title}</div>` : ''}
+                        <div class="notif-message">${notif.message || ''}${count > 0 ? ` <span style="font-size:11px;background:rgba(99,102,241,0.2);border-radius:10px;padding:1px 7px;margin-left:6px;">+${count} autres</span>` : ''}</div>
+                        <div class="notif-time">${timeAgo(notif.created_at || notif.createdAt)}</div>
+                        <div class="notif-actions">
+                            ${postId ? `<button class="notif-action-btn" onclick="event.stopPropagation(); goToStory('${postId}')">
+                                <i class="fa fa-eye"></i> Voir l'histoire
+                            </button>` : ''}
+                            ${!isRead ? `<button class="notif-action-btn" onclick="event.stopPropagation(); markAsRead('${notifId}')">
+                                <i class="fa fa-check"></i> Marquer lu
+                            </button>` : ''}
+                        </div>
+                    </div>
+                    <button class="notif-delete" onclick="event.stopPropagation(); removeNotification('${notifId}')" title="Supprimer">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+
         async function loadNotifications() {
             const container = document.getElementById('notificationsList');
             container.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i></div>';
-            
+
             try {
                 const response = await api.getNotifications();
-                const notifications = Array.isArray(response) ? response : (response.notifications || []);
+                let notifications = Array.isArray(response) ? response : (response.notifications || []);
                 const unreadCount = response.unread_count || notifications.filter(n => !(n.is_read || n.read_at)).length;
-                
-                // Update unread badge
+
+                // Badge non lus
                 const badge = document.getElementById('unreadBadge');
-                if (unreadCount > 0) {
+                if (badge) {
                     badge.textContent = unreadCount;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
+                    badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
                 }
-                
+
+                // Filtrer selon les préférences (#15)
+                notifications = notifications.filter(n => isTypeEnabled(n.type || 'default'));
+
                 if (notifications.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
                             <i class="fa fa-bell-slash"></i>
                             <h3>Aucune notification</h3>
-                            <p>Vous n'avez pas encore de notifications</p>
-                        </div>
-                    `;
+                            <p>Vous n'avez pas encore de notifications (ou tous les types sont masqués)</p>
+                        </div>`;
                     return;
                 }
-                
-                container.innerHTML = notifications.map(notif => {
-                    const notifId = notif.notification_id || notif.id;
-                    const isRead = notif.is_read || notif.read_at;
-                    const type = notif.type || 'info';
-                    const data = notif.data || {};
-                    const postId = data.post_id || notif.storyId;
-                    
-                    let iconClass = 'notif-icon-comment';
-                    let iconName = 'fa-bell';
-                    
-                    if (type.includes('like')) {
-                        iconClass = 'notif-icon-like';
-                        iconName = 'fa-heart';
-                    } else if (type.includes('comment')) {
-                        iconClass = 'notif-icon-comment';
-                        iconName = 'fa-comment';
-                    } else if (type.includes('reply')) {
-                        iconClass = 'notif-icon-reply';
-                        iconName = 'fa-reply';
-                    } else if (type.includes('trending') || type.includes('completed')) {
-                        iconClass = 'notif-icon-completed';
-                        iconName = 'fa-star';
-                    }
-                    
-                    return `
-                        <div class="notification-item ${!isRead ? 'unread' : ''}" onclick="handleNotificationClick('${notifId}', '${postId}')">
-                            <div class="notif-icon ${iconClass}">
-                                <i class="fa ${iconName}"></i>
-                            </div>
-                            <div class="notif-content">
-                                ${notif.title ? `<div class="notif-author">${notif.title}</div>` : ''}
-                                <div class="notif-message">${notif.message || ''}</div>
-                                <div class="notif-time">${timeAgo(notif.created_at || notif.createdAt)}</div>
-                                <div class="notif-actions">
-                                    ${postId ? `<button class="notif-action-btn" onclick="event.stopPropagation(); goToStory('${postId}')">
-                                        <i class="fa fa-eye"></i> Voir l'histoire
-                                    </button>` : ''}
-                                    ${!isRead ? `<button class="notif-action-btn" onclick="event.stopPropagation(); markAsRead('${notifId}')">
-                                        <i class="fa fa-check"></i> Marquer comme lu
-                                    </button>` : ''}
-                                </div>
-                            </div>
-                            <button class="notif-delete" onclick="event.stopPropagation(); removeNotification('${notifId}')" title="Supprimer">
-                                <i class="fa fa-times"></i>
-                            </button>
-                        </div>
-                    `;
-                }).join('');
+
+                // Groupement intelligent (#14), puis par date (#17)
+                const smartGroups = groupSmart(notifications);
+                const dateGroups  = groupByDate(smartGroups.map(g => g[0])); // une notif représentative par groupe
+
+                // Map pour retrouver les extras par notif représentative
+                const extrasMap = new Map();
+                smartGroups.forEach(g => {
+                    const rep = g[0];
+                    const key = rep.notification_id || rep.id;
+                    extrasMap.set(key, g.slice(1));
+                });
+
+                let html = '';
+                dateGroups.forEach(({ label, items }) => {
+                    html += `<div style="padding:10px 20px 4px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#6e7681;">${label}</div>`;
+                    items.forEach(notif => {
+                        const key    = notif.notification_id || notif.id;
+                        const extras = extrasMap.get(key) || [];
+                        html += renderNotifCard(notif, extras);
+                    });
+                });
+
+                container.innerHTML = html;
+
             } catch (error) {
                 console.error('Erreur:', error);
                 container.innerHTML = `
@@ -614,11 +740,8 @@
                         <i class="fa fa-exclamation-triangle" style="color: #f85149;"></i>
                         <h3>Erreur de chargement</h3>
                         <p>${error.message || 'Impossible de charger les notifications'}</p>
-                        <button onclick="loadNotifications()" class="btn btn-secondary" style="margin-top: 20px;">
-                            Réessayer
-                        </button>
-                    </div>
-                `;
+                        <button onclick="loadNotifications()" class="btn btn-secondary" style="margin-top: 20px;">Réessayer</button>
+                    </div>`;
             }
         }
 

@@ -11,7 +11,7 @@ php artisan serve
 
 **Résultat attendu :**
 ```
-INFO  Server running on [https://api.xalass.com/]
+INFO  Server running on [https://api.xalass.com]
 ```
 
 ---
@@ -35,7 +35,7 @@ Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...
 Dans un **nouveau terminal**, testez la connexion au backend :
 
 ```powershell
-Invoke-WebRequest -Uri "https://api.xalass.com//api/health" -Method GET
+Invoke-WebRequest -Uri "https://api.xalass.com/api/health" -Method GET
 ```
 
 **Résultat attendu :**
@@ -51,7 +51,7 @@ Une fois les deux serveurs lancés :
 
 - **Page de login :** `http://localhost:8080/xalass-login.html`
 - **Page feed :** `http://localhost:8080/xalass-feed.html`
-- **API Health Check :** `https://api.xalass.com//api/health`
+- **API Health Check :** `https://api.xalass.com/api/health`
 
 ---
 

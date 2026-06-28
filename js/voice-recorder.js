@@ -211,14 +211,15 @@ const VoiceEffects = {
      */
     processAudioBuffer(audioBuffer) {
         // Paramètres aléatoires — différents à chaque enregistrement
-        const pitchRate    = this._rand(0.85, 1.45);   // grave (0.85) → aigu (1.45)
-        const distAmount   = this._rand(60, 220);
-        const highGain     = this._rand(6, 18);
-        const lowGain      = this._rand(-14, -4);
+        // Valeurs réduites pour éviter le bruit excessif tout en préservant l'anonymat
+        const pitchRate    = this._rand(0.88, 1.18);   // décalage de pitch discret
+        const distAmount   = this._rand(12, 35);        // distortion légère (60-220 causait du bruit)
+        const highGain     = this._rand(1, 5);          // boost hautes fréquences modéré
+        const lowGain      = this._rand(-6, -1);        // coupe basses légère
         const highFreq     = this._rand(2500, 5000);
         const lowFreq      = this._rand(120, 300);
-        const compRatio    = this._rand(8, 16);
-        const compThresh   = this._rand(-40, -20);
+        const compRatio    = this._rand(3, 6);          // compression douce (8-16 écrasait le son)
+        const compThresh   = this._rand(-30, -15);
 
         // Durée modifiée par playbackRate (approximation de pitch shift)
         const outLength = Math.ceil(audioBuffer.length / pitchRate);

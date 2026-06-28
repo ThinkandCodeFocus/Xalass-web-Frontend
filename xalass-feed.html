@@ -540,102 +540,155 @@
 
         /* Story Card */
         .story-card {
-            background: rgba(22, 27, 34, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
+            background: rgba(22, 27, 34, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 18px;
+            padding: 22px 24px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: all 0.22s;
         }
 
         .story-card:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255,255,255,0.07);
             transform: translateY(-2px);
         }
 
         .story-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             margin-bottom: 14px;
+            flex-wrap: wrap;
         }
 
         .story-avatar {
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
-            background: #f3f4f6;
+            background: rgba(99,102,241,0.15);
+            border: 2px solid rgba(99,102,241,0.3);
+            flex-shrink: 0;
+            object-fit: cover;
         }
 
         .story-meta {
             flex: 1;
+            min-width: 120px;
         }
 
         .story-author {
-            font-weight: 600;
-            font-size: 15px;
+            font-weight: 700;
+            font-size: 14px;
             color: #e6edf3;
         }
 
         .story-time {
-            font-size: 13px;
-            color: #8b949e;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
         }
 
         .story-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 3px 9px;
+            border-radius: 10px;
             font-size: 11px;
             font-weight: 600;
-            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
-        .badge-amour { background: #fce7f3; color: #db2777; }
-        .badge-amitie { background: #dbeafe; color: #2563eb; }
-        .badge-famille { background: #d1fae5; color: #059669; }
-        .badge-travail { background: #fef3c7; color: #d97706; }
-        .badge-social { background: #e0e7ff; color: #4f46e5; }
-        .badge-autre { background: #f3f4f6; color: #6b7280; }
+        .badge-amour   { background: rgba(219, 39, 119, 0.18); color: #f472b6; border: 1px solid rgba(219,39,119,0.3); }
+        .badge-amitie  { background: rgba(37, 99, 235, 0.18); color: #60a5fa; border: 1px solid rgba(37,99,235,0.3); }
+        .badge-famille { background: rgba(5, 150, 105, 0.18); color: #34d399; border: 1px solid rgba(5,150,105,0.3); }
+        .badge-travail { background: rgba(217, 119, 6, 0.18); color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
+        .badge-social  { background: rgba(79, 70, 229, 0.18); color: #a5b4fc; border: 1px solid rgba(79,70,229,0.3); }
+        .badge-autre   { background: rgba(107, 114, 128, 0.18); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
 
         .badge-following {
-            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-            color: #fff;
-            margin-left: 6px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(249, 115, 22, 0.25));
+            color: #fbbf24;
+            border: 1px solid rgba(245,158,11,0.4);
+        }
+
+        /* Badges popularité */
+        .badge-popular {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        .badge-popular.gold {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.4);
+        }
+        .badge-popular.silver {
+            background: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+            border: 1px solid rgba(148,163,184,0.4);
+        }
+        .badge-popular.bronze {
+            background: rgba(180, 83, 9, 0.2);
+            color: #d97706;
+            border: 1px solid rgba(180,83,9,0.4);
+        }
+
+        .story-author-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .story-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .follow-btn {
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 999px;
             font-size: 12px;
-            font-weight: 700;
-            border: 1px solid rgba(99, 102, 241, 0.35);
-            background: rgba(99, 102, 241, 0.08);
-            color: #c9d1d9;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.45);
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
             cursor: pointer;
             transition: all 0.2s;
-            margin-left: 6px;
             white-space: nowrap;
+            letter-spacing: 0.01em;
         }
 
         .follow-btn:hover {
-            background: rgba(99, 102, 241, 0.14);
-            border-color: rgba(99, 102, 241, 0.55);
+            background: rgba(99, 102, 241, 0.22);
+            border-color: rgba(99, 102, 241, 0.7);
+            color: #c7d2fe;
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.25);
         }
 
         .follow-btn.is-following {
             background: rgba(16, 185, 129, 0.12);
-            border-color: rgba(16, 185, 129, 0.45);
+            border-color: rgba(16, 185, 129, 0.5);
             color: #34d399;
         }
 
         .follow-btn.is-following:hover {
-            background: rgba(16, 185, 129, 0.18);
-            border-color: rgba(16, 185, 129, 0.65);
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
         }
 
         .story-title {
@@ -643,65 +696,96 @@
             font-weight: 700;
             color: #e6edf3;
             margin-bottom: 10px;
-            line-height: 1.4;
+            line-height: 1.45;
+            letter-spacing: -0.01em;
         }
 
         .story-title a {
             color: inherit;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: color 0.18s;
         }
 
         .story-title a:hover {
-            color: #8b5cf6;
-            text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
         }
 
         .story-content {
             font-size: 15px;
-            line-height: 1.7;
-            color: #c9d1d9;
+            line-height: 1.75;
+            color: #8b949e;
             margin-bottom: 16px;
         }
 
         .story-actions {
             display: flex;
-            gap: 8px;
-            padding-top: 16px;
-            border-top: 1px solid #f3f4f6;
+            gap: 6px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(99,102,241,0.12);
+            flex-wrap: wrap;
         }
 
         .action-btn {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            gap: 5px;
+            padding: 7px 13px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 8px;
             font-size: 13px;
             font-weight: 500;
-            color: #8b949e;
+            color: #6b7280;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.18s;
+            font-family: inherit;
+        }
+
+        .action-btn svg {
+            flex-shrink: 0;
+            transition: transform 0.18s;
         }
 
         .action-btn:hover {
-            background: rgba(99, 102, 241, 0.15);
-            border-color: rgba(99, 102, 241, 0.4);
-            color: #e6edf3;
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+        }
+
+        .action-btn:hover svg {
+            transform: scale(1.15);
         }
 
         .action-btn.liked {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #f85149;
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.35);
+            color: #f87171;
+        }
+
+        .action-btn.liked:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         .action-btn.reported {
-            background: rgba(217, 119, 6, 0.15);
+            background: rgba(217, 119, 6, 0.12);
             border-color: rgba(217, 119, 6, 0.3);
-            color: #f59e0b;
+            color: #fbbf24;
+        }
+
+        .action-btn.share-btn:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.35);
+            color: #34d399;
+        }
+
+        .action-btn.report-btn {
+            margin-left: auto;
+        }
+
+        .action-btn.report-btn:hover {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #f87171;
         }
 
         /* Empty State */
@@ -891,19 +975,36 @@
             .story-header {
                 gap: 10px;
                 margin-bottom: 12px;
+                align-items: flex-start;
+            }
+
+            .story-header-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                max-width: 140px;
             }
 
             .story-avatar {
-                width: 36px;
-                height: 36px;
+                width: 38px;
+                height: 38px;
             }
 
             .story-author {
-                font-size: 14px;
+                font-size: 13px;
             }
 
             .story-time {
-                font-size: 12px;
+                font-size: 11px;
+            }
+
+            .story-badge {
+                font-size: 10px;
+                padding: 2px 7px;
+            }
+
+            .follow-btn {
+                font-size: 11px;
+                padding: 4px 9px;
             }
 
             .story-title {
@@ -917,7 +1018,7 @@
             }
 
             .story-actions {
-                gap: 6px;
+                gap: 4px;
                 padding-top: 12px;
                 flex-wrap: wrap;
             }
@@ -925,6 +1026,10 @@
             .action-btn {
                 padding: 6px 10px;
                 font-size: 12px;
+            }
+
+            .action-btn.report-btn {
+                margin-left: 0;
             }
 
             .sidebar-card h3 {
@@ -1739,9 +1844,8 @@
                 gap: 4px;
             }
 
-            .bottom-nav-link span {
-                font-size: 18px;
-                line-height: 1;
+            .bottom-nav-link svg {
+                flex-shrink: 0;
             }
 
             .bottom-nav-link.active {
@@ -1766,11 +1870,26 @@
             <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
             <a href="#feed" class="logo" data-view-link="feed">Xalass</a>
             <nav class="nav">
-                <a href="#feed" class="nav-link active" data-view-link="feed">📖 Histoires</a>
-                <a href="#search" class="nav-link" data-view-link="search">🔍 Rechercher</a>
-                <a href="#friends" class="nav-link" data-view-link="friends">👥 Mes amis</a>
-                <a href="#notifications" class="nav-link" data-view-link="notifications">🔔 Notifications</a>
-                <a href="#profile" class="nav-link" data-view-link="profile">👤 Profil</a>
+                <a href="#feed" class="nav-link active" data-view-link="feed">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+                    Histoires
+                </a>
+                <a href="#search" class="nav-link" data-view-link="search">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    Rechercher
+                </a>
+                <a href="#friends" class="nav-link" data-view-link="friends">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Amis
+                </a>
+                <a href="#notifications" class="nav-link" data-view-link="notifications">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    Notifications
+                </a>
+                <a href="#profile" class="nav-link" data-view-link="profile">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Profil
+                </a>
             </nav>
             <div class="user-menu">
                 <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="showView('profile')">
@@ -1782,11 +1901,11 @@
     <!-- Menu mobile -->
     <nav class="mobile-nav" id="mobile-nav">
         <div class="mobile-nav-links">
-            <a href="#feed" class="mobile-nav-link active" data-view-link="feed" onclick="closeMobileNav()">📖 Histoires</a>
-            <a href="#search" class="mobile-nav-link" data-view-link="search" onclick="closeMobileNav()">🔍 Rechercher</a>
-            <a href="#friends" class="mobile-nav-link" data-view-link="friends" onclick="closeMobileNav()">👥 Mes amis</a>
-            <a href="#notifications" class="mobile-nav-link" data-view-link="notifications" onclick="closeMobileNav()">🔔 Notifications</a>
-            <a href="#profile" class="mobile-nav-link" data-view-link="profile" onclick="closeMobileNav()">👤 Profil</a>
+            <a href="#feed" class="mobile-nav-link active" data-view-link="feed" onclick="closeMobileNav()">Histoires</a>
+            <a href="#search" class="mobile-nav-link" data-view-link="search" onclick="closeMobileNav()">Rechercher</a>
+            <a href="#friends" class="mobile-nav-link" data-view-link="friends" onclick="closeMobileNav()">Amis</a>
+            <a href="#notifications" class="mobile-nav-link" data-view-link="notifications" onclick="closeMobileNav()">Notifications</a>
+            <a href="#profile" class="mobile-nav-link" data-view-link="profile" onclick="closeMobileNav()">Profil</a>
         </div>
     </nav>
 
@@ -1794,7 +1913,7 @@
         <!-- Sidebar gauche -->
         <aside class="sidebar-left">
             <div class="sidebar-card">
-                <h3>📊 Statistiques</h3>
+                <h3>Statistiques</h3>
                 <div class="stats-item">
                     <span class="stats-label">Total posts</span>
                     <span class="stats-value" id="total-posts">-</span>
@@ -1810,20 +1929,12 @@
             </div>
 
             <div class="sidebar-card">
-                <h3>⚡ Actions rapides</h3>
+                <h3>Accès rapide</h3>
                 <div class="quick-actions">
-                    <a href="#profile" class="quick-action-btn" data-view-link="profile">
-                        👤 Mon profil
-                    </a>
-                    <a href="#notifications" class="quick-action-btn" data-view-link="notifications">
-                        🔔 Notifications
-                    </a>
-                    <a href="xalass-admin.html" class="quick-action-btn">
-                        Moderation admin
-                    </a>
-                    <a href="#search" class="quick-action-btn" data-view-link="search">
-                        🔍 Rechercher
-                    </a>
+                    <a href="#profile" class="quick-action-btn" data-view-link="profile">Mon profil</a>
+                    <a href="#notifications" class="quick-action-btn" data-view-link="notifications">Notifications</a>
+                    <a href="xalass-admin.html" class="quick-action-btn">Administration</a>
+                    <a href="#search" class="quick-action-btn" data-view-link="search">Rechercher</a>
                 </div>
             </div>
         </aside>
@@ -1919,12 +2030,12 @@
         <!-- Filter Tabs -->
         <div class="filter-tabs">
             <button class="filter-tab active" onclick="filterStories('all', event)">Tout</button>
-            <button class="filter-tab" onclick="filterStories('amour', event)">❤️ Amour</button>
-            <button class="filter-tab" onclick="filterStories('amitie', event)">💙 Amitié</button>
-            <button class="filter-tab" onclick="filterStories('famille', event)">💚 Famille</button>
-            <button class="filter-tab" onclick="filterStories('travail', event)">💛 Travail</button>
-            <button class="filter-tab" onclick="filterStories('social', event)">💜 Social</button>
-            <button class="filter-tab" onclick="filterStories('following', event)">📖 À suivre</button>
+            <button class="filter-tab" onclick="filterStories('amour', event)">Amour</button>
+            <button class="filter-tab" onclick="filterStories('amitie', event)">Amitié</button>
+            <button class="filter-tab" onclick="filterStories('famille', event)">Famille</button>
+            <button class="filter-tab" onclick="filterStories('travail', event)">Travail</button>
+            <button class="filter-tab" onclick="filterStories('social', event)">Social</button>
+            <button class="filter-tab" onclick="filterStories('following', event)">En cours</button>
         </div>
 
         <!-- Stories Feed -->
@@ -2006,11 +2117,26 @@
     </div>
 
     <nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
-        <button class="bottom-nav-link active" type="button" data-view-link="feed"><span>H</span>Fil</button>
-        <button class="bottom-nav-link" type="button" data-view-link="search"><span>R</span>Search</button>
-        <button class="bottom-nav-link" type="button" data-view-link="friends"><span>A</span>Amis</button>
-        <button class="bottom-nav-link" type="button" data-view-link="notifications"><span>N</span>Notif</button>
-        <button class="bottom-nav-link" type="button" data-view-link="profile"><span>P</span>Profil</button>
+        <button class="bottom-nav-link active" type="button" data-view-link="feed">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            Fil
+        </button>
+        <button class="bottom-nav-link" type="button" data-view-link="search">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Recherche
+        </button>
+        <button class="bottom-nav-link" type="button" data-view-link="friends">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Amis
+        </button>
+        <button class="bottom-nav-link" type="button" data-view-link="notifications">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notifs
+        </button>
+        <button class="bottom-nav-link" type="button" data-view-link="profile">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profil
+        </button>
     </nav>
 
     <!-- Logout Modal -->
@@ -2070,10 +2196,10 @@
     </div>
 
     <!-- Charger les scripts API -->
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/voice-recorder.js"></script>
-    <script src="js/xalass-v2.js"></script>
+    <script src="js/config.js?v=3"></script>
+    <script src="js/api.js?v=3"></script>
+    <script src="js/voice-recorder.js?v=3"></script>
+    <script src="js/xalass-v2.js?v=3"></script>
     
     <script>
         let currentFilter = 'all';
@@ -2621,56 +2747,81 @@
             feed.innerHTML = postsToShow.map(story => {
                 const isLiked = story.user_liked || false;
                 const categoryClass = 'badge-' + (story.category || 'autre');
-                const isFollowing = story.status === 'EN COURS';
+                const isInProgress = story.status === 'EN COURS';
                 const reactionsCount = getCount(story.reactions_count, story.reactions);
                 const commentsCount = getCount(story.comments_count, story.comments);
                 const avatarSeed = resolveAvatarSeedFromStory(story);
                 const authorId = story.author_id || story.author?.user_id || story.author?.id;
+                const codeName = story.author?.code_name || null;
+                const followersCount = story.followers_count || 0;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);
                 const isFollowingAuthor = isAuthenticated() && !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
                 const followBtn = (!isOwner && authorId)
-                    ? `<button class="follow-btn ${isFollowingAuthor ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">${isFollowingAuthor ? 'Abonne' : 'Suivre'}</button>`
+                    ? `<button class="follow-btn ${isFollowingAuthor ? 'is-following' : ''}" type="button" data-follow-author-id="${String(authorId)}">${isFollowingAuthor ? '✓ Suivi' : '+ Suivre'}</button>`
                     : '';
+
+                let popularBadge = '';
+                if (followersCount >= 1000) {
+                    popularBadge = `<span class="badge-popular gold" title="${followersCount} abonnés">★ Star</span>`;
+                } else if (followersCount >= 500) {
+                    popularBadge = `<span class="badge-popular silver" title="${followersCount} abonnés">◆ Populaire</span>`;
+                } else if (followersCount >= 100) {
+                    popularBadge = `<span class="badge-popular bronze" title="${followersCount} abonnés">● Connu</span>`;
+                }
+
                 const safeTitle = escapeHtml(story.title);
                 const rawContent = story.content || '';
-                const safeContent = escapeHtml(rawContent);
-                
+                const isAudio = rawContent.startsWith('data:audio/') || rawContent.startsWith('data:video/');
+                const safeContent = isAudio ? '' : escapeHtml(rawContent);
+                const displayContent = isAudio
+                    ? `<div style="display:flex;align-items:center;gap:8px;color:#8b949e;font-size:13px;padding:8px 0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Message vocal — cliquez pour écouter</div>`
+                    : `<p class="story-content">${safeContent.substring(0, 300)}${rawContent.length > 300 ? '...' : ''}</p>`;
+
                 return `
                     <article class="story-card">
                         <div class="story-header">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}" alt="Avatar" class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
-                                <div class="story-author">Anonyme</div>
+                                <div class="story-author-row">
+                                    <span class="story-author">${codeName ? escapeHtml(codeName) : 'Anonyme'}</span>
+                                    ${popularBadge}
+                                </div>
                                 <div class="story-time">${formatTime(story.created_at)}</div>
                             </div>
-                            <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
-                            ${isFollowing ? '<span class="story-badge badge-following">À suivre</span>' : ''}
-                            ${followBtn}
+                            <div class="story-header-actions">
+                                <span class="story-badge ${categoryClass}">${story.category || 'autre'}</span>
+                                ${isInProgress ? '<span class="story-badge badge-following">En cours</span>' : ''}
+                                ${followBtn}
+                            </div>
                         </div>
                         <h2 class="story-title">
                             <a href="#story-${story.post_id}" onclick="event.preventDefault(); showStoryDetail(${story.post_id})">${safeTitle}</a>
                         </h2>
-                        <p class="story-content">${safeContent.substring(0, 300)}${rawContent.length > 300 ? '...' : ''}</p>
+                        ${displayContent}
                         <div class="story-actions">
                             <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${story.post_id})">
-                                ${isLiked ? '❤️' : '🤍'} ${reactionsCount}
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                ${reactionsCount}
                             </button>
                             <button class="action-btn" onclick="showStoryDetail(${story.post_id})">
-                                💬 ${commentsCount}
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                ${commentsCount}
                             </button>
-                            <button class="action-btn" onclick="shareStory(${story.post_id}, '${safeTitle.replace(/'/g, "\\'")}')">
-                                📤 Partager
+                            <button class="action-btn share-btn" onclick="shareStory(${story.post_id}, '${safeTitle.replace(/'/g, "\\'")}')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                Partager
                             </button>
-                            <button class="action-btn" onclick="reportStory(${story.post_id})">
-                                ⚠️ Signaler
+                            <button class="action-btn report-btn" onclick="reportStory(${story.post_id})">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Signaler
                             </button>
                         </div>
                     </article>
                 `;
             }).join('') + (hasMore ? `
-                <div style="text-align: center; padding: 20px;">
-                    <button onclick="loadMorePosts()" style="padding: 12px 24px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
-                        Charger plus de posts (${stories.length - endIndex} restants)
+                <div style="text-align: center; padding: 24px 0;">
+                    <button onclick="loadMorePosts()" style="padding: 10px 28px; background: rgba(99,102,241,0.1); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; letter-spacing: 0.01em;" onmouseover="this.style.background='rgba(99,102,241,0.2)';this.style.borderColor='rgba(99,102,241,0.5)'" onmouseout="this.style.background='rgba(99,102,241,0.1)';this.style.borderColor='rgba(99,102,241,0.3)'">
+                        Voir ${stories.length - endIndex} autres histoires
                     </button>
                 </div>
             ` : '');
@@ -3261,8 +3412,8 @@
             updatePublicModeUi();
             
             // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
-            const avatarSeed = session?.avatar || session?.user_id || 'visiteur';
-            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}`;
+            const avatarSeed = session?.avatar || session?.code_name || session?.user_id || 'visiteur';
+            const avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
             document.getElementById('user-avatar').src = avatarUrl;
             document.getElementById('publish-avatar').src = avatarUrl;
             XalassV2.attachTitleCounter(document.getElementById('story-title'), document.getElementById('story-title-counter'));
@@ -3289,10 +3440,10 @@
                     feed.querySelectorAll('.follow-btn').forEach(b => {
                         if (b.dataset.followAuthorId !== authorId) return;
                         b.classList.toggle('is-following', nowFollowing);
-                        b.textContent = nowFollowing ? 'Abonne' : 'Suivre';
+                        b.textContent = nowFollowing ? '✓ Suivi' : '+ Suivre';
                     });
                     renderFriendsView();
-                    showToast(nowFollowing ? 'Abonnement ajoute' : 'Desabonne', 'success');
+                    showToast(nowFollowing ? 'Abonnement ajouté !' : 'Désabonné', 'success');
                 } catch (err) {
                     showToast('Erreur réseau, réessayez.', 'error');
                 } finally {

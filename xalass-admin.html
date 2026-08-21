@@ -174,17 +174,6 @@
         }
         .btn-logout-admin:hover { background: rgba(248,81,73,0.2); }
 
-        .btn-change-pwd {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: transparent;
-            color: var(--muted); font-weight: 500; font-size: 13px;
-            cursor: pointer; font-family: inherit;
-            transition: all 0.2s;
-        }
-        .btn-change-pwd:hover { border-color: var(--indigo); color: var(--text); }
-
         /* ===== TAB NAV ===== */
         .tab-nav {
             background: rgba(13,17,23,0.5);
@@ -530,61 +519,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* ===== MODAL ===== */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.7); z-index: 998;
-            align-items: center; justify-content: center;
-        }
-        .modal-overlay.open { display: flex; }
-
-        .modal {
-            background: #161b22; border: 1px solid var(--border);
-            border-radius: 16px; padding: 28px;
-            width: 100%; max-width: 440px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        }
-
-        .modal-title {
-            font-size: 16px; font-weight: 700; color: var(--text);
-            margin-bottom: 20px;
-        }
-
-        .modal-label {
-            display: block; font-size: 13px; font-weight: 600;
-            color: var(--muted); margin-bottom: 6px;
-        }
-
-        .modal-input {
-            width: 100%; padding: 11px 14px;
-            background: rgba(99,102,241,0.05);
-            border: 1px solid var(--border); border-radius: 8px;
-            color: var(--text); font-size: 14px; font-family: inherit;
-            outline: none; margin-bottom: 16px;
-            transition: border-color 0.2s;
-        }
-        .modal-input:focus { border-color: var(--indigo); }
-
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-
-        .btn-modal-cancel {
-            padding: 9px 18px; border: 1px solid var(--border);
-            border-radius: 8px; background: transparent;
-            color: var(--muted); font-size: 14px; cursor: pointer;
-            font-family: inherit; transition: all 0.2s;
-        }
-        .btn-modal-cancel:hover { border-color: var(--indigo); color: var(--text); }
-
-        .btn-modal-confirm {
-            padding: 9px 18px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border: none; border-radius: 8px;
-            color: #fff; font-size: 14px; font-weight: 600;
-            cursor: pointer; font-family: inherit;
-            transition: opacity 0.2s;
-        }
-        .btn-modal-confirm:hover { opacity: 0.85; }
-
         /* ===== SECTION GRID ===== */
         .section-grid {
             display: grid; grid-template-columns: 1fr 1fr;
@@ -619,19 +553,31 @@
         <div class="login-logo">Xalass</div>
         <div class="login-badge">Admin Panel</div>
         <form id="login-form" onsubmit="handleLogin(event)">
-            <label class="login-label">Mot de passe administrateur</label>
+            <label class="login-label">Pseudonyme</label>
+            <input
+                type="text"
+                id="login-codename"
+                class="login-input"
+                placeholder="Ton pseudo anonyme"
+                autocomplete="username"
+                autofocus
+                required
+            />
+            <label class="login-label">Mot de passe</label>
             <input
                 type="password"
                 id="login-password"
                 class="login-input"
                 placeholder="••••••••"
                 autocomplete="current-password"
-                autofocus
+                required
             />
-            <button type="submit" class="login-btn">Accéder au tableau de bord</button>
-            <p class="login-error" id="login-error">Mot de passe incorrect.</p>
+            <button type="submit" class="login-btn" id="login-submit-btn">Accéder au tableau de bord</button>
+            <p class="login-error" id="login-error"></p>
         </form>
-        <p class="login-setup-notice" id="login-notice"></p>
+        <p class="login-setup-notice" id="login-notice">
+            Cet espace est réservé aux comptes administrateurs. Connecte-toi avec ton pseudonyme et ton mot de passe habituels — l'accès n'est accordé qu'aux comptes marqués administrateur côté serveur.
+        </p>
     </div>
 </div>
 
@@ -647,7 +593,6 @@
             </div>
             <div class="header-right">
                 <span class="header-time" id="header-time"></span>
-                <button class="btn-change-pwd" onclick="openChangePwd()">🔑 Mot de passe</button>
                 <button class="btn-logout-admin" onclick="logout()">Déconnexion</button>
             </div>
         </div>
@@ -881,22 +826,6 @@
     </main>
 </div>
 
-<!-- ===== CHANGE PASSWORD MODAL ===== -->
-<div class="modal-overlay" id="change-pwd-modal">
-    <div class="modal">
-        <div class="modal-title">🔑 Changer le mot de passe admin</div>
-        <label class="modal-label">Nouveau mot de passe</label>
-        <input type="password" class="modal-input" id="new-pwd" placeholder="Nouveau mot de passe…">
-        <label class="modal-label">Confirmer</label>
-        <input type="password" class="modal-input" id="confirm-pwd" placeholder="Confirmer le mot de passe…">
-        <div id="pwd-error" style="color:var(--danger); font-size:13px; margin-bottom:12px; display:none;"></div>
-        <div class="modal-actions">
-            <button class="btn-modal-cancel" onclick="closeChangePwd()">Annuler</button>
-            <button class="btn-modal-confirm" onclick="saveNewPassword()">Enregistrer</button>
-        </div>
-    </div>
-</div>
-
 <!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
 
@@ -907,10 +836,10 @@
 // ====================================================
 // CONSTANTS & STORAGE KEYS
 // ====================================================
-const ADMIN_AUTH_KEY   = 'xalass_admin_hash';
-const WORDS_KEY        = 'xalass_v2_moderation_settings';
-const SESSION_TTL_MS   = 4 * 60 * 60 * 1000; // 4 heures
-const ADMIN_SESSION_KEY = 'xalass_admin_session_until';
+const WORDS_KEY = 'xalass_v2_moderation_settings';
+// L'admin panel réutilise EXACTEMENT la session normale de l'app
+// (api.sessionStorageKey / 'xalass_session', gérée par api.js) : il n'y a
+// plus de schéma de stockage ni d'auth séparé pour l'admin.
 
 const DEFAULT_WORDS = {
     vulgar: {
@@ -928,58 +857,111 @@ const DEFAULT_WORDS = {
 // ====================================================
 // AUTHENTICATION
 // ====================================================
+// L'admin panel n'a plus de mécanisme d'auth "maison" : la connexion passe
+// par le VRAI login backend (api.loginAnonymousUser, le même que
+// xalass-login.html), et l'accès au dashboard n'est accordé QUE si le
+// compte connecté est confirmé admin par un appel à un endpoint réservé
+// aux admins. Un login code_name/mot de passe valide ne suffit donc pas :
+// on vérifie systématiquement (à chaque chargement de page ET juste après
+// le login) plutôt que de faire confiance à un flag mis en cache.
 
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+// Endpoint admin-only utilisé à la fois pour vérifier les droits admin et
+// pour peupler l'onglet Signalements. Le nom exact peut légèrement varier
+// côté backend (voir description de la PR) — ajuster ici si besoin.
+const ADMIN_REVIEW_QUEUE_ENDPOINT = '/moderation/review-queue';
+
+/**
+ * Appelle un endpoint réservé aux admins. Résout si le compte actuellement
+ * connecté (session xalass_session / header X-Anon-ID) est admin, rejette
+ * sinon (401/403 si non-admin ou non connecté, autre erreur si réseau/API).
+ */
+async function verifyAdminAccess() {
+    return await api.request(ADMIN_REVIEW_QUEUE_ENDPOINT, { method: 'GET' });
 }
 
-function isLoggedIn() {
-    const until = parseInt(localStorage.getItem(ADMIN_SESSION_KEY) || '0', 10);
-    return Date.now() < until;
+function isForbiddenError(error) {
+    // 403 = requête authentifiée mais rejetée par le middleware IsAdmin
+    // (compte réel, mais pas admin).
+    return !!error && error.status === 403;
 }
 
-function setSession() {
-    localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + SESSION_TTL_MS));
-}
-
-function clearSession() {
-    localStorage.removeItem(ADMIN_SESSION_KEY);
+function isUnauthorizedError(error) {
+    // 401 = non authentifié (pas de session, ou session invalide/expirée).
+    return !!error && error.status === 401;
 }
 
 async function handleLogin(e) {
     e.preventDefault();
-    const pwd = document.getElementById('login-password').value.trim();
-    if (!pwd) return;
+    const codeName = (document.getElementById('login-codename').value || '').trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    const submitBtn = document.getElementById('login-submit-btn');
 
-    const hash = await sha256(pwd);
-    const storedHash = localStorage.getItem(ADMIN_AUTH_KEY);
+    errEl.style.display = 'none';
+    errEl.textContent = '';
 
-    if (!storedHash) {
-        // Premier lancement : définit le mot de passe
-        localStorage.setItem(ADMIN_AUTH_KEY, hash);
-        setSession();
-        showDashboard();
-        toast('Mot de passe administrateur défini avec succès.', 'success');
+    if (!codeName || !password) {
+        errEl.textContent = 'Pseudonyme et mot de passe requis.';
+        errEl.style.display = 'block';
         return;
     }
 
-    if (hash === storedHash) {
-        setSession();
-        showDashboard();
-    } else {
-        const errEl = document.getElementById('login-error');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Connexion…';
+
+    // ÉTAPE 1 : vraie connexion backend (identique à xalass-login.html).
+    // Une erreur ici (mauvais pseudo/mot de passe, y compris un éventuel
+    // 401 renvoyé par /login/anoUser) veut dire "identifiants invalides" —
+    // ça n'a rien à voir avec les droits admin, donc on ne la fait PAS
+    // passer par la logique de refus d'accès admin ci-dessous.
+    let user;
+    try {
+        user = await api.loginAnonymousUser(codeName, password);
+    } catch (error) {
+        errEl.textContent = error.message || 'Identifiants invalides. Vérifie ton pseudonyme et ton mot de passe.';
         errEl.style.display = 'block';
-        setTimeout(() => { errEl.style.display = 'none'; }, 3000);
-        document.getElementById('login-password').value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Accéder au tableau de bord';
+        return;
     }
+
+    // ÉTAPE 2 : le login a réussi — on persiste la session avec la MÊME clé
+    // localStorage que le reste de l'app (api.sessionStorageKey ===
+    // 'xalass_session'), pas de stockage admin séparé. api.js lira cette
+    // session pour ajouter automatiquement X-Anon-ID sur les prochaines
+    // requêtes (y compris la vérification admin juste en dessous).
+    localStorage.setItem(api.sessionStorageKey, JSON.stringify({
+        user_id: user.user_id,
+        anon_uuid: user.anon_uuid,
+        code_name: user.code_name,
+        session_hash: user.session_hash
+    }));
+
+    // ÉTAPE 3 : un login valide ne veut PAS dire "admin". On l'appelle
+    // explicitement "accès refusé" si l'endpoint admin-only rejette la
+    // requête — le login a beau avoir réussi, l'accès au dashboard NE DOIT
+    // PAS être accordé.
+    try {
+        await verifyAdminAccess();
+    } catch (error) {
+        if (isForbiddenError(error) || isUnauthorizedError(error)) {
+            errEl.textContent = `Accès refusé : le compte "${codeName}" est bien authentifié mais n'a pas les droits administrateur.`;
+        } else {
+            errEl.textContent = `Connexion réussie mais impossible de vérifier les droits administrateur (${error.message || 'erreur réseau'}). Réessaie.`;
+        }
+        errEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Accéder au tableau de bord';
+        return;
+    }
+
+    document.getElementById('login-password').value = '';
+    showDashboard();
 }
 
 function logout() {
-    clearSession();
+    // Déconnexion réelle du compte (même session que le reste du site).
+    localStorage.removeItem(api.sessionStorageKey);
     location.reload();
 }
 
@@ -987,36 +969,6 @@ function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
     initDashboard();
-}
-
-function openChangePwd() {
-    document.getElementById('new-pwd').value = '';
-    document.getElementById('confirm-pwd').value = '';
-    document.getElementById('pwd-error').style.display = 'none';
-    document.getElementById('change-pwd-modal').classList.add('open');
-}
-function closeChangePwd() {
-    document.getElementById('change-pwd-modal').classList.remove('open');
-}
-
-async function saveNewPassword() {
-    const p1 = document.getElementById('new-pwd').value;
-    const p2 = document.getElementById('confirm-pwd').value;
-    const errEl = document.getElementById('pwd-error');
-
-    if (!p1 || p1.length < 6) {
-        errEl.textContent = 'Le mot de passe doit faire au moins 6 caractères.';
-        errEl.style.display = 'block'; return;
-    }
-    if (p1 !== p2) {
-        errEl.textContent = 'Les mots de passe ne correspondent pas.';
-        errEl.style.display = 'block'; return;
-    }
-
-    const hash = await sha256(p1);
-    localStorage.setItem(ADMIN_AUTH_KEY, hash);
-    closeChangePwd();
-    toast('Mot de passe mis à jour.', 'success');
 }
 
 // ====================================================
@@ -1405,17 +1357,38 @@ function initDashboard() {
 // BOOTSTRAP
 // ====================================================
 
-(function boot() {
-    const hasPassword = !!localStorage.getItem(ADMIN_AUTH_KEY);
-    const notice = document.getElementById('login-notice');
-    if (!hasPassword) {
-        notice.textContent = 'Première connexion : choisissez un mot de passe administrateur. Il sera enregistré de façon sécurisée sur cet appareil.';
+/**
+ * Si une session xalass_session existe déjà (l'utilisateur est connecté
+ * ailleurs sur le site), on ne réaffiche pas le formulaire pour rien : on
+ * revérifie directement ses droits admin auprès du backend. On ne fait
+ * JAMAIS confiance à un flag "isAdmin" mis en cache localement — toujours
+ * un vrai appel réseau.
+ */
+async function boot() {
+    const anonUuid = api.getAnonUuid();
+    if (!anonUuid) {
+        return; // Pas de session : on laisse le formulaire de connexion vide.
     }
 
-    if (isLoggedIn()) {
+    try {
+        await verifyAdminAccess();
         showDashboard();
+    } catch (error) {
+        const errEl = document.getElementById('login-error');
+        if (isForbiddenError(error)) {
+            const session = api.getSession();
+            errEl.textContent = `Accès refusé : le compte connecté${session.code_name ? ` (${session.code_name})` : ''} n'a pas les droits administrateur. Connecte-toi avec un compte admin.`;
+            errEl.style.display = 'block';
+        } else if (isUnauthorizedError(error)) {
+            errEl.textContent = 'Session expirée ou invalide. Merci de te reconnecter.';
+            errEl.style.display = 'block';
+        }
+        // Erreur réseau/API (ni 401 ni 403) : on affiche simplement le
+        // formulaire de connexion, l'utilisateur pourra réessayer.
     }
-})();
+}
+
+boot();
 </script>
 
 </body>

@@ -214,6 +214,68 @@
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
+        /* Secondary filters: sort + date range */
+        .filters-secondary-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 16px;
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b949e;
+        }
+
+        .filter-select-input {
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+            color: #e6edf3;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select-input:focus {
+            border-color: #8b5cf6;
+        }
+
+        /* Chromium affiche l'icone de calendrier en noir par defaut : on l'eclaircit pour le theme sombre */
+        .filter-select-input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7);
+            cursor: pointer;
+        }
+
+        .btn-clear-dates {
+            padding: 10px 16px;
+            background: rgba(248, 81, 73, 0.08);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            border-radius: 10px;
+            color: #f85149;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-clear-dates:hover {
+            background: rgba(248, 81, 73, 0.16);
+        }
+
         /* Results Header */
         .results-header {
             display: none;
@@ -462,6 +524,15 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
+            .filters-secondary-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-select-input {
+                width: 100%;
+            }
+
             .post-footer {
                 flex-direction: column;
                 gap: 12px;
@@ -546,6 +617,27 @@
                     ⭐ Autre
                 </button>
             </div>
+
+            <div class="filters-secondary-row">
+                <div class="filter-group">
+                    <label class="filter-group-label" for="sortSelect">Trier par</label>
+                    <select id="sortSelect" class="filter-select-input" onchange="setSort(this.value)">
+                        <option value="recent" selected>Plus récent</option>
+                        <option value="popular">Plus populaire</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-group-label" for="dateFromInput">Du</label>
+                    <input type="date" id="dateFromInput" class="filter-select-input" onchange="setDateRange()">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-group-label" for="dateToInput">Au</label>
+                    <input type="date" id="dateToInput" class="filter-select-input" onchange="setDateRange()">
+                </div>
+                <button type="button" class="btn-clear-dates" id="clearDateRangeBtn" onclick="clearDateRange()" style="display:none;">
+                    <i class="fa fa-times"></i> Effacer les dates
+                </button>
+            </div>
         </div>
 
         <!-- Results Header -->
@@ -566,6 +658,9 @@
         let currentFilter = 'all';
         let currentQuery = '';
         let searchTimeout;
+        let currentSort = 'recent'; // 'recent' | 'popular'
+        let dateFrom = null; // 'YYYY-MM-DD' ou null
+        let dateTo = null;   // 'YYYY-MM-DD' ou null
 
         function getAvatarUrl(seed) {
             return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
@@ -737,7 +832,7 @@
 
         function setFilter(category) {
             currentFilter = category;
-            
+
             // Mettre à jour l'UI
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -745,33 +840,102 @@
                     btn.classList.add('active');
                 }
             });
-            
+
             performSearch();
+        }
+
+        // Tri (popularité = réactions + commentaires, ou plus récent en premier).
+        function setSort(value) {
+            currentSort = value === 'popular' ? 'popular' : 'recent';
+            performSearch();
+        }
+
+        function hasActiveDateRange() {
+            return !!(dateFrom || dateTo);
+        }
+
+        function setDateRange() {
+            const fromEl = document.getElementById('dateFromInput');
+            const toEl = document.getElementById('dateToInput');
+            dateFrom = (fromEl.value || '').trim() || null;
+            dateTo = (toEl.value || '').trim() || null;
+
+            const clearBtn = document.getElementById('clearDateRangeBtn');
+            if (clearBtn) clearBtn.style.display = hasActiveDateRange() ? 'inline-flex' : 'none';
+
+            performSearch();
+        }
+
+        function clearDateRange() {
+            dateFrom = null;
+            dateTo = null;
+            document.getElementById('dateFromInput').value = '';
+            document.getElementById('dateToInput').value = '';
+            document.getElementById('clearDateRangeBtn').style.display = 'none';
+            performSearch();
+        }
+
+        function getPostEngagementScore(post) {
+            const reactions = Number(post?.reactions_count) || 0;
+            const comments = Number(post?.comments_count) || 0;
+            return reactions + comments;
+        }
+
+        // Applique le tri et le filtre de date côté client sur les résultats
+        // renvoyés par l'API (le backend /search/posts ne prend en charge que
+        // query + category pour l'instant).
+        function applyClientFilters(posts) {
+            let filtered = Array.isArray(posts) ? posts : [];
+
+            if (hasActiveDateRange()) {
+                const fromTime = dateFrom ? new Date(`${dateFrom}T00:00:00`).getTime() : null;
+                const toTime = dateTo ? new Date(`${dateTo}T23:59:59.999`).getTime() : null;
+                filtered = filtered.filter(post => {
+                    const created = new Date(post.created_at || post.createdAt).getTime();
+                    if (Number.isNaN(created)) return false;
+                    if (fromTime !== null && created < fromTime) return false;
+                    if (toTime !== null && created > toTime) return false;
+                    return true;
+                });
+            }
+
+            filtered = [...filtered];
+            if (currentSort === 'popular') {
+                filtered.sort((a, b) => getPostEngagementScore(b) - getPostEngagementScore(a));
+            } else {
+                filtered.sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt));
+            }
+
+            return filtered;
         }
 
         async function performSearch() {
             const container = document.getElementById('resultsContainer');
             const header = document.getElementById('resultsHeader');
-            
-            // Si pas de recherche et filtre "all", afficher l'état initial
-            if (!currentQuery && currentFilter === 'all') {
+
+            // Si pas de recherche, filtre "all" et aucune plage de dates, afficher l'état initial
+            if (!currentQuery && currentFilter === 'all' && !hasActiveDateRange()) {
                 showInitialState();
                 return;
             }
-            
+
             // Afficher le chargement
             container.innerHTML = '<div class="loading"><i class="fa fa-spinner fa-spin"></i></div>';
             header.classList.remove('visible');
-            
+
             try {
                 let results = [];
-                
-                if (currentFilter !== 'all' && !currentQuery) {
-                    results = await api.searchPosts(null, currentFilter);
-                } else if (currentQuery || currentFilter !== 'all') {
+
+                if (currentQuery || currentFilter !== 'all') {
                     results = await api.searchPosts(currentQuery || null, currentFilter !== 'all' ? currentFilter : null);
+                } else {
+                    // Seule une plage de dates est active (pas de mot-clé ni de catégorie) :
+                    // on récupère toutes les publications via l'endpoint dédié (plus fiable
+                    // qu'un /search/posts avec un corps vide) puis on filtre par date ci-dessous.
+                    results = await api.getAllPosts();
                 }
-                
+
+                results = applyClientFilters(results);
                 displayResults(results);
             } catch (error) {
                 console.error('Erreur lors de la recherche:', error);
@@ -791,11 +955,17 @@
             
             if (posts.length === 0) {
                 header.classList.remove('visible');
+                let emptyMessage = 'Aucune histoire dans cette catégorie';
+                if (currentQuery) {
+                    emptyMessage = `Aucune histoire ne correspond à "${currentQuery}"`;
+                } else if (hasActiveDateRange()) {
+                    emptyMessage = 'Aucune histoire ne correspond à la plage de dates sélectionnée.';
+                }
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fa fa-search"></i>
                         <h3>Aucun résultat</h3>
-                        <p>${currentQuery ? `Aucune histoire ne correspond à "${currentQuery}"` : 'Aucune histoire dans cette catégorie'}</p>
+                        <p>${emptyMessage}</p>
                     </div>
                 `;
                 return;

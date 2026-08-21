@@ -13,8 +13,7 @@ const XALASS = {
     },
     CATEGORIES: ['amour', 'amitie', 'social', 'travail', 'autre'],
     AVATAR_COUNT: 18,
-    REPORT_THRESHOLD: 5,
-    DEMO_MODE: false
+    REPORT_THRESHOLD: 5
 };
 
 // === UTILITAIRES ===
@@ -642,158 +641,6 @@ function generatePseudoSuggestions() {
     return suggestions;
 }
 
-// === DONNÉES DE DÉMONSTRATION ===
-
-function initDemoData() {
-    // Vérifier si les données existent déjà
-    if (getStories().length > 0) return;
-    
-    // Créer des utilisateurs de démo
-    const demoUsers = [
-        { id: 'demo1', pseudo: 'AnonymePoète42', password: 'demo', avatar: 1, createdAt: new Date(Date.now() - 86400000 * 30).toISOString() },
-        { id: 'demo2', pseudo: 'SecretConteur17', password: 'demo', avatar: 5, createdAt: new Date(Date.now() - 86400000 * 25).toISOString() },
-        { id: 'demo3', pseudo: 'LibrePenseur99', password: 'demo', avatar: 10, createdAt: new Date(Date.now() - 86400000 * 20).toISOString() },
-        { id: 'demo4', pseudo: 'NocturneAmi33', password: 'demo', avatar: 15, createdAt: new Date(Date.now() - 86400000 * 15).toISOString() }
-    ];
-    
-    saveUsers(demoUsers);
-    
-    // Créer des histoires de démo
-    const demoStories = [
-        {
-            id: 'story1',
-            authorId: 'demo1',
-            authorPseudo: 'AnonymePoète42',
-            authorAvatar: 1,
-            content: "Aujourd'hui, j'ai enfin osé lui dire ce que je ressentais. Après 3 ans à garder ce secret, les mots sont sortis d'eux-mêmes. Son sourire m'a fait comprendre que j'aurais dû parler bien avant...",
-            category: 'amour',
-            isAsuivre: false,
-            likes: ['demo2', 'demo3', 'demo4'],
-            comments: [
-                {
-                    id: 'comment1',
-                    authorId: 'demo2',
-                    authorPseudo: 'SecretConteur17',
-                    authorAvatar: 5,
-                    content: "Quelle belle histoire ! Le courage paie toujours 💪",
-                    likes: ['demo1', 'demo3'],
-                    replies: [
-                        {
-                            id: 'reply1',
-                            authorId: 'demo1',
-                            authorPseudo: 'AnonymePoète42',
-                            authorAvatar: 1,
-                            content: "Merci beaucoup ! Je ne regrette rien 😊",
-                            likes: ['demo2'],
-                            createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
-                        }
-                    ],
-                    createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
-                }
-            ],
-            reports: [],
-            views: 127,
-            createdAt: new Date(Date.now() - 3600000 * 8).toISOString()
-        },
-        {
-            id: 'story2',
-            authorId: 'demo2',
-            authorPseudo: 'SecretConteur17',
-            authorAvatar: 5,
-            content: "Mon meilleur ami ne sait pas que c'est moi qui ai payé sa facture d'hôpital. Il traversait une période difficile et je ne pouvais pas rester sans rien faire. Certains secrets méritent d'être gardés...",
-            category: 'amitie',
-            isAsuivre: false,
-            likes: ['demo1', 'demo3', 'demo4'],
-            comments: [
-                {
-                    id: 'comment2',
-                    authorId: 'demo3',
-                    authorPseudo: 'LibrePenseur99',
-                    authorAvatar: 10,
-                    content: "Tu es une personne exceptionnelle. L'amitié vraie, c'est ça.",
-                    likes: ['demo1', 'demo2', 'demo4'],
-                    replies: [],
-                    createdAt: new Date(Date.now() - 86400000).toISOString()
-                }
-            ],
-            reports: [],
-            views: 89,
-            createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
-        },
-        {
-            id: 'story3',
-            authorId: 'demo3',
-            authorPseudo: 'LibrePenseur99',
-            authorAvatar: 10,
-            content: "Chapitre 1 : Le jour où tout a basculé\n\nJe ne savais pas encore que cette rencontre allait changer ma vie. Le café était bondé ce matin-là, et la seule place disponible était face à un inconnu qui lisait le même livre que moi...",
-            category: 'social',
-            isAsuivre: true,
-            likes: ['demo1', 'demo4'],
-            comments: [],
-            reports: [],
-            views: 234,
-            createdAt: new Date(Date.now() - 3600000 * 3).toISOString()
-        },
-        {
-            id: 'story4',
-            authorId: 'demo4',
-            authorPseudo: 'NocturneAmi33',
-            authorAvatar: 15,
-            content: "J'ai démissionné aujourd'hui. Après 10 ans dans la même entreprise, j'ai choisi de suivre ma passion. Tout le monde pense que je suis fou, mais pour la première fois depuis longtemps, je me sens vivant.",
-            category: 'travail',
-            isAsuivre: false,
-            likes: ['demo1', 'demo2', 'demo3'],
-            comments: [
-                {
-                    id: 'comment3',
-                    authorId: 'demo1',
-                    authorPseudo: 'AnonymePoète42',
-                    authorAvatar: 1,
-                    content: "Le courage de suivre ses rêves, c'est admirable ! Quelle est ta passion ?",
-                    likes: ['demo4'],
-                    replies: [
-                        {
-                            id: 'reply2',
-                            authorId: 'demo4',
-                            authorPseudo: 'NocturneAmi33',
-                            authorAvatar: 15,
-                            content: "La photographie de paysages. Je pars bientôt en voyage ! 📷",
-                            likes: ['demo1', 'demo2'],
-                            createdAt: new Date(Date.now() - 3600000).toISOString()
-                        }
-                    ],
-                    createdAt: new Date(Date.now() - 7200000).toISOString()
-                }
-            ],
-            reports: [],
-            views: 156,
-            createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
-        }
-    ];
-    
-    saveStories(demoStories);
-    
-    // Créer des notifications de démo
-    const demoNotifications = [
-        {
-            id: 'notif1',
-            type: 'like_story',
-            userId: 'demo1',
-            fromUserId: 'demo2',
-            fromPseudo: 'SecretConteur17',
-            fromAvatar: 5,
-            storyId: 'story1',
-            message: 'SecretConteur17 a aimé votre histoire',
-            read: false,
-            createdAt: new Date(Date.now() - 3600000).toISOString()
-        }
-    ];
-    
-    saveNotifications(demoNotifications);
-    
-    console.log('Données de démonstration initialisées');
-}
-
 // === HELPERS DE RENDU ===
 
 function getCategoryLabel(category) {
@@ -839,29 +686,7 @@ function incrementViews(storyId) {
 
 // === INITIALISATION ===
 
-function shouldInitDemoData() {
-    if (window.XALASS_ENABLE_DEMO_DATA === true) {
-        return true;
-    }
-
-    if (XALASS.DEMO_MODE) {
-        return true;
-    }
-
-    try {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('demo') === '1';
-    } catch (error) {
-        return false;
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser les données de démo au premier lancement
-    if (shouldInitDemoData()) {
-        initDemoData();
-    }
-    
     // Ajouter les styles pour les animations toast
     const style = document.createElement('style');
     style.textContent = `

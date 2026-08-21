@@ -19,7 +19,7 @@ INFO  Server running on [https://api.xalass.com]
 ### Terminal 2 : Frontend
 
 ```bash
-cd Winku-Social-Network-Corporate-Responsive-Template
+# Depuis la racine du dépôt (Xalass-web-Frontend)
 python -m http.server 8080
 ```
 

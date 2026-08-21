@@ -629,15 +629,6 @@ class XalassAPI {
         }
     }
 
-    createEventSource(lastPostId = 0) {
-        const params = new URLSearchParams({ last_post_id: String(lastPostId) });
-        const anonUuid = this.getAnonUuid();
-        if (anonUuid) params.set('anon_uuid', anonUuid);
-        const sessionHash = this.getSessionHash();
-        if (sessionHash) params.set('session_hash', sessionHash);
-
-        return new EventSource(`${this.baseURL}/stream/posts?${params.toString()}`);
-    }
 }
 
 const api = new XalassAPI();

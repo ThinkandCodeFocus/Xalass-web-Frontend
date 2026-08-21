@@ -152,6 +152,11 @@ class XalassAPI {
                 if (data && typeof data === 'object') {
                     Object.assign(err, data);
                 }
+                // Toujours exposer le vrai status HTTP (après Object.assign, pour ne
+                // jamais être écrasé par un champ "status" éventuel du corps JSON) —
+                // permet aux appelants de distinguer proprement 401/403 (accès refusé)
+                // des autres erreurs (réseau, 5xx, validation...).
+                err.status = response.status;
                 throw err;
             }
             return data;

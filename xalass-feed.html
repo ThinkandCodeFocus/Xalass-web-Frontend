@@ -1654,289 +1654,8 @@
             color: #8b5cf6;
         }
 
-        /* Single page app views */
-        .app-view {
-            display: none;
-        }
-
-        .app-view.active {
-            display: block;
-            animation: fadeIn 0.18s ease;
-        }
-
-        .view-card {
-            background: rgba(22, 27, 34, 0.72);
-            border: 1px solid rgba(99, 102, 241, 0.22);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-        }
-
-        .view-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 14px;
-            color: #e6edf3;
-        }
-
-        .view-muted {
-            color: #8b949e;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .view-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .view-list-item {
-            border: 1px solid rgba(99, 102, 241, 0.18);
-            border-radius: 12px;
-            padding: 14px;
-            background: rgba(13, 17, 23, 0.42);
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 12px;
-            background: rgba(13, 17, 23, 0.62);
-            color: #e6edf3;
-            font: inherit;
-            margin-bottom: 16px;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-        }
-
-        .profile-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .profile-stat {
-            border: 1px solid rgba(99, 102, 241, 0.18);
-            border-radius: 12px;
-            padding: 14px;
-            background: rgba(13, 17, 23, 0.42);
-        }
-
-        .profile-stat strong {
-            display: block;
-            font-size: 22px;
-            color: #8b5cf6;
-        }
-
         .mobile-bottom-nav {
             display: none;
-        }
-
-        .back-inline-btn {
-            margin-bottom: 12px;
-            padding: 10px 14px;
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 10px;
-            background: rgba(99, 102, 241, 0.10);
-            color: #c9d1d9;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* ==========================================
-           PROFIL — Style TikTok
-           ========================================== */
-        .profile-hero {
-            text-align: center;
-            padding: 36px 20px 28px;
-            background: rgba(22,27,34,0.55);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 20px;
-            margin-bottom: 16px;
-            backdrop-filter: blur(16px);
-        }
-
-        .profile-avatar-large {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 3px solid rgba(99,102,241,0.5);
-            box-shadow: 0 0 0 6px rgba(99,102,241,0.08), 0 8px 24px rgba(0,0,0,0.3);
-            margin: 0 auto 16px;
-            display: block;
-            object-fit: cover;
-        }
-
-        .profile-name {
-            font-size: 22px;
-            font-weight: 800;
-            color: #e6edf3;
-            margin-bottom: 4px;
-            letter-spacing: -0.02em;
-        }
-
-        .profile-handle {
-            font-size: 13px;
-            color: #4b5563;
-            margin-bottom: 24px;
-        }
-
-        .profile-stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding-top: 20px;
-        }
-
-        .profile-stat-item {
-            text-align: center;
-            flex: 1;
-            border-right: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .profile-stat-item:last-child { border-right: none; }
-
-        .profile-stat-num {
-            font-size: 24px;
-            font-weight: 800;
-            color: #e6edf3;
-            display: block;
-            line-height: 1.15;
-        }
-
-        .profile-stat-label {
-            font-size: 11px;
-            color: #4b5563;
-            margin-top: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .profile-section-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #4b5563;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin: 20px 0 10px;
-        }
-
-        .profile-stories-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .profile-story-thumb {
-            background: rgba(22,27,34,0.9);
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 8px;
-            cursor: pointer;
-            transition: background 0.18s;
-            border: none;
-            font-family: inherit;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-        }
-
-        .profile-story-thumb:hover {
-            background: rgba(99,102,241,0.2);
-        }
-
-        .profile-story-thumb-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: #c9d1d9;
-            line-height: 1.4;
-            max-height: 44px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            margin: 6px 0 8px;
-        }
-
-        .profile-story-stats {
-            display: flex;
-            gap: 8px;
-            font-size: 10px;
-            color: #4b5563;
-            font-weight: 600;
-        }
-
-        /* Friend cards */
-        .friend-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
-            background: rgba(22,27,34,0.55);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            margin-bottom: 10px;
-            transition: border-color 0.18s, background 0.18s;
-        }
-
-        .friend-card:hover {
-            border-color: rgba(99,102,241,0.3);
-            background: rgba(22,27,34,0.75);
-        }
-
-        .friend-avatar {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            border: 2px solid rgba(99,102,241,0.3);
-            flex-shrink: 0;
-            object-fit: cover;
-        }
-
-        .friend-info { flex: 1; min-width: 0; }
-
-        .friend-name {
-            font-weight: 700;
-            font-size: 14px;
-            color: #e6edf3;
-        }
-
-        .friend-meta {
-            font-size: 12px;
-            color: #4b5563;
-            margin-top: 2px;
-        }
-
-        .friend-unfollow-btn {
-            padding: 6px 12px;
-            border-radius: 8px;
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.25);
-            color: #f87171;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.18s;
-            white-space: nowrap;
-        }
-
-        .friend-unfollow-btn:hover {
-            background: rgba(239,68,68,0.18);
-            border-color: rgba(239,68,68,0.45);
         }
 
         /* Micro-interactions & fluidité */
@@ -1972,15 +1691,6 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-        }
-
-        /* Story detail améliorée */
-        .story-detail-content {
-            white-space: pre-wrap;
-            font-size: 15px;
-            line-height: 1.8;
-            color: #c9d1d9;
-            margin-top: 12px;
         }
 
         .public-cta-card {
@@ -2081,10 +1791,6 @@
             .main-container {
                 padding-bottom: 18px;
             }
-
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
     </style>
@@ -2093,9 +1799,9 @@
     <header class="header">
         <div class="header-inner">
             <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
-            <a href="#feed" class="logo" data-view-link="feed">Xalass</a>
+            <a href="xalass-feed.html" class="logo">Xalass</a>
             <nav class="nav">
-                <a href="#feed" class="nav-link active" data-view-link="feed">
+                <a href="xalass-feed.html" class="nav-link active">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
                     Histoires
                 </a>
@@ -2103,21 +1809,21 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     Rechercher
                 </a>
-                <a href="#friends" class="nav-link" data-view-link="friends">
+                <a href="xalass-friends.html" class="nav-link">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     Amis
                 </a>
-                <a href="#notifications" class="nav-link" data-view-link="notifications">
+                <a href="xalass-notifications.html" class="nav-link">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     Notifications
                 </a>
-                <a href="#profile" class="nav-link" data-view-link="profile">
+                <a href="xalass-profile.html" class="nav-link">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     Profil
                 </a>
             </nav>
             <div class="user-menu">
-                <img src="" alt="Avatar" class="user-avatar" id="user-avatar" onclick="showView('profile')">
+                <a href="xalass-profile.html"><img src="" alt="Avatar" class="user-avatar" id="user-avatar"></a>
                 <button class="btn-logout" onclick="logout()">Déconnexion</button>
             </div>
         </div>
@@ -2126,11 +1832,11 @@
     <!-- Menu mobile -->
     <nav class="mobile-nav" id="mobile-nav">
         <div class="mobile-nav-links">
-            <a href="#feed" class="mobile-nav-link active" data-view-link="feed" onclick="closeMobileNav()">Histoires</a>
+            <a href="xalass-feed.html" class="mobile-nav-link active" onclick="closeMobileNav()">Histoires</a>
             <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">Rechercher</a>
-            <a href="#friends" class="mobile-nav-link" data-view-link="friends" onclick="closeMobileNav()">Amis</a>
-            <a href="#notifications" class="mobile-nav-link" data-view-link="notifications" onclick="closeMobileNav()">Notifications</a>
-            <a href="#profile" class="mobile-nav-link" data-view-link="profile" onclick="closeMobileNav()">Profil</a>
+            <a href="xalass-friends.html" class="mobile-nav-link" onclick="closeMobileNav()">Amis</a>
+            <a href="xalass-notifications.html" class="mobile-nav-link" onclick="closeMobileNav()">Notifications</a>
+            <a href="xalass-profile.html" class="mobile-nav-link" onclick="closeMobileNav()">Profil</a>
         </div>
     </nav>
 
@@ -2156,8 +1862,8 @@
             <div class="sidebar-card">
                 <h3>Accès rapide</h3>
                 <div class="quick-actions">
-                    <a href="#profile" class="quick-action-btn" data-view-link="profile">Mon profil</a>
-                    <a href="#notifications" class="quick-action-btn" data-view-link="notifications">Notifications</a>
+                    <a href="xalass-profile.html" class="quick-action-btn">Mon profil</a>
+                    <a href="xalass-notifications.html" class="quick-action-btn">Notifications</a>
                     <a href="xalass-admin.html" class="quick-action-btn">Administration</a>
                     <a href="xalass-search.html" class="quick-action-btn">Rechercher</a>
                 </div>
@@ -2166,7 +1872,7 @@
 
         <!-- Colonne centrale -->
         <main class="main">
-        <section class="app-view active" id="feed-view" data-view="feed">
+        <section id="feed-view">
         <div class="public-cta-card" id="public-cta-card">
             <h2>Les histoires les plus populaires</h2>
             <p>Tu peux lire les publications qui ont le plus de reactions et commentaires. Pour voir la suite, aimer, commenter ou publier, connecte-toi ou cree un compte.</p>
@@ -2266,33 +1972,6 @@
         <!-- Stories Feed -->
         <div id="stories-feed"></div>
         </section>
-
-        <section class="app-view" id="story-detail-view" data-view="story">
-            <button class="back-inline-btn" onclick="showView('feed')">Retour au fil</button>
-            <div id="story-detail-content"></div>
-        </section>
-
-        <section class="app-view" id="friends-view" data-view="friends">
-            <div class="view-card">
-                <h2 class="view-title">Mes amis</h2>
-                <p class="view-muted">Retrouve ici les auteurs anonymes que tu suis. La liste se met a jour avec les boutons Suivre du fil.</p>
-                <div class="view-list" id="friends-list" style="margin-top: 16px;"></div>
-            </div>
-        </section>
-
-        <section class="app-view" id="notifications-view" data-view="notifications">
-            <div class="view-card">
-                <h2 class="view-title">Notifications</h2>
-                <div class="view-list" id="notifications-list"></div>
-            </div>
-        </section>
-
-        <section class="app-view" id="profile-view" data-view="profile">
-            <div class="view-card">
-                <h2 class="view-title">Profil</h2>
-                <div id="profile-content"></div>
-            </div>
-        </section>
         </main>
 
         <!-- Sidebar droite -->
@@ -2334,7 +2013,7 @@
     </div>
 
     <nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
-        <button class="bottom-nav-link active" type="button" data-view-link="feed">
+        <button class="bottom-nav-link active" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
             Fil
         </button>
@@ -2342,15 +2021,15 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             Recherche
         </button>
-        <button class="bottom-nav-link" type="button" data-view-link="friends">
+        <button class="bottom-nav-link" type="button" onclick="window.location.href='xalass-friends.html'">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Amis
         </button>
-        <button class="bottom-nav-link" type="button" data-view-link="notifications">
+        <button class="bottom-nav-link" type="button" onclick="window.location.href='xalass-notifications.html'">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             Notifs
         </button>
-        <button class="bottom-nav-link" type="button" data-view-link="profile">
+        <button class="bottom-nav-link" type="button" onclick="window.location.href='xalass-profile.html'">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Profil
         </button>
@@ -2562,280 +2241,27 @@
             return post?.author_id || post?.author?.user_id || post?.author?.id || null;
         }
 
-        function showView(viewName, options = {}) {
-            const view = viewName || 'feed';
-            document.querySelectorAll('.app-view').forEach(section => {
-                section.classList.toggle('active', section.dataset.view === view);
-            });
-
-            document.querySelectorAll('[data-view-link]').forEach(link => {
-                link.classList.toggle('active', link.dataset.viewLink === view);
-            });
-
-            if (!options.skipHash) {
-                const hash = view === 'feed' ? '#feed' : `#${view}`;
-                if (window.location.hash !== hash) history.replaceState(null, '', hash);
-            }
-
-            closeMobileNav();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            if (view === 'friends') renderFriendsView();
-            if (view === 'notifications') renderNotificationsView();
-            if (view === 'profile') renderProfileView();
+        // Post detail, amis, notifications et profil vivent desormais uniquement
+        // sur leurs pages autonomes respectives (xalass-story.html, xalass-friends.html,
+        // xalass-notifications.html, xalass-profile.html) — plus de vue interne a la SPA
+        // pour ces fonctionnalites, donc plus de routeur hash necessaire pour elles.
+        function goToStory(postId) {
+            // xalass-story.html exige aussi une session (elle redirige vers le login
+            // sinon), mais on garde la verification ici pour rediriger directement
+            // sans faire naviguer l'utilisateur vers une page qui va elle-meme le
+            // rediriger.
+            if (!requireAuthForAction('login')) return;
+            window.location.href = `xalass-story.html?id=${encodeURIComponent(postId)}`;
         }
 
-        function bindSinglePageNavigation() {
-            document.querySelectorAll('[data-view-link]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const view = this.dataset.viewLink;
-                    if (!view) return;
-                    e.preventDefault();
-                    showView(view);
-                });
-            });
-
-            window.addEventListener('hashchange', handleInitialHash);
-        }
-
-        function handleInitialHash() {
+        // Compat : redirige les anciens liens partages au format
+        // xalass-feed.html#story-ID (avant migration) vers le vrai permalien.
+        function redirectLegacyStoryHash() {
             const raw = window.location.hash.replace('#', '');
             if (raw.startsWith('story-')) {
                 const postId = raw.replace('story-', '');
-                showStoryDetail(postId, { skipHash: true });
-                return;
+                if (postId) window.location.replace(`xalass-story.html?id=${encodeURIComponent(postId)}`);
             }
-
-            const allowed = ['feed', 'friends', 'notifications', 'profile'];
-            showView(allowed.includes(raw) ? raw : 'feed', { skipHash: true });
-        }
-
-        function showStoryDetail(postId, options = {}) {
-            if (!requireAuthForAction('login')) return;
-            const story = allPosts.find(post => String(post.post_id) === String(postId));
-            const target = document.getElementById('story-detail-content');
-            if (!target) return;
-
-            if (!story) {
-                target.innerHTML = `
-                    <div class="view-card">
-                        <h2 class="view-title">Histoire introuvable</h2>
-                        <p class="view-muted">Elle n'est pas encore chargee dans le fil.</p>
-                    </div>
-                `;
-                showView('story', options);
-                return;
-            }
-
-            const reactionsCount = getCount(story.reactions_count, story.reactions);
-            const commentsCount = getCount(story.comments_count, story.comments);
-            const categoryClass = 'badge-' + (story.category || 'autre');
-            const avatarSeed = resolveAvatarSeedFromStory(story);
-            const avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
-            const codeName = story.author?.code_name || story.author?.pseudo || null;
-            const displayName = codeName ? escapeHtml(codeName) : 'Anonyme';
-            const followersCount = story.followers_count ?? 0;
-            let popularBadge = '';
-            if (followersCount >= 1000) popularBadge = `<span class="badge-popular gold" title="${followersCount} abonn&eacute;s">&#9733; Star</span>`;
-            else if (followersCount >= 500) popularBadge = `<span class="badge-popular silver">&#9670; Populaire</span>`;
-            else if (followersCount >= 100) popularBadge = `<span class="badge-popular bronze">&#9679; Connu</span>`;
-            const isAudio = (story.content || '').startsWith('data:audio/') || (story.content || '').startsWith('data:video/');
-            const contentHtml = isAudio
-                ? `<div class="audio-placeholder" style="padding:20px 0;text-align:center;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" style="margin-bottom:10px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                    <div style="color:#c9d1d9;font-size:14px;font-weight:600;">Message vocal</div>
-                    <button class="action-btn" style="margin-top:12px;" onclick="playAudioInDetail(${story.post_id})">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-                        &Eacute;couter
-                    </button>
-                    <audio id="detail-audio-${story.post_id}" style="display:none"></audio>
-                   </div>`
-                : `<div class="story-detail-content">${escapeHtml(story.content)}</div>`;
-            target.innerHTML = `
-                <article class="view-card">
-                    <div class="story-header">
-                        <img src="${avatarUrl}" alt="Avatar" class="story-avatar">
-                        <div class="story-meta">
-                            <div class="story-author">${displayName} ${popularBadge}</div>
-                            <div class="story-time">${formatTime(story.created_at)}</div>
-                        </div>
-                        <span class="story-badge ${categoryClass}">${escapeHtml(story.category || 'autre')}</span>
-                    </div>
-                    <h2 class="story-title">${escapeHtml(story.title)}</h2>
-                    ${contentHtml}
-                    <div class="story-actions">
-                        <button class="action-btn ${story.user_liked ? 'liked' : ''}" id="detail-like-btn-${story.post_id}" onclick="toggleLikeDetail(${story.post_id}, this)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="${story.user_liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                            <span id="detail-like-count-${story.post_id}">${reactionsCount}</span>
-                        </button>
-                        <button class="action-btn" type="button">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            ${commentsCount}
-                        </button>
-                        <button class="action-btn" onclick="shareStory(${story.post_id}, '${escapeHtml(story.title).replace(/'/g, "\\'")}')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                            Partager
-                        </button>
-                        <button class="action-btn" onclick="reportStory(${story.post_id})">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            Signaler
-                        </button>
-                    </div>
-                </article>
-            `;
-            showView('story', options);
-            if (!options.skipHash) history.replaceState(null, '', `#story-${postId}`);
-        }
-
-        function playAudioInDetail(postId) {
-            const story = allPosts.find(p => String(p.post_id) === String(postId));
-            if (!story) return;
-            const el = document.getElementById(`detail-audio-${postId}`);
-            if (!el) return;
-            el.src = story.content;
-            el.style.display = 'block';
-            el.controls = true;
-            el.play().catch(() => {});
-        }
-
-        function toggleLikeDetail(postId, btn) {
-            toggleLike(postId);
-            const story = allPosts.find(p => String(p.post_id) === String(postId));
-            if (!story) return;
-            const countEl = document.getElementById(`detail-like-count-${postId}`);
-            if (countEl) countEl.textContent = getCount(story.reactions_count, story.reactions);
-            const svgPath = btn.querySelector('path');
-            if (svgPath) svgPath.setAttribute('fill', story.user_liked ? 'currentColor' : 'none');
-            btn.classList.toggle('liked', !!story.user_liked);
-            btn.classList.add('like-pulse');
-            setTimeout(() => btn.classList.remove('like-pulse'), 400);
-        }
-
-        function renderFriendsView() {
-            const list = document.getElementById('friends-list');
-            if (!list) return;
-
-            const followingIds = api.getFollowingIdsLocal(session);
-            const seenIds = new Set();
-            const followedAuthors = [];
-
-            allPosts.forEach(post => {
-                const authorId = String(getPostAuthorId(post) || '');
-                if (!authorId || !followingIds.includes(authorId) || seenIds.has(authorId)) return;
-                seenIds.add(authorId);
-                const codeName = post.author?.code_name || null;
-                const postCount = allPosts.filter(p => String(getPostAuthorId(p)) === authorId).length;
-                followedAuthors.push({ authorId, codeName, postCount });
-            });
-
-            list.innerHTML = followedAuthors.length ? followedAuthors.map(author => {
-                const seed = author.codeName || author.authorId;
-                const avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
-                const name = escapeHtml(author.codeName || 'Anonyme');
-                return `
-                <div class="friend-card" id="friend-card-${author.authorId}">
-                    <img src="${avatarUrl}" class="friend-avatar" alt="Avatar">
-                    <div class="friend-info">
-                        <div class="friend-name">${name}</div>
-                        <div class="friend-meta">${author.postCount} histoire${author.postCount > 1 ? 's' : ''}</div>
-                    </div>
-                    <button class="friend-unfollow-btn" onclick="unfollowFromFriends('${author.authorId}', this)">Se d&eacute;sabonner</button>
-                </div>`;
-            }).join('') : `<p class="view-muted" style="text-align:center;padding:40px 0;">Tu ne suis encore personne.<br>Clique sur <strong>+ Suivre</strong> sur une histoire.</p>`;
-        }
-
-        function unfollowFromFriends(authorId, btn) {
-            api.unfollowLocal(authorId, session);
-            const card = document.getElementById(`friend-card-${authorId}`);
-            if (card) {
-                card.style.transition = 'opacity 0.25s, transform 0.25s';
-                card.style.opacity = '0';
-                card.style.transform = 'translateX(20px)';
-                setTimeout(() => { card.remove(); renderFriendsView(); }, 270);
-            }
-        }
-
-        function renderNotificationsView() {
-            const list = document.getElementById('notifications-list');
-            if (!list) return;
-
-            const liked = allPosts.filter(post => post.user_liked).slice(0, 6);
-            const latest = allPosts.slice(0, 4);
-            const items = [
-                ...liked.map(post => ({ title: 'Histoire aimee', text: post.title, postId: post.post_id })),
-                ...latest.map(post => ({ title: 'Nouvelle histoire', text: post.title, postId: post.post_id }))
-            ];
-
-            list.innerHTML = items.length ? items.map(item => `
-                <button class="view-list-item" type="button" onclick="showStoryDetail(${item.postId})" style="text-align:left; cursor:pointer; color:inherit;">
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <p class="view-muted">${escapeHtml(item.text)}</p>
-                </button>
-            `).join('') : `<p class="view-muted">Aucune notification pour le moment.</p>`;
-        }
-
-        async function renderProfileView() {
-            const target = document.getElementById('profile-content');
-            if (!target) return;
-
-            const myPosts = allPosts.filter(post =>
-                session?.user_id && String(getPostAuthorId(post)) === String(session.user_id)
-            );
-            const totalLikes = myPosts.reduce((sum, p) => sum + getCount(p.reactions_count, p.reactions), 0);
-            const totalComments = myPosts.reduce((sum, p) => sum + getCount(p.comments_count, p.comments), 0);
-            const avatarSeed = session?.avatar ?? session?.avatar_id ?? session?.avatar_seed ?? session?.code_name ?? session?.user_id ?? 1;
-            const avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
-
-            let followersCount = api.getFollowersCountLocal(session?.user_id || '');
-            try { followersCount = await api.getFollowersCount(session?.user_id); } catch (_) {}
-
-            const thumbsHtml = myPosts.slice(0, 9).map(post => {
-                const likes = getCount(post.reactions_count, post.reactions);
-                const comments = getCount(post.comments_count, post.comments);
-                const isAudio = (post.content || '').startsWith('data:audio/') || (post.content || '').startsWith('data:video/');
-                const icon = isAudio
-                    ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
-                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-                return `
-                <button class="profile-story-thumb" onclick="showStoryDetail(${post.post_id})">
-                    ${icon}
-                    <div class="profile-story-thumb-title">${escapeHtml(post.title)}</div>
-                    <div class="profile-story-stats">
-                        <span>&#9829; ${likes}</span>
-                        <span>&#9670; ${comments}</span>
-                    </div>
-                </button>`;
-            }).join('');
-
-            target.innerHTML = `
-                <div class="profile-hero">
-                    <img src="${avatarUrl}" class="profile-avatar-large" alt="Mon avatar">
-                    <div class="profile-name">${escapeHtml(session?.code_name || 'Anonyme')}</div>
-                    <div class="profile-handle">Membre Xalass</div>
-                    <div class="profile-stats-bar">
-                        <div class="profile-stat-item">
-                            <span class="profile-stat-num">${followersCount}</span>
-                            <span class="profile-stat-label">Abonn&eacute;s</span>
-                        </div>
-                        <div class="profile-stat-item">
-                            <span class="profile-stat-num">${myPosts.length}</span>
-                            <span class="profile-stat-label">Histoires</span>
-                        </div>
-                        <div class="profile-stat-item">
-                            <span class="profile-stat-num">${totalLikes}</span>
-                            <span class="profile-stat-label">Likes</span>
-                        </div>
-                        <div class="profile-stat-item">
-                            <span class="profile-stat-num">${totalComments}</span>
-                            <span class="profile-stat-label">Commentaires</span>
-                        </div>
-                    </div>
-                </div>
-                ${myPosts.length ? `
-                <div class="profile-section-title">Mes histoires</div>
-                <div class="profile-stories-grid">${thumbsHtml}</div>
-                ` : `<p class="view-muted" style="text-align:center;padding:48px 0;">Tu n&apos;as pas encore publi&eacute; d&apos;histoire.<br>Lance-toi !</p>`}
-            `;
         }
 
         function showToast(message, type = 'info') {
@@ -3052,9 +2478,6 @@
                     </div>
                 `;
                 updateStats();
-                renderFriendsView();
-                renderNotificationsView();
-                renderProfileView();
                 return;
             }
 
@@ -3115,7 +2538,7 @@
                             </div>
                         </div>
                         <h2 class="story-title">
-                            <a href="#story-${story.post_id}" onclick="event.preventDefault(); showStoryDetail(${story.post_id})">${safeTitle}</a>
+                            <a href="xalass-story.html?id=${story.post_id}" onclick="event.preventDefault(); goToStory(${story.post_id})">${safeTitle}</a>
                         </h2>
                         ${displayContent}
                         <div class="story-actions">
@@ -3123,7 +2546,7 @@
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                                 ${reactionsCount}
                             </button>
-                            <button class="action-btn" onclick="showStoryDetail(${story.post_id})">
+                            <button class="action-btn" onclick="goToStory(${story.post_id})">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 ${commentsCount}
                             </button>
@@ -3148,9 +2571,6 @@
             
             // Mettre à jour les statistiques
             updateStats();
-            renderFriendsView();
-            renderNotificationsView();
-            renderProfileView();
         }
 
         // Charger plus de posts
@@ -3466,8 +2886,11 @@
 
         // Share story
         function shareStory(postId, title) {
-            const url = window.location.origin + window.location.pathname + '#story-' + postId;
-            
+            // Permalien reel vers xalass-story.html (source unique de verite pour le
+            // detail d'une histoire) plutot que l'ancien hash SPA #story-ID.
+            const baseDir = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+            const url = baseDir + 'xalass-story.html?id=' + postId;
+
             if (navigator.share) {
                 navigator.share({
                     title: title,
@@ -3727,7 +3150,6 @@
         // Init
         document.addEventListener('DOMContentLoaded', async function() {
             if (!checkAuth()) return;
-            bindSinglePageNavigation();
             updatePublicModeUi();
             
             // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
@@ -3761,7 +3183,6 @@
                         b.classList.toggle('is-following', nowFollowing);
                         b.textContent = nowFollowing ? '✓ Suivi' : '+ Suivre';
                     });
-                    renderFriendsView();
                     showToast(nowFollowing ? 'Abonnement ajouté !' : 'Désabonné', 'success');
                 } catch (err) {
                     showToast('Erreur réseau, réessayez.', 'error');
@@ -3776,8 +3197,8 @@
             }
             // Charger les posts (avec cache)
             await loadPosts();
-            handleInitialHash();
-            
+            redirectLegacyStoryHash();
+
             // SSE désactivé — endpoint /api/stream/posts non implémenté côté backend
         });
     </script>

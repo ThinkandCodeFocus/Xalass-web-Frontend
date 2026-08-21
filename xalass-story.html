@@ -729,6 +729,7 @@ let currentCommentPreview = '';
 let currentPost = null;
 let currentSession = null;
 let moreCommentsExpanded = false;
+let notifBadgePollId = null;
 
 // Map comment_id → comment object (top-level + replies) for 2-level nesting check
 let commentsMap = {};
@@ -1111,6 +1112,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Mettre à jour le badge de notifications
     await updateNotifBadge();
+
+    // #36: rafraichissement automatique du badge (entre 30s et 60s)
+    notifBadgePollId = setInterval(updateNotifBadge, 45000);
+});
+
+window.addEventListener('beforeunload', function() {
+    if (notifBadgePollId) clearInterval(notifBadgePollId);
 });
 
 async function loadStory() {

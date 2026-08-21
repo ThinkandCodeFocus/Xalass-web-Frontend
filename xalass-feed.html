@@ -2264,6 +2264,7 @@
             }
         }
 
+
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             const bg = type === 'error'
@@ -2999,9 +3000,6 @@
 
         function confirmLogout() {
             localStorage.removeItem('xalass_session');
-            if (eventSource) {
-                eventSource.close();
-            }
             window.location.href = 'xalass-login.html';
         }
 
@@ -3035,117 +3033,6 @@
                 closeMobileNav();
             }
         });
-
-        // Connexion SSE pour les mises à jour en temps réel
-        let eventSource = null;
-
-        function connectSSE() {
-            if (eventSource) {
-                eventSource.close();
-            }
-
-            const lastPostId = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.post_id)) : 0;
-            eventSource = api.createEventSource(lastPostId);
-
-            // Écouter les nouveaux posts
-            eventSource.addEventListener('message', function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.type === 'new_posts' && data.posts && data.posts.length > 0) {
-                        // Ajouter les nouveaux posts au début de la liste
-                        data.posts.reverse(); // Inverser pour avoir les plus récents en premier
-                        allPosts = [...data.posts, ...allPosts];
-                        postsCache.data = allPosts;
-                        postsCache.timestamp = Date.now();
-                        renderStories();
-                        
-                        // Notification discrète
-                        showNotification(`${data.posts.length} nouveau(x) post(s) !`);
-                    }
-                    
-                    if (data.type === 'post_updates' && data.updates) {
-                        // Mettre à jour les compteurs des posts existants
-                        data.updates.forEach(update => {
-                            const post = allPosts.find(p => p.post_id === update.post_id);
-                            if (post) {
-                                post.reactions_count = update.reactions_count;
-                                post.comments_count = update.comments_count;
-                                post.user_liked = update.user_liked;
-                            }
-                        });
-                        renderStories();
-                    }
-                } catch (error) {
-                    console.error('Erreur SSE:', error);
-                }
-            });
-
-            // Gérer les erreurs
-            eventSource.onerror = function(error) {
-                console.error('Erreur de connexion SSE:', error);
-                // Réessayer après 5 secondes
-                setTimeout(() => {
-                    if (eventSource && eventSource.readyState === EventSource.CLOSED) {
-                        connectSSE();
-                    }
-                }, 5000);
-            };
-        }
-
-        // Fonction pour afficher une notification discrète
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: rgba(22, 27, 34, 0.95);
-                backdrop-filter: blur(12px);
-                border: 1px solid rgba(99, 102, 241, 0.3);
-                color: #e6edf3;
-                padding: 16px 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-                font-size: 14px;
-                font-weight: 500;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Ajouter les animations CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Init
         document.addEventListener('DOMContentLoaded', async function() {
@@ -3198,8 +3085,6 @@
             // Charger les posts (avec cache)
             await loadPosts();
             redirectLegacyStoryHash();
-
-            // SSE désactivé — endpoint /api/stream/posts non implémenté côté backend
         });
     </script>
 </body>

@@ -174,19 +174,19 @@ INFO  Server running on [https://api.xalass.com]
 
 **Option A : Python (Recommandé)**
 ```bash
-cd Winku-Social-Network-Corporate-Responsive-Template
+# Depuis la racine du dépôt (Xalass-web-Frontend)
 python -m http.server 8080
 ```
 
 **Option B : PHP**
 ```bash
-cd Winku-Social-Network-Corporate-Responsive-Template
+# Depuis la racine du dépôt (Xalass-web-Frontend)
 php -S localhost:8080
 ```
 
 **Option C : Node.js (si installé)**
 ```bash
-cd Winku-Social-Network-Corporate-Responsive-Template
+# Depuis la racine du dépôt (Xalass-web-Frontend)
 npx http-server -p 8080
 ```
 
@@ -255,20 +255,19 @@ Xalass-web-Frontend/
 │   │   └── api.php              # Routes API
 │   └── .env                     # Configuration (à créer)
 │
-└── Winku-Social-Network-Corporate-Responsive-Template/  # Frontend
-    ├── js/
-    │   ├── api.js               # Service API JavaScript
-    │   ├── config.js            # Configuration API
-    │   └── xalass.js            # Fonctions utilitaires
-    ├── css/                     # Styles CSS
-    ├── images/                  # Images et ressources
-    └── xalass-*.html            # Pages HTML
-        ├── xalass-login.html    # Page de connexion
-        ├── xalass-feed.html     # Page principale (feed)
-        ├── xalass-story.html    # Détail d'un post
-        ├── xalass-profile.html  # Profil utilisateur
-        ├── xalass-search.html   # Recherche
-        └── xalass-notifications.html  # Notifications
+├── js/                           # Frontend - Scripts JavaScript
+│   ├── api.js                    # Service API JavaScript
+│   ├── config.js                 # Configuration API
+│   └── xalass.js                 # Fonctions utilitaires
+├── css/                          # Frontend - Styles CSS
+├── images/                       # Frontend - Images et ressources
+└── xalass-*.html                 # Frontend - Pages HTML
+    ├── xalass-login.html         # Page de connexion
+    ├── xalass-feed.html          # Page principale (feed)
+    ├── xalass-story.html         # Détail d'un post
+    ├── xalass-profile.html       # Profil utilisateur
+    ├── xalass-search.html        # Recherche
+    └── xalass-notifications.html # Notifications
 ```
 
 ---
@@ -277,7 +276,7 @@ Xalass-web-Frontend/
 
 ### Configuration Frontend
 
-Le fichier `Winku-Social-Network-Corporate-Responsive-Template/js/config.js` contient l'URL du backend :
+Le fichier `js/config.js` (à la racine du dépôt) contient l'URL du backend :
 
 ```javascript
 const API_CONFIG = {

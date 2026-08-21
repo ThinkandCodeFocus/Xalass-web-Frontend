@@ -2788,23 +2788,61 @@
             }
         }
 
-        function renderNotificationsView() {
+        const FEED_NOTIF_TYPE_LABELS = {
+            post_comment: 'Nouveau commentaire',
+            comment_reply: 'Nouvelle reponse',
+            post_like: 'Histoire aimee',
+            comment_like: 'Commentaire aime',
+            story_completed: 'Histoire terminee',
+            post_deleted: 'Publication supprimee',
+            moderation_action: 'Moderation',
+            new_follower: 'Nouvel abonne'
+        };
+
+        async function renderNotificationsView() {
             const list = document.getElementById('notifications-list');
             if (!list) return;
 
-            const liked = allPosts.filter(post => post.user_liked).slice(0, 6);
-            const latest = allPosts.slice(0, 4);
-            const items = [
-                ...liked.map(post => ({ title: 'Histoire aimee', text: post.title, postId: post.post_id })),
-                ...latest.map(post => ({ title: 'Nouvelle histoire', text: post.title, postId: post.post_id }))
-            ];
+            list.innerHTML = `<p class="view-muted">Chargement...</p>`;
 
-            list.innerHTML = items.length ? items.map(item => `
-                <button class="view-list-item" type="button" onclick="showStoryDetail(${item.postId})" style="text-align:left; cursor:pointer; color:inherit;">
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <p class="view-muted">${escapeHtml(item.text)}</p>
-                </button>
-            `).join('') : `<p class="view-muted">Aucune notification pour le moment.</p>`;
+            try {
+                const response = await api.getNotifications();
+                const notifications = Array.isArray(response) ? response : (response.notifications || []);
+
+                if (!notifications.length) {
+                    list.innerHTML = `<p class="view-muted">Aucune notification pour le moment.</p>`;
+                    return;
+                }
+
+                list.innerHTML = notifications.map(notif => {
+                    const notifId = notif.notification_id || notif.id;
+                    const isRead = notif.is_read || notif.read_at;
+                    const postId = (notif.data && notif.data.post_id) || notif.post_id || null;
+                    const title = notif.title || FEED_NOTIF_TYPE_LABELS[notif.type] || 'Notification';
+                    const message = notif.message || '';
+                    const time = notif.created_at || notif.createdAt ? formatTime(notif.created_at || notif.createdAt) : '';
+                    const clickAttr = postId ? `onclick="handleFeedNotificationClick('${notifId ?? ''}', '${postId}')"` : '';
+                    return `
+                        <button class="view-list-item" type="button" ${clickAttr} style="text-align:left; cursor:${postId ? 'pointer' : 'default'}; color:inherit; ${isRead ? '' : 'font-weight:600;'}">
+                            <strong>${escapeHtml(title)}</strong>
+                            <p class="view-muted">${escapeHtml(message)}</p>
+                            ${time ? `<span class="view-muted" style="font-size:12px;">${escapeHtml(time)}</span>` : ''}
+                        </button>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+                list.innerHTML = `<p class="view-muted">Impossible de charger les notifications.</p>`;
+            }
+        }
+
+        function handleFeedNotificationClick(notifId, postId) {
+            if (notifId && typeof api.markNotificationAsRead === 'function') {
+                api.markNotificationAsRead(notifId).catch(() => {});
+            }
+            if (postId) {
+                showStoryDetail(postId);
+            }
         }
 
         async function renderProfileView() {

@@ -41,6 +41,16 @@ const API_CONFIG = (() => {
         DEFAULT_HEADERS: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-        }
+        },
+        // ⚠️ PLACEHOLDER — ceci est la clé publique VAPID d'exemple documentée par la
+        // librairie web-push (https://github.com/web-push-libs/web-push), PAS une vraie
+        // clé Xalass. Elle DOIT être remplacée avant que les notifications push ne soient
+        // utilisées en production : générer une vraie paire de clés VAPID côté serveur
+        // (ex. `npx web-push generate-vapid-keys`), déployer la clé privée correspondante
+        // sur le backend, puis remplacer uniquement la valeur ci-dessous par la clé publique
+        // générée. Tant que ce placeholder reste en place, les abonnements push créés par
+        // js/push-notifications.js ne pourront pas être authentifiés par un vrai serveur
+        // push et cette fonctionnalité doit être considérée comme non fonctionnelle.
+        VAPID_PUBLIC_KEY: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
     };
 })();

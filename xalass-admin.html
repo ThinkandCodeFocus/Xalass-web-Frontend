@@ -1249,17 +1249,25 @@ async function handleDeletePost(postId, title) {
     }
 }
 
-function handleKeepPost(postId) {
-    // Remove from local cache display without actually deleting (admin validated it)
-    cachedPosts = cachedPosts.map(p => {
-        if (String(p.post_id || p.id) === String(postId)) {
-            return { ...p, report_count: 0 };
-        }
-        return p;
-    });
-    renderReports();
-    updateStats();
-    toast('Publication validée — retirée de la file de modération.', 'success');
+async function handleKeepPost(postId) {
+    // ⚠️ Endpoint provisoire (voir js/api.js restorePost) : POST /moderation/posts/{id}/restore
+    try {
+        await api.restorePost(postId);
+        // On ne met à jour l'état local qu'après le succès de l'appel API,
+        // pour que report_count reste synchronisé avec le backend et que la
+        // publication ne réapparaisse pas dans la file au prochain rechargement.
+        cachedPosts = cachedPosts.map(p => {
+            if (String(p.post_id || p.id) === String(postId)) {
+                return { ...p, report_count: 0 };
+            }
+            return p;
+        });
+        renderReports();
+        updateStats();
+        toast('Publication validée — retirée de la file de modération.', 'success');
+    } catch (err) {
+        toast('Erreur lors de la validation : ' + (err.message || ''), 'error');
+    }
 }
 
 // ====================================================

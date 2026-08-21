@@ -562,11 +562,6 @@
     <script src="js/xalass.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les données de démo
-            if (window.XALASS_ENABLE_DEMO_DATA === true && typeof initDemoData === 'function') {
-                initDemoData();
-            }
-            
             // Vérifier si l'utilisateur est déjà connecté
             let session = null;
             if (typeof checkAuth === 'function') {

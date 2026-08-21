@@ -343,6 +343,25 @@ class XalassAPI {
         });
     }
 
+    // ========== MODÉRATION (ADMIN) ==========
+
+    /**
+     * Valide une publication signalée depuis la file de modération admin
+     * (la retire de la file en confirmant qu'elle est conservée côté backend).
+     *
+     * ⚠️ Endpoint PROVISOIRE : POST /moderation/posts/{id}/restore
+     * Un backend teammate ajoute en parallèle une API de file de modération
+     * avec un endpoint de confirmation/restauration ; ce chemin pourra être
+     * légèrement différent une fois sa PR finalisée — à ajuster ici si besoin
+     * au moment de la review.
+     */
+    async restorePost(postId) {
+        return await this.request(`/moderation/posts/${postId}/restore`, {
+            method: 'POST',
+            body: JSON.stringify({})
+        });
+    }
+
     // ========== NOTIFICATIONS & SSE ==========
 
     async getNotifications() {

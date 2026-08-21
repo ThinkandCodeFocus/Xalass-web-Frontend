@@ -532,14 +532,40 @@
             return 'À l\'instant';
         }
 
+        // ---- #36: rafraichissement automatique du badge de notifications ----
+        const NOTIF_BADGE_POLL_MS = 45000; // entre 30s et 60s
+        let notifBadgePollId = null;
+
+        async function refreshUnreadBadge() {
+            try {
+                const response = await api.getNotifications();
+                const notifications = Array.isArray(response) ? response : (response.notifications || []);
+                const unreadCount = response.unread_count || notifications.filter(n => !(n.is_read || n.read_at)).length;
+
+                const badge = document.getElementById('unreadBadge');
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                }
+            } catch (error) {
+                console.error('Erreur lors du rafraichissement du badge de notifications:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const session = checkAuth();
             if (!session) return;
-            
+
             const avatarSeed = session.avatar || session.user_id || 1;
             document.getElementById('headerAvatar').src = getAvatarUrl(avatarSeed);
-            
+
             loadNotifications();
+
+            notifBadgePollId = setInterval(refreshUnreadBadge, NOTIF_BADGE_POLL_MS);
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (notifBadgePollId) clearInterval(notifBadgePollId);
         });
 
         // ---- #13: Tous les types de notifications ----

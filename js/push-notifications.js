@@ -24,8 +24,14 @@
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') return;
 
-                // S'abonner (VAPID public key — à remplacer par une vraie clé générée)
-                const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+                // S'abonner (VAPID public key — voir js/config.js : VAPID_PUBLIC_KEY est
+                // encore la clé d'exemple de la librairie web-push, à remplacer par une
+                // vraie clé générée avant utilisation en production)
+                const VAPID_PUBLIC_KEY = (typeof API_CONFIG !== 'undefined' && API_CONFIG.VAPID_PUBLIC_KEY) || null;
+                if (!VAPID_PUBLIC_KEY) {
+                    console.warn('VAPID_PUBLIC_KEY manquante dans js/config.js — abonnement push annulé.');
+                    return;
+                }
                 const vapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
                 sub = await reg.pushManager.subscribe({
                     userVisibleOnly: true,

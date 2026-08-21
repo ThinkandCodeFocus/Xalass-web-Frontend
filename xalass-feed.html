@@ -2099,7 +2099,7 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
                     Histoires
                 </a>
-                <a href="#search" class="nav-link" data-view-link="search">
+                <a href="xalass-search.html" class="nav-link">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     Rechercher
                 </a>
@@ -2127,7 +2127,7 @@
     <nav class="mobile-nav" id="mobile-nav">
         <div class="mobile-nav-links">
             <a href="#feed" class="mobile-nav-link active" data-view-link="feed" onclick="closeMobileNav()">Histoires</a>
-            <a href="#search" class="mobile-nav-link" data-view-link="search" onclick="closeMobileNav()">Rechercher</a>
+            <a href="xalass-search.html" class="mobile-nav-link" onclick="closeMobileNav()">Rechercher</a>
             <a href="#friends" class="mobile-nav-link" data-view-link="friends" onclick="closeMobileNav()">Amis</a>
             <a href="#notifications" class="mobile-nav-link" data-view-link="notifications" onclick="closeMobileNav()">Notifications</a>
             <a href="#profile" class="mobile-nav-link" data-view-link="profile" onclick="closeMobileNav()">Profil</a>
@@ -2159,7 +2159,7 @@
                     <a href="#profile" class="quick-action-btn" data-view-link="profile">Mon profil</a>
                     <a href="#notifications" class="quick-action-btn" data-view-link="notifications">Notifications</a>
                     <a href="xalass-admin.html" class="quick-action-btn">Administration</a>
-                    <a href="#search" class="quick-action-btn" data-view-link="search">Rechercher</a>
+                    <a href="xalass-search.html" class="quick-action-btn">Rechercher</a>
                 </div>
             </div>
         </aside>
@@ -2272,14 +2272,6 @@
             <div id="story-detail-content"></div>
         </section>
 
-        <section class="app-view" id="search-view" data-view="search">
-            <div class="view-card">
-                <h2 class="view-title">Recherche</h2>
-                <input class="search-box" id="spa-search-input" type="search" placeholder="Rechercher une histoire, une categorie ou un mot..." oninput="renderSearchView()">
-                <div class="view-list" id="spa-search-results"></div>
-            </div>
-        </section>
-
         <section class="app-view" id="friends-view" data-view="friends">
             <div class="view-card">
                 <h2 class="view-title">Mes amis</h2>
@@ -2346,7 +2338,7 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
             Fil
         </button>
-        <button class="bottom-nav-link" type="button" data-view-link="search">
+        <button class="bottom-nav-link" type="button" onclick="window.location.href='xalass-search.html'">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             Recherche
         </button>
@@ -2588,7 +2580,6 @@
             closeMobileNav();
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            if (view === 'search') renderSearchView();
             if (view === 'friends') renderFriendsView();
             if (view === 'notifications') renderNotificationsView();
             if (view === 'profile') renderProfileView();
@@ -2615,7 +2606,7 @@
                 return;
             }
 
-            const allowed = ['feed', 'search', 'friends', 'notifications', 'profile'];
+            const allowed = ['feed', 'friends', 'notifications', 'profile'];
             showView(allowed.includes(raw) ? raw : 'feed', { skipHash: true });
         }
 
@@ -2718,30 +2709,6 @@
             btn.classList.toggle('liked', !!story.user_liked);
             btn.classList.add('like-pulse');
             setTimeout(() => btn.classList.remove('like-pulse'), 400);
-        }
-
-        function renderSearchView() {
-            const input = document.getElementById('spa-search-input');
-            const results = document.getElementById('spa-search-results');
-            if (!results) return;
-
-            const query = (input?.value || '').trim().toLowerCase();
-            const matches = allPosts.filter(post => {
-                if (!query) return true;
-                return [
-                    post.title,
-                    post.content,
-                    post.category,
-                    post.status
-                ].some(value => String(value || '').toLowerCase().includes(query));
-            }).slice(0, 20);
-
-            results.innerHTML = matches.length ? matches.map(post => `
-                <button class="view-list-item" type="button" onclick="showStoryDetail(${post.post_id})" style="text-align:left; cursor:pointer; color:inherit;">
-                    <strong>${escapeHtml(post.title)}</strong>
-                    <p class="view-muted">${escapeHtml((post.content || '').slice(0, 150))}${(post.content || '').length > 150 ? '...' : ''}</p>
-                </button>
-            `).join('') : `<p class="view-muted">Aucun resultat pour cette recherche.</p>`;
         }
 
         function renderFriendsView() {
@@ -3085,7 +3052,6 @@
                     </div>
                 `;
                 updateStats();
-                renderSearchView();
                 renderFriendsView();
                 renderNotificationsView();
                 renderProfileView();
@@ -3182,7 +3148,6 @@
             
             // Mettre à jour les statistiques
             updateStats();
-            renderSearchView();
             renderFriendsView();
             renderNotificationsView();
             renderProfileView();

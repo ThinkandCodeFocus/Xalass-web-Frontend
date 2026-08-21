@@ -2788,23 +2788,61 @@
             }
         }
 
-        function renderNotificationsView() {
+        const FEED_NOTIF_TYPE_LABELS = {
+            post_comment: 'Nouveau commentaire',
+            comment_reply: 'Nouvelle reponse',
+            post_like: 'Histoire aimee',
+            comment_like: 'Commentaire aime',
+            story_completed: 'Histoire terminee',
+            post_deleted: 'Publication supprimee',
+            moderation_action: 'Moderation',
+            new_follower: 'Nouvel abonne'
+        };
+
+        async function renderNotificationsView() {
             const list = document.getElementById('notifications-list');
             if (!list) return;
 
-            const liked = allPosts.filter(post => post.user_liked).slice(0, 6);
-            const latest = allPosts.slice(0, 4);
-            const items = [
-                ...liked.map(post => ({ title: 'Histoire aimee', text: post.title, postId: post.post_id })),
-                ...latest.map(post => ({ title: 'Nouvelle histoire', text: post.title, postId: post.post_id }))
-            ];
+            list.innerHTML = `<p class="view-muted">Chargement...</p>`;
 
-            list.innerHTML = items.length ? items.map(item => `
-                <button class="view-list-item" type="button" onclick="showStoryDetail(${item.postId})" style="text-align:left; cursor:pointer; color:inherit;">
-                    <strong>${escapeHtml(item.title)}</strong>
-                    <p class="view-muted">${escapeHtml(item.text)}</p>
-                </button>
-            `).join('') : `<p class="view-muted">Aucune notification pour le moment.</p>`;
+            try {
+                const response = await api.getNotifications();
+                const notifications = Array.isArray(response) ? response : (response.notifications || []);
+
+                if (!notifications.length) {
+                    list.innerHTML = `<p class="view-muted">Aucune notification pour le moment.</p>`;
+                    return;
+                }
+
+                list.innerHTML = notifications.map(notif => {
+                    const notifId = notif.notification_id || notif.id;
+                    const isRead = notif.is_read || notif.read_at;
+                    const postId = (notif.data && notif.data.post_id) || notif.post_id || null;
+                    const title = notif.title || FEED_NOTIF_TYPE_LABELS[notif.type] || 'Notification';
+                    const message = notif.message || '';
+                    const time = notif.created_at || notif.createdAt ? formatTime(notif.created_at || notif.createdAt) : '';
+                    const clickAttr = postId ? `onclick="handleFeedNotificationClick('${notifId ?? ''}', '${postId}')"` : '';
+                    return `
+                        <button class="view-list-item" type="button" ${clickAttr} style="text-align:left; cursor:${postId ? 'pointer' : 'default'}; color:inherit; ${isRead ? '' : 'font-weight:600;'}">
+                            <strong>${escapeHtml(title)}</strong>
+                            <p class="view-muted">${escapeHtml(message)}</p>
+                            ${time ? `<span class="view-muted" style="font-size:12px;">${escapeHtml(time)}</span>` : ''}
+                        </button>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+                list.innerHTML = `<p class="view-muted">Impossible de charger les notifications.</p>`;
+            }
+        }
+
+        function handleFeedNotificationClick(notifId, postId) {
+            if (notifId && typeof api.markNotificationAsRead === 'function') {
+                api.markNotificationAsRead(notifId).catch(() => {});
+            }
+            if (postId) {
+                showStoryDetail(postId);
+            }
         }
 
         async function renderProfileView() {
@@ -3611,9 +3649,6 @@
 
         function confirmLogout() {
             localStorage.removeItem('xalass_session');
-            if (eventSource) {
-                eventSource.close();
-            }
             window.location.href = 'xalass-login.html';
         }
 
@@ -3647,117 +3682,6 @@
                 closeMobileNav();
             }
         });
-
-        // Connexion SSE pour les mises à jour en temps réel
-        let eventSource = null;
-
-        function connectSSE() {
-            if (eventSource) {
-                eventSource.close();
-            }
-
-            const lastPostId = allPosts.length > 0 ? Math.max(...allPosts.map(p => p.post_id)) : 0;
-            eventSource = api.createEventSource(lastPostId);
-
-            // Écouter les nouveaux posts
-            eventSource.addEventListener('message', function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.type === 'new_posts' && data.posts && data.posts.length > 0) {
-                        // Ajouter les nouveaux posts au début de la liste
-                        data.posts.reverse(); // Inverser pour avoir les plus récents en premier
-                        allPosts = [...data.posts, ...allPosts];
-                        postsCache.data = allPosts;
-                        postsCache.timestamp = Date.now();
-                        renderStories();
-                        
-                        // Notification discrète
-                        showNotification(`${data.posts.length} nouveau(x) post(s) !`);
-                    }
-                    
-                    if (data.type === 'post_updates' && data.updates) {
-                        // Mettre à jour les compteurs des posts existants
-                        data.updates.forEach(update => {
-                            const post = allPosts.find(p => p.post_id === update.post_id);
-                            if (post) {
-                                post.reactions_count = update.reactions_count;
-                                post.comments_count = update.comments_count;
-                                post.user_liked = update.user_liked;
-                            }
-                        });
-                        renderStories();
-                    }
-                } catch (error) {
-                    console.error('Erreur SSE:', error);
-                }
-            });
-
-            // Gérer les erreurs
-            eventSource.onerror = function(error) {
-                console.error('Erreur de connexion SSE:', error);
-                // Réessayer après 5 secondes
-                setTimeout(() => {
-                    if (eventSource && eventSource.readyState === EventSource.CLOSED) {
-                        connectSSE();
-                    }
-                }, 5000);
-            };
-        }
-
-        // Fonction pour afficher une notification discrète
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: rgba(22, 27, 34, 0.95);
-                backdrop-filter: blur(12px);
-                border: 1px solid rgba(99, 102, 241, 0.3);
-                color: #e6edf3;
-                padding: 16px 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-                font-size: 14px;
-                font-weight: 500;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Ajouter les animations CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Init
         document.addEventListener('DOMContentLoaded', async function() {
@@ -3812,8 +3736,6 @@
             // Charger les posts (avec cache)
             await loadPosts();
             handleInitialHash();
-            
-            // SSE désactivé — endpoint /api/stream/posts non implémenté côté backend
         });
     </script>
 </body>

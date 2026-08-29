@@ -7,7 +7,7 @@ updated: 2026-08-29
 review_after: 2026-08-29
 status: proposed
 tags: ["cochange", "git", "pattern"]
-filenames: ["xalass-story.html", "xalass.feed.html"]
+filenames: ["xalass-feed.html", "xalass-story.html"]
 created_at: "2026-08-29T14:13:18.862980800+00:00"
 content_hash: "aa7e6ba496d47b8f3308f949a026aac3e8f472829f44b8b367052b45eac833e5"
 source_tool: "buddy_memory_lifecycle:git"

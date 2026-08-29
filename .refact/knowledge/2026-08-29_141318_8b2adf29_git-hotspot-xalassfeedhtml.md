@@ -7,7 +7,7 @@ updated: 2026-08-29
 review_after: 2026-08-29
 status: proposed
 tags: ["code", "git", "hotspot"]
-filenames: ["xalass.feed.html"]
+filenames: ["xalass-feed.html"]
 created_at: "2026-08-29T14:13:18.801521300+00:00"
 content_hash: "f5f258df26283f59fd5635149968b593fab5ba89a3ec9a80adf77e684533e12c"
 source_tool: "buddy_memory_lifecycle:git"

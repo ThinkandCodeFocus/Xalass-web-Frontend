@@ -7,7 +7,7 @@ updated: 2026-08-29
 review_after: 2026-08-29
 status: proposed
 tags: ["git", "lesson"]
-filenames: ["xalass-search.html", "xalass.feed.html"]
+filenames: ["xalass-feed.html", "xalass-search.html"]
 created_at: "2026-08-29T14:13:18.733886900+00:00"
 content_hash: "269247e6f8fdba214504ddef8eabaa7c8d5cae59abdbf84993cadb1c728062cb"
 source_tool: "buddy_memory_lifecycle:git"

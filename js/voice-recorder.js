@@ -93,10 +93,34 @@ const VoiceRecorder = {
         return true;
     },
 
+        /**
+     * Annule l'enregistrement en cours (ne sauvegarde rien)
+     */
+    cancel() {
+        if (!this.mediaRecorder || !this.isRecording) return false;
+
+        this._cancelled = true;
+        this.mediaRecorder.stop();
+        this.isRecording = false;
+        clearInterval(this.recordingInterval);
+
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+
+        return true;
+    },
+
     /**
      * Callback quand l'enregistrement est terminé
      */
-    onRecordingStop() {
+       onRecordingStop() {
+        if (this._cancelled) {
+            this._cancelled = false;
+            this.audioChunks = [];
+            document.dispatchEvent(new CustomEvent('recordingCancelled'));
+            return;
+        }
         // Utiliser le vrai type MIME de ce que MediaRecorder a enregistré
         const mimeType = (this.mediaRecorder && this.mediaRecorder.mimeType) || 'audio/webm';
         const audioBlob = new Blob(this.audioChunks, { type: mimeType });

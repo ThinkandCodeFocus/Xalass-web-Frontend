@@ -124,16 +124,33 @@
 
         #storyContent .post-actions a,
         #storyContent .post-actions button {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid var(--x-border);
             color: var(--x-muted) !important;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: all .15s ease;
         }
 
         #storyContent .post-actions a:hover,
         #storyContent .post-actions button:hover {
             color: var(--x-text) !important;
+            border-color: var(--x-accent);
+            background: rgba(99, 102, 241, 0.16);
         }
 
         #storyContent .post-actions a.like.liked {
             color: var(--x-like) !important;
+            border-color: rgba(244, 63, 94, 0.4);
+            background: rgba(244, 63, 94, 0.1);
         }
 
         /* Comment form */
@@ -506,6 +523,9 @@
                             </a>
                             <a href="xalass-friends.html" style="color: #333;" title="Mes amis">
                                 <i class="fa fa-users" style="font-size: 20px;"></i>
+                            </a>
+                            <a href="xalass-admin.html" style="color: #333;" title="Administration">
+                                <i class="fa fa-shield" style="font-size: 20px;"></i>
                             </a>
                             <a href="xalass-profile.html" id="headerAvatar" style="width: 35px; height: 35px; border-radius: 50%; overflow: hidden; display: block;">
                                 <img src="" alt="Mon profil" style="width: 100%; height: 100%; object-fit: cover;">

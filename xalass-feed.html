@@ -2198,15 +2198,9 @@
                 return sessionSeed;
             }
 
-            // Chercher d'abord l'avatar stocké localement pour cet auteur par son ID
-            if (authorId !== undefined && authorId !== null && authorId !== '') {
-                const avatarByUserId = getRememberedAvatarForUserId(authorId);
-                if (avatarByUserId !== null) {
-                    return avatarByUserId;
-                }
-            }
-
-            // Chercher ensuite les données directes de l'API
+            // Valeur canonique renvoyée par l'API (anonymous_users.avatar, choisie à
+            // l'inscription) — la même pour tout le monde qui regarde ce post, donc
+            // vérifiée EN PREMIER, avant tout cache local propre à ce navigateur.
             const direct =
                 author?.avatar ??
                 author?.avatar_id ??
@@ -2224,10 +2218,18 @@
 
             if (direct !== undefined && direct !== null && direct !== '') return direct;
 
+            // Comptes créés avant que l'avatar ne soit persisté côté serveur (avatar=null en
+            // base) : repli sur un cache local propre à ce navigateur (peut différer d'un
+            // visiteur à l'autre), puis sur l'ID auteur — stable et identique pour tout le
+            // monde, donc préférable à un cache local pour ne pas réintroduire l'incohérence.
+            if (authorId !== undefined && authorId !== null && authorId !== '') {
+                const avatarByUserId = getRememberedAvatarForUserId(authorId);
+                if (avatarByUserId !== null) return avatarByUserId;
+            }
+
             const remembered = getRememberedAvatarSeedForCodeName(authorCodeName);
             if (remembered !== null) return remembered;
 
-            // Utiliser l'ID de l'auteur comme seed si disponible (crée des avatars uniques et persistants)
             if (authorId !== undefined && authorId !== null && authorId !== '') return authorId;
             return story.post_id ?? story.id ?? 1;
         }

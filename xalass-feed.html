@@ -1935,11 +1935,10 @@
                     <canvas class="visualizer-canvas" id="visualizer" style="display: none;"></canvas>
                 </div>
 
-                <div class="voice-options">
-                    <label class="voice-option-label">
-                        <input type="checkbox" id="applyAnonymityEffect" checked>
-                        Appliquer l'effet d'anonymat à ma voix
-                    </label>
+                               <div class="voice-options">
+                    <span class="voice-option-label" style="cursor: default;">
+                        🔒 Anonymisation automatique et obligatoire
+                    </span>
                 </div>
 
                 <div class="recordings-list" id="recordingsList" style="display: none;"></div>
@@ -2716,18 +2715,13 @@
             showToast('Enregistrement annulé', 'info');
         });
 
-        document.addEventListener('recordingComplete', async (e) => {
+      document.addEventListener('recordingComplete', async (e) => {
             const audioData = e.detail.audioData;
             const duration = e.detail.duration;
             
-            // Appliquer l'effet d'anonymat si demandé
-            const shouldApplyEffect = document.getElementById('applyAnonymityEffect').checked;
-            let finalAudioData = audioData;
-
-            if (shouldApplyEffect) {
-                showToast('Anonymisation en cours…', 'info');
-                finalAudioData = await anonymizeAudio(audioData);
-            }
+            // L'anonymisation est désormais obligatoire et non désactivable
+            showToast('Anonymisation en cours…', 'info');
+            const finalAudioData = await anonymizeAudio(audioData);
             
             // Créer un objet d'enregistrement
             const recording = {
@@ -2735,9 +2729,8 @@
                 audioData: finalAudioData,
                 duration: duration,
                 timestamp: new Date().toISOString(),
-                withEffect: shouldApplyEffect
+                withEffect: true
             };
-            
             voiceRecordings.push(recording);
             selectedVoiceRecording = recording;
             

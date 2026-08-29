@@ -244,6 +244,8 @@ const VoiceEffects = {
         const lowFreq      = this._rand(120, 300);
         const compRatio    = this._rand(3, 6);          // compression douce (8-16 écrasait le son)
         const compThresh   = this._rand(-30, -15);
+          const outputGain   = this._rand(0.85, 1.15);     // volume aléatoire
+        const noiseLevel   = this._rand(0.002, 0.01); 
 
         // Durée modifiée par playbackRate (approximation de pitch shift)
         const outLength = Math.ceil(audioBuffer.length / pitchRate);
@@ -288,14 +290,30 @@ const VoiceEffects = {
         compressor.attack.value = 0.003;
         compressor.release.value = 0.25;
 
+              // Volume aléatoire
+        const gainNode = offlineContext.createGain();
+        gainNode.gain.value = outputGain;
+
+        // Bruit blanc léger (masque les caractéristiques résiduelles de la voix)
+        const noiseBuffer = offlineContext.createBuffer(1, outLength, audioBuffer.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < outLength; i++) {
+            noiseData[i] = (Math.random() * 2 - 1) * noiseLevel;
+        }
+        const noiseSource = offlineContext.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+
         source.connect(distortion);
         distortion.connect(bandpass);
         bandpass.connect(lowShelf);
         lowShelf.connect(highShelf);
         highShelf.connect(compressor);
-        compressor.connect(offlineContext.destination);
+        compressor.connect(gainNode);
+        noiseSource.connect(gainNode);
+        gainNode.connect(offlineContext.destination);
 
         source.start();
+        noiseSource.start();
 
         return offlineContext.startRendering().then((renderedBuffer) => renderedBuffer);
     },

@@ -2496,7 +2496,6 @@
                 const commentsCount = getCount(story.comments_count, story.comments);
                 const avatarSeed = resolveAvatarSeedFromStory(story);
                 const authorId = story.author_id || story.author?.user_id || story.author?.id;
-                const codeName = story.author?.code_name || null;
                 const followersCount = story.followers_count || 0;
                 const isOwner = session && authorId && String(authorId) === String(session.user_id);
                 const isFollowingAuthor = isAuthenticated() && !isOwner && authorId ? api.isFollowingLocal(authorId, session) : false;
@@ -2527,7 +2526,7 @@
                             <img src="https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
                                 <div class="story-author-row">
-                                    <span class="story-author">${codeName ? escapeHtml(codeName) : 'Anonyme'}</span>
+                                    <span class="story-author">Anonyme</span>
                                     ${popularBadge}
                                 </div>
                                 <div class="story-time">${formatTime(story.created_at)}</div>

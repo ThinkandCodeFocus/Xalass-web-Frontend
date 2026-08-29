@@ -2527,7 +2527,7 @@
                 return `
                     <article class="story-card">
                         <div class="story-header">
-                            <img src="https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf" alt="Avatar" class="story-avatar">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
                                 <div class="story-author-row">
                                     <span class="story-author">Anonyme</span>
@@ -3044,7 +3044,7 @@
             
             // Utiliser un avatar par défaut (on pourrait récupérer l'avatar depuis l'API plus tard)
             const avatarSeed = session?.avatar || session?.code_name || session?.user_id || 'visiteur';
-            const avatarUrl = `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(String(avatarSeed))}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+            const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}`;
             document.getElementById('user-avatar').src = avatarUrl;
             document.getElementById('publish-avatar').src = avatarUrl;
             XalassV2.attachTitleCounter(document.getElementById('story-title'), document.getElementById('story-title-counter'));

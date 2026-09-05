@@ -43,7 +43,13 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Types de requêtes qu'on ne met jamais en cache (données sensibles / toujours fraîches)
+// Reponses API : JAMAIS mises en cache. Chaque reponse de l'API est
+// propre a une identite anonyme, transmise par l'en-tete X-Anon-ID
+// (voir js/api.js) -- or le Cache API indexe par URL et ignore les
+// en-tetes. Les mettre en cache ferait ressortir hors-ligne les
+// notifications ou le profil de l'identite precedente apres un
+// changement d'identite sur l'appareil. Le ticket #30 ne demande que
+// l'app shell et les assets statiques : on s'y tient.
 function isApiRequest(url) {
     return url.pathname.startsWith('/api/') || url.hostname.startsWith('api.');
 }
@@ -52,26 +58,19 @@ function isStaticAsset(url) {
     return /\.(css|js|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico)$/i.test(url.pathname);
 }
 
+// Ne met en cache qu'une reponse reellement exploitable : sans ce garde-fou,
+// un 401 ou un 500 serait memorise puis reservi tel quel hors-ligne.
+function isCacheable(response) {
+    return response && response.ok && response.type !== 'opaque';
+}
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     if (request.method !== 'GET') return; // Ne cache jamais POST/PUT/DELETE
 
     const url = new URL(request.url);
 
-    // API : network-first, repli sur le cache si hors-ligne (pour ne pas servir
-    // de données périmées quand la connexion fonctionne).
-    if (isApiRequest(url)) {
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    const clone = response.clone();
-                    caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone));
-                    return response;
-                })
-                .catch(() => caches.match(request))
-        );
-        return;
-    }
+    if (isApiRequest(url)) return; // Laisse passer au reseau, sans cache
 
     // Assets statiques (CSS/JS/fonts/images) : cache-first, rapide et fonctionne hors-ligne.
     if (isStaticAsset(url)) {
@@ -79,8 +78,10 @@ self.addEventListener('fetch', (event) => {
             caches.match(request).then((cached) => {
                 if (cached) return cached;
                 return fetch(request).then((response) => {
-                    const clone = response.clone();
-                    caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+                    if (isCacheable(response)) {
+                        const clone = response.clone();
+                        caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+                    }
                     return response;
                 });
             })
@@ -88,14 +89,16 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Pages HTML : network-first avec repli sur le cache (contenu à jour en
-    // priorité, consultation minimale hors-ligne en secours).
+    // Pages HTML : network-first avec repli sur le cache (contenu a jour en
+    // priorite, consultation minimale hors-ligne en secours).
     if (request.mode === 'navigate' || url.pathname.endsWith('.html')) {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    const clone = response.clone();
-                    caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone));
+                    if (isCacheable(response)) {
+                        const clone = response.clone();
+                        caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone));
+                    }
                     return response;
                 })
                 .catch(() => caches.match(request).then((cached) => cached || caches.match('/xalass-feed.html')))

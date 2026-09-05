@@ -1576,9 +1576,11 @@ async function submitReportForm() {
 
 async function updateNotifBadge() {
     try {
-        const notifications = await api.getNotifications();
-        const unreadCount = notifications.filter(n => !n.read).length;
+        const response = await api.getNotifications();
+        const notifications = Array.isArray(response) ? response : (response.notifications || []);
+        const unreadCount = response.unread_count ?? notifications.filter(n => !(n.is_read || n.read_at)).length;
         const badge = document.getElementById('notifBadge');
+        if (!badge) return;
 
         if (unreadCount > 0) {
             badge.textContent = unreadCount > 9 ? '9+' : unreadCount;

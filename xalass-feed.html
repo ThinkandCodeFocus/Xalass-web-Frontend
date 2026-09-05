@@ -1922,6 +1922,9 @@
                         <button class="recorder-btn" id="stopBtn" onclick="stopVoiceRecording()" style="display: none;">
                             ⏹️ Arrêter l'enregistrement
                         </button>
+                        <button class="recorder-btn" id="cancelBtn" onclick="cancelVoiceRecording()" style="display: none; background: rgba(220,38,38,0.15); color: #f85149; border: 1px solid rgba(220,38,38,0.3);">
+                            ✖️ Annuler
+                        </button>
                         <div class="recorder-status" id="recorderStatus" style="display: none;">
                             <span class="recording-indicator"></span>
                             <span>Enregistrement en cours</span>
@@ -1933,10 +1936,9 @@
                 </div>
 
                 <div class="voice-options">
-                    <label class="voice-option-label">
-                        <input type="checkbox" id="applyAnonymityEffect" checked>
-                        Appliquer l'effet d'anonymat à ma voix
-                    </label>
+                    <span class="voice-option-label" style="cursor: default;">
+                        🔒 Anonymisation automatique et obligatoire
+                    </span>
                 </div>
 
                 <div class="recordings-list" id="recordingsList" style="display: none;"></div>
@@ -2627,20 +2629,30 @@
             if (started) {
                 document.getElementById('recordBtn').style.display = 'none';
                 document.getElementById('stopBtn').style.display = 'block';
+                document.getElementById('cancelBtn').style.display = 'block';
                 document.getElementById('recorderStatus').style.display = 'flex';
                 document.getElementById('visualizer').style.display = 'block';
-                
-                // Démarrer le dessin de la visualisation
+
                 drawVisualizer();
             }
         }
 
-        function stopVoiceRecording() {
-            VoiceRecorder.stop();
+        function resetRecorderUI() {
             document.getElementById('recordBtn').style.display = 'block';
             document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('recorderStatus').style.display = 'none';
             document.getElementById('visualizer').style.display = 'none';
+        }
+
+        function stopVoiceRecording() {
+            VoiceRecorder.stop();
+            resetRecorderUI();
+        }
+
+        function cancelVoiceRecording() {
+            VoiceRecorder.cancel();
+            resetRecorderUI();
         }
 
         function drawVisualizer() {
@@ -2690,28 +2702,46 @@
                 `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         });
 
+        // Arrêt automatique quand la durée max (60s) est atteinte : l'UI doit
+        // revenir à l'état "idle" toute seule, sinon elle reste bloquée sur
+        // "Enregistrement en cours" alors que ce n'est plus vrai.
+        document.addEventListener('recordingMaxDuration', () => {
+            resetRecorderUI();
+            showToast('Durée maximale atteinte (60s)', 'info');
+        });
+
+        // Feedback visuel quand une annulation est confirmée (aucun audio sauvegardé)
+        document.addEventListener('recordingCancelled', () => {
+            showToast('Enregistrement annulé', 'info');
+        });
+
         document.addEventListener('recordingComplete', async (e) => {
             const audioData = e.detail.audioData;
             const duration = e.detail.duration;
-            
-            // Appliquer l'effet d'anonymat si demandé
-            const shouldApplyEffect = document.getElementById('applyAnonymityEffect').checked;
-            let finalAudioData = audioData;
 
-            if (shouldApplyEffect) {
-                showToast('Anonymisation en cours…', 'info');
+            // L'anonymisation est obligatoire et non désactivable.
+            showToast('Anonymisation en cours…', 'info');
+
+            let finalAudioData;
+            try {
                 finalAudioData = await anonymizeAudio(audioData);
+            } catch (error) {
+                // L'interface promet une anonymisation systématique : si elle
+                // échoue, on refuse l'enregistrement plutôt que de conserver
+                // la voix réelle de l'utilisateur (ticket #5).
+                console.error('Anonymisation impossible :', error);
+                showToast("Anonymisation impossible : enregistrement annulé. Réessayez.", 'error');
+                return;
             }
-            
+
             // Créer un objet d'enregistrement
             const recording = {
                 id: generateId(),
                 audioData: finalAudioData,
                 duration: duration,
                 timestamp: new Date().toISOString(),
-                withEffect: shouldApplyEffect
+                withEffect: true
             };
-            
             voiceRecordings.push(recording);
             selectedVoiceRecording = recording;
             
@@ -2758,7 +2788,7 @@
             const recording = voiceRecordings.find(r => r.id === recordingId);
             if (!recording) return;
             
-            VoicePlayer.play(recording.audioData, recording.withEffect);
+            VoicePlayer.play(recording.audioData);
         }
 
         function deleteRecording(recordingId) {

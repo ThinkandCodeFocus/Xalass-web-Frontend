@@ -94,9 +94,33 @@ const VoiceRecorder = {
     },
 
     /**
+     * Annule l'enregistrement en cours (ne sauvegarde rien)
+     */
+    cancel() {
+        if (!this.mediaRecorder || !this.isRecording) return false;
+
+        this._cancelled = true;
+        this.mediaRecorder.stop();
+        this.isRecording = false;
+        clearInterval(this.recordingInterval);
+
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+
+        return true;
+    },
+
+    /**
      * Callback quand l'enregistrement est terminé
      */
     onRecordingStop() {
+        if (this._cancelled) {
+            this._cancelled = false;
+            this.audioChunks = [];
+            document.dispatchEvent(new CustomEvent('recordingCancelled'));
+            return;
+        }
         // Utiliser le vrai type MIME de ce que MediaRecorder a enregistré
         const mimeType = (this.mediaRecorder && this.mediaRecorder.mimeType) || 'audio/webm';
         const audioBlob = new Blob(this.audioChunks, { type: mimeType });
@@ -194,8 +218,12 @@ const VoiceEffects = {
                 reader.readAsDataURL(blob);
             });
         } catch (error) {
+            // Ne JAMAIS retomber sur base64Audio : ce serait la voix reelle,
+            // non anonymisee, alors que l'interface garantit a l'utilisateur
+            // une anonymisation obligatoire. On echoue franchement, l'appelant
+            // se charge de refuser l'enregistrement (ticket #5).
             console.error('Erreur effet audio:', error);
-            return base64Audio;
+            throw new Error("L'anonymisation de la voix a echoue");
         }
     },
 
@@ -220,6 +248,8 @@ const VoiceEffects = {
         const lowFreq      = this._rand(120, 300);
         const compRatio    = this._rand(3, 6);          // compression douce (8-16 écrasait le son)
         const compThresh   = this._rand(-30, -15);
+        const outputGain   = this._rand(0.85, 1.15);    // volume aléatoire
+        const noiseLevel   = this._rand(0.002, 0.01);   // bruit blanc de masquage
 
         // Durée modifiée par playbackRate (approximation de pitch shift)
         const outLength = Math.ceil(audioBuffer.length / pitchRate);
@@ -264,14 +294,30 @@ const VoiceEffects = {
         compressor.attack.value = 0.003;
         compressor.release.value = 0.25;
 
+        // Volume aléatoire
+        const gainNode = offlineContext.createGain();
+        gainNode.gain.value = outputGain;
+
+        // Bruit blanc léger (masque les caractéristiques résiduelles de la voix)
+        const noiseBuffer = offlineContext.createBuffer(1, outLength, audioBuffer.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < outLength; i++) {
+            noiseData[i] = (Math.random() * 2 - 1) * noiseLevel;
+        }
+        const noiseSource = offlineContext.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+
         source.connect(distortion);
         distortion.connect(bandpass);
         bandpass.connect(lowShelf);
         lowShelf.connect(highShelf);
         highShelf.connect(compressor);
-        compressor.connect(offlineContext.destination);
+        compressor.connect(gainNode);
+        noiseSource.connect(gainNode);
+        gainNode.connect(offlineContext.destination);
 
         source.start();
+        noiseSource.start();
 
         return offlineContext.startRendering().then((renderedBuffer) => renderedBuffer);
     },
@@ -370,18 +416,19 @@ const VoicePlayer = {
     currentAudio: null,
     
     /**
-     * Joue un audio Base64 avec effet d'anonymat
+     * Joue un audio Base64 tel quel.
+     *
+     * L'anonymisation est appliquee une seule fois, au moment de
+     * l'enregistrement (voir anonymizeAudio) : la re-appliquer ici
+     * distordrait une seconde fois un audio deja traite, et l'utilisateur
+     * n'entendrait donc pas ce qui est reellement publie.
      */
-    async play(base64Audio, withEffect = true) {
+    async play(base64Audio) {
         try {
             // Arrête la lecture précédente
             this.stop();
-            
-            const audioToPlay = withEffect ? 
-                await VoiceEffects.applyAnonymityEffect(base64Audio) : 
-                base64Audio;
-            
-            this.currentAudio = new Audio(audioToPlay);
+
+            this.currentAudio = new Audio(base64Audio);
             this.currentAudio.play();
             
             return this.currentAudio;

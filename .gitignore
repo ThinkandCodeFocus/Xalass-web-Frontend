@@ -1,2 +1,5 @@
 
 .refact/
+
+# Reglages d'editeur, propres a chaque poste
+.vscode/

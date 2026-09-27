@@ -64,7 +64,15 @@
         }
 
         /* Header */
+        /* L'en-tete gardait une hauteur fixe (64 px, 58 px sur mobile) alors
+           que ses trois colonnes se replient sur petit ecran : le menu
+           descendait jusqu'a 109 px, hors du bandeau, et recouvrait le lien
+           « Retour au fil » place a 80 px. Avec un z-index de 1000, il
+           avalait le clic sans rien faire. Le bandeau epouse desormais son
+           contenu, et la page se decale d'autant (voir ajusterDecalageEnTete).
+           Au passage, les icones cessent de flotter hors du fond translucide. */
         .sticky-header {
+            height: auto !important;
             background: rgba(13, 17, 23, 0.80) !important;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -152,6 +160,26 @@
             color: var(--x-like) !important;
             border-color: rgba(244, 63, 94, 0.4);
             background: rgba(244, 63, 94, 0.1);
+        }
+
+        .retour-au-fil {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.10);
+            border: 1px solid var(--x-border);
+            color: var(--x-accent) !important;
+            font-weight: 600;
+            text-decoration: none !important;
+        }
+
+        .retour-au-fil:hover {
+            background: rgba(99, 102, 241, 0.18);
         }
 
         /* Comment form */
@@ -547,7 +575,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <!-- Bouton retour -->
-                    <a href="xalass-feed.html" style="display: inline-block; margin-bottom: 20px; color: #667eea;">
+                    <a href="xalass-feed.html" class="retour-au-fil">
                         <i class="fa fa-arrow-left"></i> Retour au fil
                     </a>
 
@@ -1646,5 +1674,21 @@ document.getElementById('reportModal').addEventListener('click', function(e) {
 });
 </script>
 
+<script>
+    // L'en-tete est fixe et sa hauteur varie avec la largeur de l'ecran : un
+    // padding-top ecrit en dur laissait le contenu passer dessous. On mesure.
+    (function () {
+        function ajusterDecalageEnTete() {
+            var entete = document.querySelector('.sticky-header');
+            var section = document.querySelector('section');
+            if (!entete || !section) return;
+            section.style.paddingTop = (entete.offsetHeight + 24) + 'px';
+        }
+
+        window.addEventListener('load', ajusterDecalageEnTete);
+        window.addEventListener('resize', ajusterDecalageEnTete);
+        document.addEventListener('DOMContentLoaded', ajusterDecalageEnTete);
+    })();
+</script>
 </body>
 </html>

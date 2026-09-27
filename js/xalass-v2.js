@@ -50,18 +50,15 @@ async function validateContent(text) {
     // Durée de vie du cache local des mots (10 minutes)
     const WORDS_CACHE_TTL = 10 * 60 * 1000;
 
-    // Mots par défaut — utilisés si l'API est inaccessible
+    // Aucun mot masque par defaut.
+    //
+    // Ces listes etaient codees en dur et s'ajoutaient a celles de
+    // l'administration : vider la liste cote administration ne suffisait donc
+    // pas a arreter le masquage. Les mots se reglent maintenant au seul
+    // endroit prevu pour ca, la page d'administration.
     const DEFAULT_WORDS = {
-        vulgar: {
-            wolof:    ['saga', 'kat', 'ndey', 'bay', 'thiapathiapa', 'saayi', 'khadj'],
-            francais: ['merde', 'putain', 'connard', 'salope', 'con', 'conne', 'couille'],
-            anglais:  ['fuck', 'shit', 'bitch', 'asshole', 'bastard', 'damn']
-        },
-        grave: {
-            wolof:    [],
-            francais: ['suicide', 'terrorisme', 'viol', 'meurtre', 'pedophilie', 'jihad'],
-            anglais:  ['suicide', 'terrorism', 'rape', 'murder', 'pedophilia', 'jihad']
-        }
+        vulgar: { wolof: [], francais: [], anglais: [] },
+        grave:  { wolof: [], francais: [], anglais: [] }
     };
 
     // Charge les listes depuis l'API backend et les met en cache localStorage
@@ -172,19 +169,19 @@ async function validateContent(text) {
         return hits;
     }
 
+    // Le mot etait cherche sans limite de mot : « con » masquait le milieu de
+    // « connaissez », et une publication s'est retrouvee en ligne avec
+    // « ***naissez ». Les limites  ne masquent plus que le mot entier, comme
+    // le fait deja le backend.
     function censorText(text) {
-        let out = String(text || '');
-        const normalized = normalizeText(out);
-        getAllWords().forEach(word => {
-            if (!word) return;
-            const nw = normalizeText(word);
-            const re = new RegExp(escapeRegex(nw), 'gi');
-            if (re.test(normalized)) {
-                const wRe = new RegExp(escapeRegex(word), 'gi');
-                out = out.replace(wRe, m => '*'.repeat(Math.max(3, m.length)));
-            }
-        });
-        return out;
+        const out = String(text || '');
+        const mots = getAllWords().filter(Boolean);
+        if (!mots.length) return out;
+
+        return mots.reduce((resultat, word) => {
+            const wRe = new RegExp('\b' + escapeRegex(word) + '\b', 'gi');
+            return resultat.replace(wRe, m => '*'.repeat(Math.max(3, m.length)));
+        }, out);
     }
 
     function findModerationWords(text) {

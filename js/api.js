@@ -211,6 +211,19 @@ class XalassAPI {
         return this.extractObject(response, ['user', 'data']) || response;
     }
 
+    /**
+     * Suppression definitive du compte et de tout ce qui s'y rattache.
+     *
+     * Le pseudonyme est renvoye au serveur, qui le compare : sans cette
+     * verification, un appel direct a l'API suffirait a effacer un compte.
+     */
+    async deleteAccount(userId, codeName) {
+        return this.request('/delete/anoUser', {
+            method: 'POST',
+            body: JSON.stringify({ author_internal_id: userId, code_name: codeName })
+        });
+    }
+
     // ========== POSTS ==========
 
     async createPost(title, content, category, status = 'FINISH') {

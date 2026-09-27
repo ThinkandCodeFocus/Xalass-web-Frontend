@@ -515,6 +515,59 @@
         }
 
         /* Logout Modal */
+        .suppr-card {
+            border-color: rgba(239, 68, 68, 0.35) !important;
+        }
+
+        .suppr-liste {
+            margin: 0 0 18px;
+            padding: 14px 16px;
+            list-style: none;
+            background: rgba(239, 68, 68, 0.07);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            color: #fca5a5;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .suppr-champ {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+            color: #e6edf3;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .suppr-champ:focus {
+            outline: none;
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .suppr-aide {
+            display: block;
+            margin-bottom: 18px;
+            color: #8b949e;
+            font-size: 13px;
+        }
+
+        .suppr-erreur {
+            display: none;
+            margin-bottom: 14px;
+            color: #fca5a5;
+            font-size: 14px;
+        }
+
+        .btn-logout-confirm[disabled] {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
         .logout-modal {
             position: fixed;
             inset: 0;
@@ -787,6 +840,35 @@
         </div>
     </div>
 
+    <div class="logout-modal" id="deleteAccountModal" onclick="fermerModaleSuppression()">
+        <div class="logout-card suppr-card" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="titreSuppression">
+            <div class="logout-icon">&#128465;&#65039;</div>
+            <h3 class="logout-title" id="titreSuppression">Supprimer mon compte</h3>
+            <p class="logout-description">
+                Cette action est d&eacute;finitive. Elle ne peut pas &ecirc;tre annul&eacute;e.
+            </p>
+
+            <ul class="suppr-liste">
+                <li>Ton compte <strong id="supprPseudo">&mdash;</strong></li>
+                <li>Tes histoires et leurs commentaires</li>
+                <li>Tes r&eacute;actions et tes abonnements</li>
+            </ul>
+
+            <label class="suppr-aide" for="supprConfirmation">
+                Pour confirmer, &eacute;cris ton pseudo : <strong id="supprPseudoAttendu">&mdash;</strong>
+            </label>
+            <input type="text" id="supprConfirmation" class="suppr-champ" autocomplete="off"
+                   spellcheck="false" placeholder="Ton pseudo" aria-describedby="supprErreur">
+            <span class="suppr-erreur" id="supprErreur" role="alert"></span>
+
+            <div class="logout-actions">
+                <button type="button" class="btn-logout-cancel" onclick="fermerModaleSuppression()">Annuler</button>
+                <button type="button" class="btn-logout-confirm" id="supprValider" disabled
+                        onclick="lancerSuppressionCompte()">Supprimer d&eacute;finitivement</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.min.js"></script>
     <script src="js/xalass.js"></script>
     <script src="js/config.js?v=3"></script>
@@ -1035,6 +1117,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLogoutModal();
+                fermerModaleSuppression();
             }
         });
 
@@ -1177,17 +1260,81 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLogoutModal();
+                fermerModaleSuppression();
             }
         });
 
+        // La suppression passait par deux boites natives du navigateur, et ne
+        // supprimait rien : elle vidait la session locale, le compte et les
+        // histoires restaient en base. Elle appelle maintenant l'API, derriere
+        // une modale aux couleurs du site.
         function confirmDeleteAccount() {
-            if (confirm('⚠️ ATTENTION : Cette action supprimera définitivement votre compte et toutes vos histoires.\n\nVoulez-vous vraiment supprimer votre compte ?')) {
-                if (confirm('Êtes-vous vraiment sûr ? Vous perdrez tout accès à ce compte.')) {
-                    // TODO: Implémenter la suppression de compte côté backend
-                    clearSession();
-                    showToast('Compte supprimé', 'success');
-                    window.location.href = 'xalass-login.html';
-                }
+            const session = getSession();
+            const pseudo = session && session.code_name ? session.code_name : '';
+
+            const modale = document.getElementById('deleteAccountModal');
+            const champ = document.getElementById('supprConfirmation');
+            const valider = document.getElementById('supprValider');
+            const erreur = document.getElementById('supprErreur');
+            if (!modale) return;
+
+            document.getElementById('supprPseudo').textContent = pseudo || 'ce compte';
+            document.getElementById('supprPseudoAttendu').textContent = pseudo || '-';
+
+            champ.value = '';
+            erreur.style.display = 'none';
+            erreur.textContent = '';
+            valider.disabled = true;
+            valider.textContent = 'Supprimer definitivement';
+
+            // Le bouton ne s'active que si le pseudo saisi correspond : une
+            // action irreversible ne doit pas tenir a un clic de travers.
+            champ.oninput = function () {
+                valider.disabled = champ.value.trim() !== pseudo;
+            };
+
+            champ.onkeydown = function (e) {
+                if (e.key === 'Enter' && !valider.disabled) lancerSuppressionCompte();
+            };
+
+            modale.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function () { champ.focus(); }, 60);
+        }
+
+        function fermerModaleSuppression() {
+            const modale = document.getElementById('deleteAccountModal');
+            if (!modale) return;
+            modale.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        async function lancerSuppressionCompte() {
+            const session = getSession();
+            const champ = document.getElementById('supprConfirmation');
+            const valider = document.getElementById('supprValider');
+            const erreur = document.getElementById('supprErreur');
+
+            if (!session || !session.user_id) {
+                window.location.href = 'xalass-login.html';
+                return;
+            }
+
+            valider.disabled = true;
+            valider.textContent = 'Suppression...';
+            erreur.style.display = 'none';
+
+            try {
+                await api.deleteAccount(session.user_id, champ.value.trim());
+                clearSession();
+                showToast('Compte supprime definitivement', 'success');
+                setTimeout(function () { window.location.href = 'xalass-login.html'; }, 900);
+            } catch (e) {
+                // La session n'est pas videe : rien n'a ete supprime.
+                erreur.textContent = (e && e.message) ? e.message : "La suppression n'a pas abouti. Reessaie.";
+                erreur.style.display = 'block';
+                valider.disabled = false;
+                valider.textContent = 'Supprimer definitivement';
             }
         }
 

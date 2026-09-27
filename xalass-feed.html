@@ -1668,6 +1668,25 @@
             animation: cardIn 0.28s ease both;
         }
 
+        /* L'histoire ne s'ouvrait qu'en cliquant le titre ou l'icone des
+           commentaires : le corps de la carte, la ou l'oeil se pose, ne
+           repondait pas. Toute la carte est desormais une cible, les boutons
+           d'action exceptes (voir le gestionnaire de clic delegue). */
+        .story-card {
+            cursor: pointer;
+        }
+
+        .story-card:focus-visible {
+            outline: 2px solid var(--x-accent, #6366f1);
+            outline-offset: 3px;
+        }
+
+        .story-card .story-actions,
+        .story-card .story-header-actions,
+        .story-card .story-title a {
+            cursor: auto;
+        }
+
         @keyframes cardIn {
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -2530,7 +2549,7 @@
                     : `<p class="story-content">${safeContent.substring(0, 300)}${rawContent.length > 300 ? '...' : ''}</p>`;
 
                 return `
-                    <article class="story-card">
+                    <article class="story-card" data-story-id="${story.post_id}" tabindex="0" role="link" aria-label="Ouvrir l'histoire ${safeTitle}">
                         <div class="story-header">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(String(avatarSeed))}" alt="Avatar" class="story-avatar">
                             <div class="story-meta">
@@ -2581,6 +2600,44 @@
             // Mettre à jour les statistiques
             updateStats();
         }
+
+        // Ouverture de l'histoire depuis n'importe ou dans la carte.
+        //
+        // Delegue sur le conteneur : les cartes sont reconstruites a chaque
+        // rendu, un ecouteur pose sur chacune aurait fuite a chaque fois.
+        // Les elements deja interactifs (j'aime, partager, signaler, suivre,
+        // le titre) gardent leur propre action.
+        function brancherOuvertureHistoire() {
+            document.addEventListener('click', function (e) {
+                const carte = e.target.closest('.story-card');
+                if (!carte) return;
+
+                // Un clic sur un bouton, un lien ou le menu d'entete garde son
+                // comportement : on ne detourne que le reste de la carte.
+                if (e.target.closest('button, a, input, textarea, select, .story-actions, .story-header-actions')) return;
+
+                // Une selection de texte n'est pas un clic d'ouverture.
+                const selection = window.getSelection();
+                if (selection && String(selection).trim().length > 0) return;
+
+                const id = carte.getAttribute('data-story-id');
+                if (id) goToStory(id);
+            });
+
+            // Clavier : la carte reste atteignable sans souris.
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const carte = document.activeElement && document.activeElement.closest
+                    ? document.activeElement.closest('.story-card')
+                    : null;
+                if (!carte || document.activeElement !== carte) return;
+                e.preventDefault();
+                const id = carte.getAttribute('data-story-id');
+                if (id) goToStory(id);
+            });
+        }
+
+        brancherOuvertureHistoire();
 
         // Charger plus de posts
         function loadMorePosts() {

@@ -1,6 +1,7 @@
 // Configuration de l'API Backend
 const API_CONFIG = (() => {
     const DEFAULT_BASE_URL = 'https://api.xalass.com/api';
+
     const STORAGE_KEY = 'xalass_api_base_url';
     const QUERY_KEY = 'api_base_url';
 
